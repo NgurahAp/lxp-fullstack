@@ -1,0 +1,148 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  role      Role     @default(student)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trainings      Training[]
+  trainingUsers  Training_Users[]
+  
+  @@map("users")
+}
+
+model Training {
+  id           Int      @id @default(autoincrement())
+  title        String   @db.VarChar(255)
+  description  String?
+  instructorId Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  instructor User   @relation(fields: [instructorId], references: [id])
+  meetings   Meeting[]
+  users      Training_Users[]
+
+  @@map("trainings")
+}
+
+model Training_Users {
+  id         Int      @id @default(autoincrement())
+  trainingId Int
+  userId     Int
+  status     Status   @default(enrolled)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  training Training @relation(fields: [trainingId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  scores   Score[]
+
+  @@map("training_users")
+}
+
+model Meeting {
+  id           Int      @id @default(autoincrement())
+  trainingId   Int
+  title        String   @db.VarChar(255)
+  meetingDate  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  training Training @relation(fields: [trainingId], references: [id])
+  modules  Module[]
+  quizzes  Quiz[]
+  tasks    Task[]
+  scores   Score[]
+
+  @@map("meetings")
+}
+
+model Module {
+  id          Int      @id @default(autoincrement())
+  meetingId   Int
+  title       String   @db.VarChar(255)
+  content     String   @db.VarChar(255)  // PDF file path
+  moduleScore Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+
+  @@map("modules")
+}
+
+model Quiz {
+  id         Int      @id @default(autoincrement())
+  meetingId  Int
+  title      String   @db.VarChar(255)
+  questions  Json
+  quizScore  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+
+  @@map("quizzes")
+}
+
+model Task {
+  id         Int      @id @default(autoincrement())
+  meetingId  Int
+  title      String   @db.VarChar(255)
+  description String?
+  dueDate    DateTime?
+  taskScore  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+
+  @@map("tasks")
+}
+
+model Score {
+  id            Int      @id @default(autoincrement())
+  trainingUserId Int
+  meetingId     Int
+  moduleScore   Int      @default(0)
+  quizScore     Int      @default(0)
+  taskScore     Int      @default(0)
+  totalScore    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  trainingUser Training_Users @relation(fields: [trainingUserId], references: [id])
+  meeting      Meeting        @relation(fields: [meetingId], references: [id])
+
+  @@map("scores")
+}
+
+enum Role {
+  admin
+  instructor
+  student
+}
+
+enum Status {
+  enrolled
+  completed
+  dropped
+}
