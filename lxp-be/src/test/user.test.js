@@ -80,4 +80,40 @@ describe("POST /api/users/login", function () {
     expect(result.body.data.token).toBeDefined();
     expect(result.body.data.token).not.toBe("test");
   });
+
+  it("Should reject login if request is invalid", async () => {
+    const result = await supertest(web).post("/api/users/login").send({
+      email: "",
+      password: "",
+    });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+
+  it("Should reject login if password is wrong", async () => {
+    const result = await supertest(web).post("/api/users/login").send({
+      email: "test@gmail.com",
+      password: "password123",
+    });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(401);
+    expect(result.body.errors).toBeDefined();
+  });
+
+  it("Should reject login if username is wrong", async () => {
+    const result = await supertest(web).post("/api/users/login").send({
+      email: "tes@gmail.com",
+      password: "password",
+    });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(401);
+    expect(result.body.errors).toBeDefined();
+  });
 });

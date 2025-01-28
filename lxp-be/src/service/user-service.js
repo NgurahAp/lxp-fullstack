@@ -52,6 +52,15 @@ const login = async (request) => {
     throw new ResponseError(401, "Email or password is wrong");
   }
 
+  const isPasswordValid = await bcrypt.compare(
+    loginRequest.password,
+    user.password
+  );
+
+  if (!isPasswordValid) {
+    throw new ResponseError(401, "Email or password is wrong");
+  }
+
   const token = uuid().toString();
 
   return prismaClient.user.update({
