@@ -2,18 +2,15 @@ import supertest from "supertest";
 import { prismaClient } from "../application/database";
 import { web } from "../application/web";
 import { logger } from "../application/logging";
+import {
+  createTestInstructor,
+  createTestUser,
+  removeTestInstructor,
+} from "./test.util";
 
 describe("POST /api/trainings", () => {
   beforeEach(async () => {
-    await prismaClient.user.create({
-      data: {
-        name: "test instructor",
-        email: "instructor@test.com",
-        password: "hashedpassword",
-        role: "instructor",
-        token: "test",
-      },
-    });
+    await createTestInstructor();
   });
 
   afterEach(async () => {
@@ -30,12 +27,7 @@ describe("POST /api/trainings", () => {
         title: "test training",
       },
     });
-
-    await prismaClient.user.deleteMany({
-      where: {
-        email: "instructor@test.com",
-      },
-    });
+    await removeTestInstructor();
   });
 
   it("Should create new training", async () => {
@@ -73,21 +65,12 @@ describe("POST /api/trainings", () => {
 
 describe("POST /api/training-users", () => {
   beforeEach(async () => {
-    await prismaClient.user.create({
-      data: {
-        name: "test user",
-        email: "user@test.com",
-        password: "hashedpassword",
-        role: "student",
-        token: "test", // Tambahkan token untuk testing
-      },
-    });
+    await createTestUser();
 
-    const instructor = await prismaClient.user.create({
-      data: {
-        name: "test instructor",
+    await createTestInstructor();
+    const instructor = await prismaClient.user.findFirst({
+      where: {
         email: "instructor@test.com",
-        password: "hashedpassword",
         role: "instructor",
       },
     });
@@ -113,7 +96,7 @@ describe("POST /api/training-users", () => {
     });
 
     const user = await prismaClient.user.findFirst({
-      where: { email: "user@test.com" },
+      where: { email: "test@gmail.com" },
     });
 
     await supertest(web)

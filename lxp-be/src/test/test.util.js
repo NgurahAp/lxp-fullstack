@@ -20,4 +20,25 @@ const createTestUser = async () => {
   });
 };
 
-export { removeTestUser, createTestUser };
+const createTestInstructor = async () => {
+  await prismaClient.user.create({
+    data: {
+      name: "test instructor",
+      email: "instructor@test.com",
+      password: "hashedpassword",
+      role: "instructor",
+      token: "test",
+    },
+  });
+};
+
+const removeTestInstructor = async () => {
+  await prismaClient.user.deleteMany({
+    where: {
+      email: "instructor@test.com",
+    },
+  });
+};
+
+
+export { removeTestUser, createTestUser, createTestInstructor, removeTestInstructor };
