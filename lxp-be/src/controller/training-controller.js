@@ -1,4 +1,4 @@
-import trainingService from "../service/training-service";
+import trainingService from "../service/training-service.js";
 
 const createTraining = async (req, res, next) => {
   try {

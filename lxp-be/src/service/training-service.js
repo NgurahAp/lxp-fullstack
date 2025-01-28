@@ -1,10 +1,10 @@
-import { prismaClient } from "../application/database";
+import { prismaClient } from "../application/database.js";
 import {
   createTrainingUserValidation,
   createTrainingValidation,
 } from "../validation/training-validation.js";
 import { validate } from "../validation/validation.js";
-import { ResponseError } from "../error/response-error";
+import { ResponseError } from "../error/response-error.js";
 
 const createTraining = async (request) => {
   const training = validate(createTrainingValidation, request);
