@@ -7,4 +7,9 @@ const registerUserValidation = Joi.object({
   role: Joi.string().valid("student", "admin").optional(),
 });
 
-export { registerUserValidation };
+const loginUserValidation = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).required(),
+});
+
+export { registerUserValidation, loginUserValidation };
