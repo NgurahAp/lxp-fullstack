@@ -9,6 +9,7 @@ import {
 } from "./test.util";
 
 describe("POST /api/trainings", () => {
+
   beforeEach(async () => {
     await createTestInstructor();
   });
@@ -31,6 +32,7 @@ describe("POST /api/trainings", () => {
   });
 
   it("Should create new training", async () => {
+    // Mengambil data instruktor
     const instructor = await prismaClient.user.findFirst({
       where: { email: "instructor@test.com" },
     });
