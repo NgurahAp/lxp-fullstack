@@ -1,6 +1,7 @@
 import supertest from "supertest";
 import { prismaClient } from "../application/database";
 import { web } from "../application/web";
+import { logger } from "../application/logging";
 
 describe("POST /api/trainings", () => {
   beforeEach(async () => {
@@ -67,5 +68,73 @@ describe("POST /api/trainings", () => {
       });
 
     expect(result.status).toBe(400);
+  });
+});
+
+describe("POST /api/training-users", () => {
+  beforeEach(async () => {
+    await prismaClient.user.create({
+      data: {
+        name: "test user",
+        email: "user@test.com",
+        password: "hashedpassword",
+        role: "student",
+        token: "test", // Tambahkan token untuk testing
+      },
+    });
+
+    const instructor = await prismaClient.user.create({
+      data: {
+        name: "test instructor",
+        email: "instructor@test.com",
+        password: "hashedpassword",
+        role: "instructor",
+      },
+    });
+
+    await prismaClient.training.create({
+      data: {
+        title: "test training",
+        description: "test description",
+        instructorId: instructor.id,
+      },
+    });
+  });
+
+  afterEach(async () => {
+    await prismaClient.training_Users.deleteMany({});
+    await prismaClient.training.deleteMany({});
+    await prismaClient.user.deleteMany({});
+  });
+
+  it("Should reject enrollment if user already enrolled", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "user@test.com" },
+    });
+
+    await supertest(web)
+      .post("/api/training-users")
+      .set("Authorization", "Bearer test")
+      .send({
+        trainingId: training.id,
+        userId: user.id,
+      });
+
+    const result = await supertest(web)
+      .post("/api/training-users")
+      .set("Authorization", "Bearer test")
+      .send({
+        trainingId: training.id,
+        userId: user.id,
+      });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBe("User already enrolled in this training");
   });
 });

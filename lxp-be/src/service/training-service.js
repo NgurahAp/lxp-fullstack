@@ -48,6 +48,17 @@ const createTrainingUser = async (request) => {
     throw new ResponseError(404, "User not Found");
   }
 
+  const existingEnrollment = await prismaClient.training_Users.findFirst({
+    where: {
+      trainingId: trainingUser.trainingId,
+      userId: trainingUser.userId,
+    },
+  });
+
+  if (existingEnrollment) {
+    throw new ResponseError(400, "User already enrolled in this training");
+  }
+
   return prismaClient.training_Users.create({
     data: trainingUser,
     select: {
