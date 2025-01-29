@@ -23,5 +23,10 @@ userRouter.post(
   authMiddleware,
   trainingController.createTrainingUser
 );
+userRouter.get(
+  "/api/student/trainings",
+  authMiddleware,
+  trainingController.getStudentsTraining
+);
 
 export { userRouter };

@@ -142,3 +142,86 @@ describe("POST /api/training-users", () => {
     expect(result.body.errors).toBe("User already enrolled in this training");
   });
 });
+
+describe("GET /api/students/trainings", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestInstructor();
+
+    // Create a test training
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    await prismaClient.training.create({
+      data: {
+        title: "test training",
+        description: "test description",
+        instructorId: instructor.id,
+      },
+    });
+
+    // Enroll test user in training
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+
+    await prismaClient.training_Users.create({
+      data: {
+        trainingId: training.id,
+        userId: user.id,
+        // status: "enrolled",
+      },
+    });
+  });
+
+  afterEach(async () => {
+    await prismaClient.training_Users.deleteMany({});
+    await prismaClient.training.deleteMany({});
+    await removeTestUser();
+    await removeTestInstructor();
+  });
+
+  it("Should return students training with pagination", async () => {
+    const result = await supertest(web)
+      .get("/api/student/trainings")
+      .set("Authorization", "Bearer test")
+      .query({ page: 1, size: 10 });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(Array.isArray(result.body.data)).toBe(true);
+    expect(result.body.paging).toBeDefined();
+    expect(result.body.paging.page).toBe(1);
+    expect(result.body.data[0].training.title).toBe("test training");
+  });
+
+  it("Should filter trainings by status", async () => {
+    const result = await supertest(web)
+      .get("/api/student/trainings")
+      .set("Authorization", "Bearer test")
+      .query({
+        status: "enrolled",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data[0].status).toBe("enrolled");
+  });
+
+  it("Should reject invalid pagination parameters", async () => {
+    const result = await supertest(web)
+      .get("/api/student/trainings")
+      .set("Authorization", "Bearer test")
+      .query({
+        page: 0,
+        size: 100,
+      });
+
+    expect(result.status).toBe(400);
+  });
+});

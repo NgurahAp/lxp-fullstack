@@ -14,4 +14,14 @@ const createTrainingUserValidation = Joi.object({
     .default("enrolled"),
 });
 
-export { createTrainingUserValidation, createTrainingValidation };
+const getStudentTrainingsValidation = Joi.object({
+  page: Joi.number().min(1).default(1),
+  size: Joi.number().min(1).max(50).default(10),
+  status: Joi.number().valid("enrolled", "completed", "dropped").optional(),
+});
+
+export {
+  createTrainingUserValidation,
+  createTrainingValidation,
+  getStudentTrainingsValidation,
+};

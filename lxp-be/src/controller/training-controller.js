@@ -25,4 +25,16 @@ const createTrainingUser = async (req, res, next) => {
   }
 };
 
-export default { createTraining, createTrainingUser };
+const getStudentsTraining = async (req, res, next) => {
+  try {
+    const result = await trainingService.getStudentTrainings(
+      req.user,
+      req.query
+    );
+    res.status(200).json(result);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { createTraining, createTrainingUser, getStudentsTraining };

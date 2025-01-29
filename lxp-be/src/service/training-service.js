@@ -2,6 +2,7 @@ import { prismaClient } from "../application/database.js";
 import {
   createTrainingUserValidation,
   createTrainingValidation,
+  getStudentTrainingsValidation,
 } from "../validation/training-validation.js";
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response-error.js";
@@ -91,4 +92,61 @@ const createTrainingUser = async (request) => {
   });
 };
 
-export default { createTraining, createTrainingUser };
+const getStudentTrainings = async (user, request) => {
+  const option = validate(getStudentTrainingsValidation, request);
+
+  // calculate pagination
+  const skip = (option.page - 1) * option.size;
+
+  const where = {
+    userId: user.id,
+  };
+
+  if (option.status) {
+    where.status = option.status;
+  }
+
+  // Get Total count of pagination
+  const total = await prismaClient.training_Users.count({ where });
+
+  // Get Trainings
+  const trainings = await prismaClient.training_Users.findMany({
+    where,
+    skip,
+    take: option.size,
+    select: {
+      id: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      training: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          instructor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return {
+    data: trainings,
+    paging: {
+      page: option.page,
+      total_items: total,
+      total_pages: Math.ceil(total / option.size),
+    },
+  };
+};
+
+export default { createTraining, createTrainingUser, getStudentTrainings };
