@@ -117,3 +117,21 @@ describe("POST /api/users/login", function () {
     expect(result.body.errors).toBeDefined();
   });
 });
+
+describe("GET /api/users/current", function () {
+  beforeEach(async () => {
+    await createTestUser();
+  });
+
+  afterEach(async () => {
+    await removeTestUser();
+  });
+
+  it("Should can get current user", async () => {
+    const result = await supertest(web)
+      .get("/api/users/current")
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(200);
+  });
+});

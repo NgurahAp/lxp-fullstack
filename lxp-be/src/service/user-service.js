@@ -1,6 +1,7 @@
 import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {
+  getUserValidation,
   loginUserValidation,
   registerUserValidation,
 } from "../validation/user-validation.js";
@@ -76,4 +77,25 @@ const login = async (request) => {
   });
 };
 
-export default { register, login };
+const get = async (email) => {
+  email = validate(getUserValidation, email);
+
+  // Pengecekan email ke DB
+  const user = await prismaClient.user.findUnique({
+    where: {
+      email: email,
+    },
+    select: {
+      email: true,
+      name: true,
+    },
+  });
+
+  if (!user) {
+    throw new ResponseError(404, "User not found");
+  }
+
+  return user;
+};
+
+export default { register, login, get };
