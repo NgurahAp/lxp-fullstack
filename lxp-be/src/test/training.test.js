@@ -5,6 +5,7 @@ import { logger } from "../application/logging";
 import {
   createTestInstructor,
   createTestUser,
+  createTraining,
   removeTestInstructor,
   removeTestUser,
 } from "./test.util";
@@ -153,13 +154,7 @@ describe("GET /api/students/trainings", () => {
       where: { email: "instructor@test.com" },
     });
 
-    await prismaClient.training.create({
-      data: {
-        title: "test training",
-        description: "test description",
-        instructorId: instructor.id,
-      },
-    });
+    await createTraining(instructor.id);
 
     // Enroll test user in training
     const training = await prismaClient.training.findFirst({
@@ -174,7 +169,6 @@ describe("GET /api/students/trainings", () => {
       data: {
         trainingId: training.id,
         userId: user.id,
-        // status: "enrolled",
       },
     });
   });

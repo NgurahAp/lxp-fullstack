@@ -48,10 +48,21 @@ const removeTestInstructor = async () => {
   });
 };
 
+const createTraining = async (instructorId) => {
+  await prismaClient.training.create({
+    data: {
+      title: "test training",
+      description: "test description",
+      instructorId: instructorId,
+    },
+  });
+};
+
 export {
   removeTestUser,
   createTestUser,
   createTestInstructor,
   removeTestInstructor,
   getTestUser,
+  createTraining
 };
