@@ -6,8 +6,16 @@ import {
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response-error.js";
 
-const createTraining = async (request) => {
+const createTraining = async (user, request) => {
   const training = validate(createTrainingValidation, request);
+
+  // Ensure the instructorId matches the logged-in user's ID
+  if (training.instructorId !== user.id) {
+    throw new ResponseError(
+      403,
+      "You can only create training with your own instructor ID"
+    );
+  }
 
   return prismaClient.training.create({
     data: training,

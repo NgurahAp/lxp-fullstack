@@ -2,8 +2,7 @@ import trainingService from "../service/training-service.js";
 
 const createTraining = async (req, res, next) => {
   try {
-    const request = req.body;
-    const result = await trainingService.createTraining(request);
+    const result = await trainingService.createTraining(req.user, req.body);
 
     res.status(200).json({
       data: result,

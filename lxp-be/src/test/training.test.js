@@ -6,11 +6,12 @@ import {
   createTestInstructor,
   createTestUser,
   removeTestInstructor,
+  removeTestUser,
 } from "./test.util";
 
 describe("POST /api/trainings", () => {
-
   beforeEach(async () => {
+    await createTestUser();
     await createTestInstructor();
   });
 
@@ -28,6 +29,8 @@ describe("POST /api/trainings", () => {
         title: "test training",
       },
     });
+
+    await removeTestUser();
     await removeTestInstructor();
   });
 
@@ -39,17 +42,33 @@ describe("POST /api/trainings", () => {
 
     const result = await supertest(web)
       .post("/api/trainings")
-      .set("Authorization", `Bearer test`) // Add 'Bearer' prefix
+      .set("Authorization", `Bearer test-instructor`) // Add 'Bearer' prefix
       .send({
         title: "test training",
         description: "test description",
         instructorId: instructor.id,
       });
 
-    console.log(result.body); // Add this for debugging
     expect(result.status).toBe(200);
     expect(result.body.data).toBeDefined();
     expect(result.body.data.title).toBe("test training");
+  });
+
+  it("Should reject when non-instructor tries to create training", async () => {
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+
+    const result = await supertest(web)
+      .post("/api/trainings")
+      .set("Authorization", "Bearer test")
+      .send({
+        title: "test training",
+        description: "test description",
+        instructorId: user.id,
+      });
+
+    expect(result.status).toBe(403);
   });
 
   it("should reject invalid training user data", async () => {

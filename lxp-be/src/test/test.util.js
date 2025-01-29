@@ -33,9 +33,9 @@ const createTestInstructor = async () => {
     data: {
       name: "test instructor",
       email: "instructor@test.com",
-      password: "hashedpassword",
+      password: await bcrypt.hash("hashedpassword", 10),
       role: "instructor",
-      token: "test",
+      token: "test-instructor",
     },
   });
 };
