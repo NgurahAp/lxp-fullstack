@@ -7,6 +7,7 @@ const userRouter = express.Router();
 
 // Router for user
 userRouter.get("/api/users/current", authMiddleware, userController.get);
+userRouter.delete("/api/users/logout", authMiddleware, userController.logout);
 
 // Router for traininig
 userRouter.post(

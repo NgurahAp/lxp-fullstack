@@ -2,7 +2,7 @@ import supertest from "supertest";
 import { web } from "../application/web.js";
 import { prismaClient } from "../application/database.js";
 import { logger } from "../application/logging.js";
-import { createTestUser, removeTestUser } from "./test.util.js";
+import { createTestUser, getTestUser, removeTestUser } from "./test.util.js";
 
 describe("POST /api/users", function () {
   afterEach(async () => {
@@ -144,5 +144,37 @@ describe("GET /api/users/current", function () {
 
     expect(result.status).toBe(401);
     expect(result.body.errors).toBeDefined();
+  });
+});
+
+describe("DELETE /api/users/current", function () {
+  beforeEach(async () => {
+    await createTestUser();
+  });
+
+  afterEach(async () => {
+    await removeTestUser();
+  });
+
+  
+  it("Should can logout", async () => {
+    const result = await supertest(web)
+      .delete("/api/users/logout")
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBe("Success");
+
+    // Pengecekan apakah token masih ada
+    const user = await getTestUser();
+    expect(user.token).toBeNull();
+  });
+
+  it("Should reject logout if token invalid", async () => {
+    const result = await supertest(web)
+      .delete("/api/users/logout")
+      .set("Authorization", "salah");
+
+    expect(result.status).toBe(401);
   });
 });

@@ -20,6 +20,14 @@ const createTestUser = async () => {
   });
 };
 
+const getTestUser = async () => {
+  return prismaClient.user.findUnique({
+    where: {
+      email: "test@gmail.com",
+    },
+  });
+};
+
 const createTestInstructor = async () => {
   await prismaClient.user.create({
     data: {
@@ -40,5 +48,10 @@ const removeTestInstructor = async () => {
   });
 };
 
-
-export { removeTestUser, createTestUser, createTestInstructor, removeTestInstructor };
+export {
+  removeTestUser,
+  createTestUser,
+  createTestInstructor,
+  removeTestInstructor,
+  getTestUser,
+};
