@@ -133,5 +133,16 @@ describe("GET /api/users/current", function () {
       .set("Authorization", "Bearer test");
 
     expect(result.status).toBe(200);
+    expect(result.body.data.email).toBe("test@gmail.com");
+    expect(result.body.data.role).toBe("student");
+  });
+
+  it("Should reject if token is invalid", async () => {
+    const result = await supertest(web)
+      .get("/api/users/current")
+      .set("Authorization", "salah");
+
+    expect(result.status).toBe(401);
+    expect(result.body.errors).toBeDefined();
   });
 });
