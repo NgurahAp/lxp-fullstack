@@ -3,6 +3,7 @@ import authMiddleware from "../middleware/auth-middleware.js";
 import trainingController from "../controller/training-controller.js";
 import userController from "../controller/user-controller.js";
 import { instruktorMiddleware } from "../middleware/instructor-middleware.js";
+import meetingController from "../controller/meeting-controller.js";
 
 const userRouter = express.Router();
 
@@ -27,6 +28,19 @@ userRouter.get(
   "/api/student/trainings",
   authMiddleware,
   trainingController.getStudentsTraining
+);
+
+// Router for meeting
+userRouter.post(
+  "/api/meetings",
+  authMiddleware,
+  instruktorMiddleware,
+  meetingController.createMeeting
+);
+userRouter.get(
+  "/api/trainings/:trainingId/meetings",
+  authMiddleware,
+  meetingController.getMeetings
 );
 
 export { userRouter };

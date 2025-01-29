@@ -1,0 +1,114 @@
+import { prismaClient } from "../application/database.js";
+import { ResponseError } from "../error/response-error.js";
+import {
+  createMeetingValidation,
+  getMeetingValidation,
+} from "../validation/meeting-validation.js";
+import { validate } from "../validation/validation.js";
+
+const createMeeting = async (user, request) => {
+  const meeting = validate(createMeetingValidation, request);
+
+  // Verify if training exists and user is the instructor
+  const training = await prismaClient.training.findUnique({
+    where: { id: meeting.trainingId },
+    select: {
+      id: true,
+      instructorId: true,
+    },
+  });
+
+  if (!training) {
+    throw new ResponseError(404, "Training not found");
+  }
+
+  if (training.instructorId !== user.id) {
+    throw new ResponseError(
+      403,
+      "You can only create meetings for your own training"
+    );
+  }
+
+  return prismaClient.meeting.create({
+    data: meeting,
+    select: {
+      id: true,
+      title: true,
+      meetingDate: true,
+      trainingId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+};
+
+const getMeetings = async (user, request) => {
+  const validated = validate(getMeetingValidation, {
+    trainingId: parseInt(request.trainingId), // Convert string to number
+    page: request.page,
+    size: request.size
+  });
+
+  // Verify if user has access to this training
+  const enrollment = await prismaClient.training_Users.findFirst({
+    where: {
+      userId: user.id,
+      trainingId: validated.trainingId,
+      status: {
+        in: ["enrolled", "completed"],
+      },
+    },
+  });
+
+  if (!enrollment) {
+    throw new ResponseError(
+      403,
+      "You don't have access to this training's meetings"
+    );
+  }
+
+  // Calculate pagination
+  const skip = (validated.page - 1) * validated.size;
+
+  // Get Total Count
+  const total = await prismaClient.meeting.count({
+    where: { trainingId: validated.trainingId },
+  });
+
+  // Get Meetings
+  const meetings = await prismaClient.meeting.findMany({
+    where: { trainingId: validated.trainingId },
+    skip,
+    take: validated.size,
+    orderBy: { meetingDate: "asc" },
+    select: {
+      id: true,
+      title: true,
+      meetingDate: true,
+      createdAt: true,
+      updatedAt: true,
+      training: {
+        select: {
+          title: true,
+          instructor: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return {
+    data: meetings, // Changed from meeting to meetings
+    paging: {
+      page: validated.page,
+      total_items: total,
+      total_pages: Math.ceil(total / validated.size),
+    },
+  };
+};
+
+export default { createMeeting, getMeetings };
