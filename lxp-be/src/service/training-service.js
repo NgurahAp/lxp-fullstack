@@ -3,6 +3,7 @@ import {
   createTrainingUserValidation,
   createTrainingValidation,
   getStudentTrainingsValidation,
+  getTrainingDetailValidation,
 } from "../validation/training-validation.js";
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response-error.js";
@@ -149,4 +150,85 @@ const getStudentTrainings = async (user, request) => {
   };
 };
 
-export default { createTraining, createTrainingUser, getStudentTrainings };
+const getTrainingDetail = async (user, trainingId) => {
+  trainingId = validate(getTrainingDetailValidation, { trainingId }).trainingId;
+
+  // Check if user has access to this training
+  const trainingUser = await prismaClient.training_Users.findFirst({
+    where: {
+      trainingId: trainingId,
+      userId: user.id,
+    },
+  });
+
+  if (!trainingUser) {
+    throw new ResponseError(403, "You dont have access to this training");
+  }
+
+  // Get training details with meetings
+  const training = await prismaClient.training.findUnique({
+    where: { id: trainingId },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      instructor: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      meetings: {
+        select: {
+          id: true,
+          title: true,
+          meetingDate: true,
+          createdAt: true,
+          updatedAt: true,
+          modules: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          quizzes: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          tasks: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+        orderBy: {
+          meetingDate: "asc",
+        },
+      },
+      _count: {
+        select: {
+          meetings: true,
+        },
+      },
+    },
+  });
+
+  if (!training) {
+    throw new ResponseError(404, "Training not found");
+  }
+
+  return {
+    data: training,
+  };
+};
+
+export default {
+  createTraining,
+  createTrainingUser,
+  getStudentTrainings,
+  getTrainingDetail,
+};

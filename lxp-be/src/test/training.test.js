@@ -219,3 +219,75 @@ describe("GET /api/students/trainings", () => {
     expect(result.status).toBe(400);
   });
 });
+
+describe("GET /api/student/trainings/:trainingId", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestInstructor();
+
+    // Create a test training
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    await createTraining(instructor.id);
+
+    // Enroll test user in training
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+
+    await prismaClient.training_Users.create({
+      data: {
+        trainingId: training.id,
+        userId: user.id,
+      },
+    });
+
+    // Create test meeting
+    await prismaClient.meeting.create({
+      data: {
+        trainingId: training.id,
+        title: "Test Meeting",
+        meetingDate: new Date(),
+      },
+    });
+  });
+
+  afterEach(async () => {
+    await prismaClient.meeting.deleteMany({});
+    await prismaClient.training_Users.deleteMany({});
+    await prismaClient.training.deleteMany({});
+    await removeTestUser();
+    await removeTestInstructor();
+  });
+
+  it("Should return training detail with meetings", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
+    const result = await supertest(web)
+      .get(`/api/student/trainings/${training.id}`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.title).toBe("test training");
+    expect(Array.isArray(result.body.data.meetings)).toBe(true);
+    expect(result.body.data.meetings.length).toBe(1);
+    expect(result.body.data.meetings[0].title).toBe("Test Meeting");
+  });
+
+  it("Should reject when accessing unauthorized training", async () => {
+    const result = await supertest(web)
+      .get(`/api/student/trainings/99999`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(403);
+  });
+});

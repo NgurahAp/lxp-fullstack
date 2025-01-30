@@ -20,8 +20,13 @@ const getStudentTrainingsValidation = Joi.object({
   status: Joi.number().valid("enrolled", "completed", "dropped").optional(),
 });
 
+const getTrainingDetailValidation = Joi.object({
+  trainingId: Joi.number().positive().required(),
+});
+
 export {
   createTrainingUserValidation,
   createTrainingValidation,
   getStudentTrainingsValidation,
+  getTrainingDetailValidation,
 };

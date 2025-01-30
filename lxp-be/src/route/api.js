@@ -29,6 +29,11 @@ userRouter.get(
   authMiddleware,
   trainingController.getStudentsTraining
 );
+userRouter.get(
+  "/api/student/trainings/:trainingId",
+  authMiddleware,
+  trainingController.getTrainingDetail
+);
 
 // Router for meeting
 userRouter.post(
