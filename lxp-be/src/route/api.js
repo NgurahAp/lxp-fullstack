@@ -4,6 +4,7 @@ import trainingController from "../controller/training-controller.js";
 import userController from "../controller/user-controller.js";
 import { instruktorMiddleware } from "../middleware/instructor-middleware.js";
 import meetingController from "../controller/meeting-controller.js";
+import moduleController from "../controller/module-controller.js";
 
 const userRouter = express.Router();
 
@@ -51,6 +52,14 @@ userRouter.get(
   "/api/trainings/:trainingId/meetings/:meetingId",
   authMiddleware,
   meetingController.getMeetingDetail
+);
+
+// Router for module
+userRouter.post(
+  "/api/meetings/:meetingId/modules",
+  authMiddleware,
+  instruktorMiddleware,
+  moduleController.createModule
 );
 
 export { userRouter };

@@ -75,6 +75,7 @@ model Module {
   meetingId   Int
   title       String   @db.VarChar(255)
   content     String   @db.VarChar(255)  // PDF file path
+  moduleAnswer     String?     
   moduleScore Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -104,6 +105,7 @@ model Task {
   title      String   @db.VarChar(255)
   description String?
   dueDate    DateTime?
+  taskAnswer     String?     
   taskScore  Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
