@@ -2,6 +2,7 @@ import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {
   createMeetingValidation,
+  getMeetingDetailValidation,
   getMeetingValidation,
 } from "../validation/meeting-validation.js";
 import { validate } from "../validation/validation.js";
@@ -46,7 +47,7 @@ const getMeetings = async (user, request) => {
   const validated = validate(getMeetingValidation, {
     trainingId: parseInt(request.trainingId), // Convert string to number
     page: request.page,
-    size: request.size
+    size: request.size,
   });
 
   // Verify if user has access to this training
@@ -111,4 +112,58 @@ const getMeetings = async (user, request) => {
   };
 };
 
-export default { createMeeting, getMeetings };
+const getMeetingDetail = async (user, request) => {
+  const validated = validate(getMeetingDetailValidation, {
+    trainingId: parseInt(request.trainingId),
+    meetingId: parseInt(request.meetingId),
+  });
+
+  // Verify if user has access to this training
+  const enrollment = await prismaClient.training_Users.findFirst({
+    where: {
+      userId: user.id,
+      trainingId: validated.trainingId,
+      status: {
+        in: ["enrolled", "completed"],
+      },
+    },
+  });
+
+  if (!enrollment) {
+    throw new ResponseError(
+      403,
+      "You don't have access to this training's meetings"
+    );
+  }
+
+  // Get Meeting Detail
+  const meeting = await prismaClient.meeting.findUnique({
+    where: { id: validated.meetingId },
+    select: {
+      id: true,
+      title: true,
+      meetingDate: true,
+      createdAt: true,
+      updatedAt: true,
+      training: {
+        select: {
+          title: true,
+          instructor: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!meeting) {
+    throw new ResponseError(404, "Meeting not found");
+  }
+
+  return meeting;
+};
+
+export default { createMeeting, getMeetings, getMeetingDetail };

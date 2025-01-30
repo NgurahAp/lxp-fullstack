@@ -22,4 +22,16 @@ const getMeetings = async (req, res, next) => {
   }
 };
 
-export default { createMeeting, getMeetings };
+const getMeetingDetail = async (req, res, next) => {
+  try {
+    const result = await meetingService.getMeetingDetail(req.user, {
+      trainingId: req.params.trainingId,
+      meetingId: req.params.meetingId,
+    });
+    res.status(200).json({ data: result });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { createMeeting, getMeetings, getMeetingDetail };

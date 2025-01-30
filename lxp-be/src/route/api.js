@@ -42,5 +42,10 @@ userRouter.get(
   authMiddleware,
   meetingController.getMeetings
 );
+userRouter.get(
+  "/api/trainings/:trainingId/meetings/:meetingId",
+  authMiddleware,
+  meetingController.getMeetingDetail
+);
 
 export { userRouter };

@@ -12,4 +12,9 @@ const getMeetingValidation = Joi.object({
   size: Joi.number().min(1).max(50).default(10),
 });
 
-export { createMeetingValidation, getMeetingValidation };
+const getMeetingDetailValidation = Joi.object({
+  trainingId: Joi.number().positive().required(),
+  meetingId: Joi.number().positive().required(),
+});
+
+export { createMeetingValidation, getMeetingValidation, getMeetingDetailValidation };
