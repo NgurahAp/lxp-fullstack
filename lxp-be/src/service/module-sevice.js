@@ -41,6 +41,7 @@ const createModule = async (user, request, file) => {
       content: true,
       moduleScore: true,
       meetingId: true,
+      moduleAnswer: true,
       createdAt: true,
       updatedAt: true,
       meeting: {
