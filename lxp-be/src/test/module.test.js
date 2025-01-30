@@ -4,9 +4,13 @@ import { web } from "../application/web.js";
 import path from "path";
 import fs from "fs";
 import {
+  createMeeting,
+  createModule,
   createTestInstructor,
   createTestUser,
   createTraining,
+  createTrainingUser,
+  removeAll,
   removeTestInstructor,
   removeTestUser,
 } from "./test.util.js";
@@ -129,5 +133,86 @@ describe("POST /api/meetings/:meetingId/modules", () => {
       .field("moduleScore", "100"); // Convert to string
 
     expect(result.status).toBe(400);
+  });
+});
+
+describe("POST /api/modules/:moduleId/answer", () => {
+  beforeEach(async () => {
+    // Create test user and instructor
+    await createTestUser();
+    await createTestInstructor();
+
+    // Get instructor
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    // Create training
+    const training = await createTraining(instructor.id);
+
+    // Create training user enrollment
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    await createTrainingUser(training.id, user.id);
+
+    // Create meeting and module
+    const meeting = await createMeeting(training.id);
+    await createModule(meeting.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should submit module answer successfully", async () => {
+    const module = await prismaClient.module.findFirst({
+      where: { title: "Test Module" },
+    });
+
+    const result = await supertest(web)
+      .post(`/api/modules/${module.id}/answer`)
+      .set("Authorization", "Bearer test")
+      .send({
+        moduleId: module.id,
+        moduleAnswer: "This is my answer to the module",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.moduleAnswer).toBe(
+      "This is my answer to the module"
+    );
+  });
+
+  it("Should reject if user is not enrolled", async () => {
+    // Create a new training with module but without enrollment
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+    const training = await createTraining(instructor.id);
+    const meeting = await createMeeting(training.id);
+    const module = await createModule(meeting.id);
+
+    const result = await supertest(web)
+      .post(`/api/modules/${module.id}/answer`)
+      .set("Authorization", "Bearer test")
+      .send({
+        moduleId: module.id,
+        moduleAnswer: "This is my answer to the module",
+      });
+
+    expect(result.status).toBe(404);
+  });
+
+  it("Should reject invalid module ID", async () => {
+    const result = await supertest(web)
+      .post(`/api/modules/999999/answer`)
+      .set("Authorization", "Bearer test")
+      .send({
+        moduleId: 999999,
+        moduleAnswer: "This is my answer to the module",
+      });
+
+    expect(result.status).toBe(404);
   });
 });

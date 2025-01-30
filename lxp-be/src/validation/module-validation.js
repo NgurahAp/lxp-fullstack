@@ -6,4 +6,9 @@ const createModuleValidation = Joi.object({
   moduleScore: Joi.number().min(0).default(0),
 });
 
-export { createModuleValidation };
+const submitModuleAnswerValidation = Joi.object({
+  moduleId: Joi.number().positive().required(),
+  moduleAnswer: Joi.string().required(),
+});
+
+export { createModuleValidation, submitModuleAnswerValidation };

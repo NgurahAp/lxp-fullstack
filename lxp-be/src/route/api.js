@@ -61,5 +61,10 @@ userRouter.post(
   instruktorMiddleware,
   moduleController.createModule
 );
+userRouter.post(
+  "/api/modules/:moduleId/answer",
+  authMiddleware,
+  moduleController.submitModuleAnswer
+);
 
 export { userRouter };

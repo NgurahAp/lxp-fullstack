@@ -1,6 +1,9 @@
 import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
-import { createModuleValidation } from "../validation/module-validation.js";
+import {
+  createModuleValidation,
+  submitModuleAnswerValidation,
+} from "../validation/module-validation.js";
 import { validate } from "../validation/validation.js";
 
 const createModule = async (user, request, file) => {
@@ -60,4 +63,70 @@ const createModule = async (user, request, file) => {
   });
 };
 
-export default { createModule };
+const submitModuleAnswer = async (user, request) => {
+  const moduleAnswer = validate(submitModuleAnswerValidation, request);
+
+  // Check if module exists and user is enrolled in the training
+  const module = await prismaClient.module.findFirst({
+    where: {
+      id: moduleAnswer.moduleId,
+      meeting: {
+        training: {
+          users: {
+            some: {
+              userId: user.id,
+              status: "enrolled",
+            },
+          },
+        },
+      },
+    },
+    include: {
+      meeting: {
+        include: {
+          training: true,
+        },
+      },
+    },
+  });
+
+  if (!module) {
+    throw new ResponseError(
+      404,
+      "Module not found or you're not enrolled in this training"
+    );
+  }
+
+  // Update the module with the answer
+  return prismaClient.module.update({
+    where: {
+      id: moduleAnswer.moduleId,
+    },
+    data: {
+      moduleAnswer: moduleAnswer.moduleAnswer,
+    },
+    select: {
+      id: true,
+      title: true,
+      moduleAnswer: true,
+      moduleScore: true,
+      meetingId: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+ 
+export default { createModule, submitModuleAnswer };

@@ -27,4 +27,15 @@ const createModule = async (req, res, next) => {
   });
 };
 
-export default { createModule };
+const submitModuleAnswer = async (req, res, next) => {
+  try {
+    const result = await moduleSevice.submitModuleAnswer(req.user, req.body);
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { createModule, submitModuleAnswer };
