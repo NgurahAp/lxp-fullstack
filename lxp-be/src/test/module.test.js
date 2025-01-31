@@ -352,3 +352,83 @@ describe("GET /api/meetings/:meetingId/modules/:moduleId", () => {
     expect(result.status).toBe(404);
   });
 });
+
+describe("POST /api/modules/:moduleId/score", () => {
+  beforeEach(async () => {
+    // Create test user and instructor
+    await createTestUser();
+    await createTestInstructor();
+
+    // Get instructor
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    // Create training
+    const training = await createTraining(instructor.id);
+
+    // Create training user enrollment
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    await createTrainingUser(training.id, user.id);
+
+    // Create meeting and module
+    const meeting = await createMeeting(training.id);
+    await createModule(meeting.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should submit module answer successfully", async () => {
+    const module = await prismaClient.module.findFirst({
+      where: { title: "Test Module" },
+    });
+
+    const result = await supertest(web)
+      .post(`/api/modules/${module.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        moduleScore: 80,
+      });
+
+    if (result.status !== 200) {
+      console.log("Error: ", result.body);
+    }
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.moduleScore).toBe(80);
+  });
+
+  it("Should reject if module string", async () => {
+    // Create a new training with module but without enrollment
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+    const training = await createTraining(instructor.id);
+    const meeting = await createMeeting(training.id);
+    const module = await createModule(meeting.id);
+
+    const result = await supertest(web)
+      .post(`/api/modules/${module.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        moduleScore: "test",
+      });
+
+    expect(result.status).toBe(400);
+  });
+
+  it("Should reject invalid module ID", async () => {
+    const result = await supertest(web)
+      .post(`/api/modules/999999/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        moduleScore: 80,
+      });
+
+    expect(result.status).toBe(404);
+  });
+});

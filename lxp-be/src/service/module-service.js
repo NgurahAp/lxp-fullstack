@@ -1,3 +1,4 @@
+import { request } from "http";
 import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {
@@ -5,6 +6,7 @@ import {
   getDetailModuleValidation,
   getModulesValidation,
   submitModuleAnswerValidation,
+  submitScoreModuleValidation,
 } from "../validation/module-validation.js";
 import { validate } from "../validation/validation.js";
 
@@ -267,4 +269,69 @@ const getModuleDetail = async (user, request) => {
   return module;
 };
 
-export default { createModule, submitModuleAnswer, getModules, getModuleDetail };
+const submitModuleScore = async (user, moduleId, request) => {
+  // Kita perlu destructure moduleAnswer dari object hasil validasi tersebut
+  const { moduleScore } = validate(submitScoreModuleValidation, request);
+
+  const module = await prismaClient.module.findFirst({
+    where: {
+      id: moduleId,
+      meeting: {
+        training: {
+          instructorId: user.id, 
+        },
+      },
+    },
+    include: {
+      meeting: {
+        include: {
+          training: true,
+        },
+      },
+    },
+  });
+
+  if (!module) {
+    throw new ResponseError(
+      404,
+      "module not found or you're not the instructor"
+    );
+  }
+  return prismaClient.module.update({
+    where: {
+      id: moduleId,
+    },
+    data: {
+      moduleScore: moduleScore,
+    },
+    select: {
+      id: true,
+      title: true,
+      moduleAnswer: true,
+      moduleScore: true,
+      meetingId: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+export default {
+  createModule,
+  submitModuleAnswer,
+  getModules,
+  submitModuleScore,
+  getModuleDetail,
+};

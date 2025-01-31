@@ -85,9 +85,27 @@ const getModuleDetail = async (req, res, next) => {
   }
 };
 
+const submitModuleScore = async (req, res, next) => {
+  try {
+    const moduleId = parseInt(req.params.moduleId); // Ambil moduleId dari URL
+    const result = await moduleService.submitModuleScore(
+      req.user,
+      moduleId,
+      req.body
+    );
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 export default {
   createModule,
   submitModuleAnswer,
   getModules,
   getModuleDetail,
+  submitModuleScore,
 };

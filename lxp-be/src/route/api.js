@@ -76,5 +76,11 @@ userRouter.get(
   authMiddleware,
   moduleController.getModuleDetail
 );
+userRouter.post(
+  "/api/modules/:moduleId/score",
+  authMiddleware,
+  instruktorMiddleware,
+  moduleController.submitModuleScore
+);
 
 export { userRouter };

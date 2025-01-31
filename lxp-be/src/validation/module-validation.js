@@ -20,9 +20,14 @@ const getDetailModuleValidation = Joi.object({
   moduleId: Joi.number().positive().required(),
 });
 
+const submitScoreModuleValidation = Joi.object({
+  moduleScore: Joi.number().required(),
+});
+
 export {
   createModuleValidation,
   submitModuleAnswerValidation,
   getModulesValidation,
   getDetailModuleValidation,
+  submitScoreModuleValidation,
 };
