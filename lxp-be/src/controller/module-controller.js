@@ -67,5 +67,27 @@ const getModules = async (req, res, next) => {
   }
 };
 
-export default { createModule, submitModuleAnswer, getModules };
+const getModuleDetail = async (req, res, next) => {
+  try {
+    const meetingId = parseInt(req.params.meetingId);
+    const moduleId = parseInt(req.params.moduleId);
 
+    const result = await moduleService.getModuleDetail(req.user, {
+      meetingId,
+      moduleId,
+    });
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default {
+  createModule,
+  submitModuleAnswer,
+  getModules,
+  getModuleDetail,
+};

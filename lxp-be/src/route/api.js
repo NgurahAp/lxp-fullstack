@@ -71,5 +71,10 @@ userRouter.get(
   authMiddleware,
   moduleController.getModules
 );
+userRouter.get(
+  "/api/meetings/:meetingId/modules/:moduleId",
+  authMiddleware,
+  moduleController.getModuleDetail
+);
 
 export { userRouter };

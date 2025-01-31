@@ -15,8 +15,14 @@ const getModulesValidation = Joi.object({
   size: Joi.number().positive().min(1).max(100).default(10),
 });
 
+const getDetailModuleValidation = Joi.object({
+  meetingId: Joi.number().positive().required(),
+  moduleId: Joi.number().positive().required(),
+});
+
 export {
   createModuleValidation,
   submitModuleAnswerValidation,
   getModulesValidation,
+  getDetailModuleValidation,
 };

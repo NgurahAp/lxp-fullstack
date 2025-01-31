@@ -293,3 +293,62 @@ describe("GET /api/meetings/:meetingId/modules", () => {
     expect(result.status).toBe(404);
   });
 });
+
+describe("GET /api/meetings/:meetingId/modules/:moduleId", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestInstructor();
+
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    const training = await createTraining(instructor.id);
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    await createTrainingUser(training.id, user.id);
+
+    const meeting = await createMeeting(training.id);
+    await createModule(meeting.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should get module detail successfully", async () => {
+    const meeting = await prismaClient.meeting.findFirst({
+      where: { title: "Test Meeting" },
+    });
+
+    const module = await prismaClient.module.findFirst({
+      where: { title: "Test Module" },
+    });
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/modules/${module.id}`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.id).toBe(module.id);
+    expect(result.body.data.title).toBe(module.title);
+  });
+
+  it("Should reject if user is not enrolled", async () => {
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+    const training = await createTraining(instructor.id);
+    const meeting = await createMeeting(training.id);
+    const module = await createModule(meeting.id);
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/modules/${module.id}`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(404);
+  });
+});
