@@ -1,7 +1,7 @@
 import { ResponseError } from "../error/response-error.js";
 import { uploadModule } from "../middleware/upload-middleware.js";
-import moduleSevice from "../service/module-sevice.js";
 import multer from "multer";
+import moduleService from "../service/module-service.js";
 
 const createModule = async (req, res, next) => {
   uploadModule(req, res, async function (err) {
@@ -13,7 +13,7 @@ const createModule = async (req, res, next) => {
       }
 
       const meetingId = parseInt(req.params.meetingId); // Ambil meetingId dari URL
-      const result = await moduleSevice.createModule(
+      const result = await moduleService.createModule(
         req.user,
         meetingId,
         req.body,
@@ -32,7 +32,7 @@ const createModule = async (req, res, next) => {
 const submitModuleAnswer = async (req, res, next) => {
   try {
     const moduleId = parseInt(req.params.moduleId); // Ambil moduleId dari URL
-    const result = await moduleSevice.submitModuleAnswer(
+    const result = await moduleService.submitModuleAnswer(
       req.user,
       moduleId,
       req.body
