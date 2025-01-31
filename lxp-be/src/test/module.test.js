@@ -101,7 +101,10 @@ describe("POST /api/meetings/:meetingId/modules", () => {
     }
 
     expect(result.status).toBe(200);
-    // ... rest of the test
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.title).toBe("Test Module");
+    expect(result.body.data.content).toBeDefined();
+    expect(result.body.data.content).toMatch(/^modules\/.+.pdf$/);
   });
 
   it("Should reject non-PDF files", async () => {
