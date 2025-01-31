@@ -64,13 +64,14 @@ const createModule = async (user, meetingId, request, file) => {
   });
 };
 
-const submitModuleAnswer = async (user, request) => {
-  const moduleAnswer = validate(submitModuleAnswerValidation, request);
+const submitModuleAnswer = async (user, moduleId, request) => {
+  // Kita perlu destructure moduleAnswer dari object hasil validasi tersebut
+  const { moduleAnswer } = validate(submitModuleAnswerValidation, request);
 
   // Check if module exists and user is enrolled in the training
   const module = await prismaClient.module.findFirst({
     where: {
-      id: moduleAnswer.moduleId,
+      id: moduleId,
       meeting: {
         training: {
           users: {
@@ -101,10 +102,10 @@ const submitModuleAnswer = async (user, request) => {
   // Update the module with the answer
   return prismaClient.module.update({
     where: {
-      id: moduleAnswer.moduleId,
+      id: moduleId,
     },
     data: {
-      moduleAnswer: moduleAnswer.moduleAnswer,
+      moduleAnswer: moduleAnswer,
     },
     select: {
       id: true,

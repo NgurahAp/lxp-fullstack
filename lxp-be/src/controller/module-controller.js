@@ -15,7 +15,7 @@ const createModule = async (req, res, next) => {
       const meetingId = parseInt(req.params.meetingId); // Ambil meetingId dari URL
       const result = await moduleSevice.createModule(
         req.user,
-        meetingId, 
+        meetingId,
         req.body,
         req.file
       );
@@ -31,7 +31,13 @@ const createModule = async (req, res, next) => {
 
 const submitModuleAnswer = async (req, res, next) => {
   try {
-    const result = await moduleSevice.submitModuleAnswer(req.user, req.body);
+    const moduleId = parseInt(req.params.moduleId); // Ambil moduleId dari URL
+    const result = await moduleSevice.submitModuleAnswer(
+      req.user,
+      moduleId,
+      req.body
+    );
+
     res.status(200).json({
       data: result,
     });

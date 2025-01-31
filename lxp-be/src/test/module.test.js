@@ -171,7 +171,6 @@ describe("POST /api/modules/:moduleId/answer", () => {
       .post(`/api/modules/${module.id}/answer`)
       .set("Authorization", "Bearer test")
       .send({
-        moduleId: module.id,
         moduleAnswer: "This is my answer to the module",
       });
 
@@ -194,7 +193,6 @@ describe("POST /api/modules/:moduleId/answer", () => {
       .post(`/api/modules/${module.id}/answer`)
       .set("Authorization", "Bearer test")
       .send({
-        moduleId: module.id,
         moduleAnswer: "This is my answer to the module",
       });
 
@@ -206,7 +204,6 @@ describe("POST /api/modules/:moduleId/answer", () => {
       .post(`/api/modules/999999/answer`)
       .set("Authorization", "Bearer test")
       .send({
-        moduleId: 999999,
         moduleAnswer: "This is my answer to the module",
       });
 

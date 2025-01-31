@@ -6,7 +6,6 @@ const createModuleValidation = Joi.object({
 });
 
 const submitModuleAnswerValidation = Joi.object({
-  moduleId: Joi.number().positive().required(),
   moduleAnswer: Joi.string().required(),
 });
 
