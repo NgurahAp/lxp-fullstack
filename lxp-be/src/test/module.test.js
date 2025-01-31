@@ -216,3 +216,80 @@ describe("POST /api/modules/:moduleId/answer", () => {
     expect(result.status).toBe(404);
   });
 });
+
+describe("GET /api/meetings/:meetingId/modules", () => {
+  beforeEach(async () => {
+    // Create test user and instructor
+    await createTestUser();
+    await createTestInstructor();
+
+    // Get instructor
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    // Create training
+    const training = await createTraining(instructor.id);
+
+    // Create training user enrollment
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    await createTrainingUser(training.id, user.id);
+
+    // Create meeting and modules
+    const meeting = await createMeeting(training.id);
+    await createModule(meeting.id);
+    await createModule(meeting.id); // Create multiple modules for pagination testing
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should get list of modules successfully with pagination", async () => {
+    const meeting = await prismaClient.meeting.findFirst({
+      where: { title: "Test Meeting" },
+    });
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/modules?page=1&size=10`)
+      .set("Authorization", "Bearer test");
+
+    if (result.status !== 200) {
+      console.log("Error response:", result.body);
+      console.log("Status:", result.status);
+    }
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.length).toBeGreaterThan(0);
+    expect(result.body.paging).toBeDefined();
+    expect(result.body.paging.page).toBe(1);
+    expect(result.body.paging.total_page).toBeGreaterThan(0);
+  });
+
+  it("Should reject if user is not enrolled", async () => {
+    // Create a new training with module but without enrollment
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+    const training = await createTraining(instructor.id);
+    const meeting = await createMeeting(training.id);
+    await createModule(meeting.id);
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/modules`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(404);
+  });
+
+  it("Should reject invalid meeting ID", async () => {
+    const result = await supertest(web)
+      .get(`/api/meetings/999999/modules`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(404);
+  });
+});

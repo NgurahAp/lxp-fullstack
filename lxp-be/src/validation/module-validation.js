@@ -9,4 +9,14 @@ const submitModuleAnswerValidation = Joi.object({
   moduleAnswer: Joi.string().required(),
 });
 
-export { createModuleValidation, submitModuleAnswerValidation };
+const getModulesValidation = Joi.object({
+  meetingId: Joi.number().positive().required(),
+  page: Joi.number().positive().default(1),
+  size: Joi.number().positive().min(1).max(100).default(10),
+});
+
+export {
+  createModuleValidation,
+  submitModuleAnswerValidation,
+  getModulesValidation,
+};

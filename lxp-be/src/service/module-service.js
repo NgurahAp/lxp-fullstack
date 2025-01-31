@@ -2,6 +2,7 @@ import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {
   createModuleValidation,
+  getModulesValidation,
   submitModuleAnswerValidation,
 } from "../validation/module-validation.js";
 import { validate } from "../validation/validation.js";
@@ -131,4 +132,83 @@ const submitModuleAnswer = async (user, moduleId, request) => {
   });
 };
 
-export default { createModule, submitModuleAnswer };
+const getModules = async (user, request) => {
+  const { meetingId, page, size } = validate(getModulesValidation, request);
+
+  // Check if meeting exists and user is enrolled in the training
+  const meeting = await prismaClient.meeting.findFirst({
+    where: {
+      id: meetingId,
+      training: {
+        users: {
+          some: {
+            userId: user.id,
+            status: "enrolled",
+          },
+        },
+      },
+    },
+    include: {
+      training: true,
+    },
+  });
+
+  if (!meeting) {
+    throw new ResponseError(
+      404,
+      "Meeting not found or you're not enrolled in this training"
+    );
+  }
+
+  // Calculate pagination
+  const skip = (page - 1) * size;
+
+  // Get all modules for the meeting with pagination
+  const modules = await prismaClient.module.findMany({
+    where: {
+      meetingId: meetingId,
+    },
+    skip: skip,
+    take: size,
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      moduleScore: true,
+      meetingId: true,
+      moduleAnswer: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Get total count of modules for pagination metadata
+  const totalItems = await prismaClient.module.count({
+    where: {
+      meetingId: meetingId,
+    },
+  });
+
+  return {
+    data: modules,
+    paging: {
+      page: page,
+      total_item: totalItems,
+      total_page: Math.ceil(totalItems / size),
+    },
+  };
+};
+
+export default { createModule, submitModuleAnswer, getModules };

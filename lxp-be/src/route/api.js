@@ -66,5 +66,10 @@ userRouter.post(
   authMiddleware,
   moduleController.submitModuleAnswer
 );
+userRouter.get(
+  "/api/meetings/:meetingId/modules",
+  authMiddleware,
+  moduleController.getModules
+);
 
 export { userRouter };

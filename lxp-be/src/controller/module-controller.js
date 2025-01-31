@@ -46,4 +46,26 @@ const submitModuleAnswer = async (req, res, next) => {
   }
 };
 
-export default { createModule, submitModuleAnswer };
+const getModules = async (req, res, next) => {
+  try {
+    const meetingId = parseInt(req.params.meetingId); // Ambil meetingId dari URL
+    const page = parseInt(req.query.page) || 1; // Ambil page dari query, default 1
+    const size = parseInt(req.query.size) || 10; // Ambil size dari query, default 10
+
+    const result = await moduleService.getModules(req.user, {
+      meetingId,
+      page,
+      size,
+    });
+
+    res.status(200).json({
+      data: result.data,
+      paging: result.paging,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { createModule, submitModuleAnswer, getModules };
+
