@@ -91,7 +91,6 @@ describe("POST /api/meetings/:meetingId/modules", () => {
       .post(`/api/meetings/${meeting.id}/modules`)
       .set("Authorization", "Bearer test-instructor")
       .field("title", "Test Module")
-      .field("meetingId", meeting.id.toString()) // Convert to string
       .field("moduleScore", "100") // Convert to string
       .attach("content", testPdfPath);
 
@@ -113,14 +112,13 @@ describe("POST /api/meetings/:meetingId/modules", () => {
       .post(`/api/meetings/${meeting.id}/modules`)
       .set("Authorization", "Bearer test-instructor")
       .field("title", "Test Module")
-      .field("meetingId", meeting.id.toString()) // Convert to string
       .field("moduleScore", "100") // Convert to string
       .attach("content", testTxtPath);
 
     expect(result.status).toBe(400);
   });
 
-  it("Should reject non-PDF files", async () => {
+  it("Should reject if no file is uploaded", async () => {
     const meeting = await prismaClient.meeting.findFirst({
       where: { title: "Test Meeting" },
     });
@@ -129,7 +127,6 @@ describe("POST /api/meetings/:meetingId/modules", () => {
       .post(`/api/meetings/${meeting.id}/modules`)
       .set("Authorization", "Bearer test-instructor")
       .field("title", "Test Module")
-      .field("meetingId", meeting.id.toString()) // Convert to string
       .field("moduleScore", "100"); // Convert to string
 
     expect(result.status).toBe(400);

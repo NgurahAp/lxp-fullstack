@@ -6,13 +6,13 @@ import {
 } from "../validation/module-validation.js";
 import { validate } from "../validation/validation.js";
 
-const createModule = async (user, request, file) => {
+const createModule = async (user, meetingId, request, file) => {
   const module = validate(createModuleValidation, request);
 
   // Check if meeting exists and user is the instructor
   const meeting = await prismaClient.meeting.findFirst({
     where: {
-      id: module.meetingId,
+      id: meetingId,
       training: {
         instructorId: user.id,
       },
@@ -36,6 +36,7 @@ const createModule = async (user, request, file) => {
   return prismaClient.module.create({
     data: {
       ...module,
+      meetingId: meetingId,
       content: file.path.replace(/\\/g, "/").replace("public/", ""), // Simpan path relatif
     },
     select: {
@@ -128,5 +129,5 @@ const submitModuleAnswer = async (user, request) => {
     },
   });
 };
- 
+
 export default { createModule, submitModuleAnswer };

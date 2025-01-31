@@ -12,8 +12,10 @@ const createModule = async (req, res, next) => {
         throw new ResponseError(400, err.message); // Ensure the error message is passed
       }
 
+      const meetingId = parseInt(req.params.meetingId); // Ambil meetingId dari URL
       const result = await moduleSevice.createModule(
         req.user,
+        meetingId, 
         req.body,
         req.file
       );

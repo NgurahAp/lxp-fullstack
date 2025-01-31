@@ -72,7 +72,10 @@ const login = async (request) => {
       email: user.email,
     },
     select: {
+      id: true,
+      email: true,
       token: true,
+      role: true,
     },
   });
 };
@@ -120,7 +123,7 @@ const logout = async (email) => {
       token: null,
     },
     select: {
-      email: true, 
+      email: true,
     },
   });
 };
