@@ -16,4 +16,16 @@ const createQuizValidation = Joi.object({
     .required(),
 });
 
-export { createQuizValidation };
+const submitQuizValidation = Joi.object({
+  answers: Joi.array()
+    .items(
+      Joi.object({
+        questionIndex: Joi.number().min(0).required(),
+        selectedAnswer: Joi.number().min(0).max(3).required(),
+      })
+    )
+    .min(1)
+    .required(),
+});
+
+export { createQuizValidation,submitQuizValidation };

@@ -91,5 +91,10 @@ userRouter.post(
   instruktorMiddleware,
   quizController.createQuiz
 );
+userRouter.post(
+  "/api/quizzes/:quizId/submit",
+  authMiddleware,
+  quizController.submitQuiz
+);
 
 export { userRouter };
