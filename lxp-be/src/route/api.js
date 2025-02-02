@@ -5,6 +5,7 @@ import userController from "../controller/user-controller.js";
 import { instruktorMiddleware } from "../middleware/instructor-middleware.js";
 import meetingController from "../controller/meeting-controller.js";
 import moduleController from "../controller/module-controller.js";
+import quizController from "../controller/quiz-controller.js";
 
 const userRouter = express.Router();
 
@@ -81,6 +82,14 @@ userRouter.post(
   authMiddleware,
   instruktorMiddleware,
   moduleController.submitModuleScore
+);
+
+// Router for Quiz
+userRouter.post(
+  "/api/meetings/:meetingId/quizzes",
+  authMiddleware,
+  instruktorMiddleware,
+  quizController.createQuiz
 );
 
 export { userRouter };

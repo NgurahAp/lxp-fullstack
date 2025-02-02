@@ -122,6 +122,38 @@ const removeTrainingUser = async () => {
   await prismaClient.training_Users.deleteMany({});
 };
 
+const createQuiz = async (meetingId) => {
+  return prismaClient.quiz.create({
+    data: {
+      meetingId: meetingId,
+      title: "Test Quiz",
+      quizScore: 100,
+      questions: [
+        {
+          question: "Test Question 1?",
+          options: ["A", "B", "C", "D"],
+          correctAnswer: 0,
+          score: 50,
+        },
+        {
+          question: "Test Question 2?",
+          options: ["A", "B", "C", "D"],
+          correctAnswer: 1,
+          score: 50,
+        },
+      ],
+    },
+  });
+};
+
+const removeQuiz = async () => {
+  await prismaClient.quiz.deleteMany({
+    where: {
+      title: "Test Quiz",
+    },
+  });
+};
+
 // Cleanup utility
 const removeAll = async () => {
   await removeModule();
@@ -147,4 +179,6 @@ export {
   createTrainingUser,
   removeTrainingUser,
   removeAll,
+  createQuiz,
+  removeQuiz,
 };
