@@ -154,6 +154,30 @@ describe("POST /api/quizzes/:quizId/submit", () => {
     expect(result.body.data.totalQuestions).toBe(5);
   });
 
+  it("should get perfect score (80) when student dont not mengisi semuanya", async () => {
+    const quiz = await prismaClient.quiz.findFirst({
+      where: { title: "Test Quiz" },
+    });
+
+    const result = await supertest(web)
+      .post(`/api/quizzes/${quiz.id}/submit`)
+      .set("Authorization", "Bearer test")
+      .send({
+        answers: [
+          { questionIndex: 0, selectedAnswer: 0 }, // correct
+          { questionIndex: 1, selectedAnswer: 1 }, // correct
+          { questionIndex: 2, selectedAnswer: 2 }, // correct
+          // { questionIndex: 3, selectedAnswer: 1 }, // correct
+          { questionIndex: 4, selectedAnswer: 3 }, // correct
+        ],
+      });
+
+    console.log("Perfect Score Test:", result.body);
+    expect(result.status).toBe(200);
+    expect(result.body.data.score).toBe(80);
+    expect(result.body.data.totalQuestions).toBe(5);
+  });
+
   it("should throw error if quiz not found", async () => {
     const result = await supertest(web)
       .post(`/api/quizzes/99999/submit`)

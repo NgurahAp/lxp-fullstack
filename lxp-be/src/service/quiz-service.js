@@ -116,7 +116,6 @@ const submitQuiz = async (user, quizId, request) => {
   return {
     quizId: quiz.id,
     title: quiz.title,
-    submittedAnswers: submittedAnswers.answers,
     score: quizScore,
     totalQuestions: questions.length,
   };
