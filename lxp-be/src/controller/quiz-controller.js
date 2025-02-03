@@ -42,4 +42,22 @@ const getQuizDetail = async (req, res, next) => {
   }
 };
 
-export default { createQuiz, submitQuiz, getQuizDetail };
+const getQuizQuestions = async (req, res, next) => {
+  try {
+    const meetingId = parseInt(req.params.meetingId);
+    const quizId = parseInt(req.params.quizId);
+
+    const result = await quizService.getQuizQuestions(req.user, {
+      meetingId,
+      quizId,
+    });
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { createQuiz, submitQuiz, getQuizDetail, getQuizQuestions };

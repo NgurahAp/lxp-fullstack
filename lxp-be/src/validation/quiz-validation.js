@@ -33,4 +33,5 @@ const getDetailQuizValidation = Joi.object({
   quizId: Joi.number().positive().required(),
 });
 
+
 export { createQuizValidation, submitQuizValidation, getDetailQuizValidation };

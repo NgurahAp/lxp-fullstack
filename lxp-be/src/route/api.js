@@ -101,5 +101,10 @@ userRouter.get(
   authMiddleware,
   quizController.getQuizDetail
 );
+userRouter.get(
+  "/api/meetings/:meetingId/quizzes/:quizId/questions",
+  authMiddleware,
+  quizController.getQuizQuestions
+);
 
 export { userRouter };

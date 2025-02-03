@@ -222,3 +222,70 @@ describe("GET /api/meetings/:meetingId/quizzes/:quizId", () => {
     expect(result.status).toBe(404);
   });
 });
+
+describe("GET /api/meetings/:meetingId/quizzes/:quizId/questions", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestInstructor();
+
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    const training = await createTraining(instructor.id);
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    await createTrainingUser(training.id, user.id);
+
+    const meeting = await createMeeting(training.id);
+    await createQuiz(meeting.id);
+  });
+
+  afterEach(async () => {
+    await prismaClient.quiz.deleteMany({});
+    await prismaClient.meeting.deleteMany({});
+    await prismaClient.training_Users.deleteMany({});
+    await prismaClient.training.deleteMany({});
+    await removeTestUser();
+    await removeTestInstructor();
+  });
+
+  it("Should get quiz questions successfully", async () => {
+    const meeting = await prismaClient.meeting.findFirst({
+      where: { title: "Test Meeting" },
+    });
+
+    const quiz = await prismaClient.quiz.findFirst({
+      where: { title: "Test Quiz" },
+    });
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/quizzes/${quiz.id}/questions`)
+      .set("Authorization", "Bearer test");
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.questions).toBeDefined();
+    expect(result.body.data.questions[0].correctAnswer).toBeUndefined();
+    expect(result.body.data.questions[0].options).toBeDefined();
+  });
+
+  it("Should reject if user is not enrolled", async () => {
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+    const training = await createTraining(instructor.id);
+    const meeting = await createMeeting(training.id);
+    const quiz = await createQuiz(meeting.id);
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/quizzes/${quiz.id}/questions`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(404);
+  });
+});
