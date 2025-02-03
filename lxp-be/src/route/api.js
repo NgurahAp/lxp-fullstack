@@ -115,5 +115,10 @@ userRouter.post(
   instruktorMiddleware,
   taskController.createTask
 );
+userRouter.post(
+  "/api/tasks/:taskId/submit",
+  authMiddleware,
+  taskController.submitTask
+);
 
 export { userRouter };

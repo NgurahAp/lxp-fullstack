@@ -55,4 +55,57 @@ const createTask = async (user, meetingId, request) => {
   });
 };
 
-export default {createTask}
+// In task-service.js
+const submitTask = async (user, taskId, file) => {
+  // Find the task and include all necessary relations
+  const task = await prismaClient.task.findFirst({
+    where: {
+      id: taskId
+    },
+    include: {
+      meeting: {
+        include: {
+          training: {
+            include: {
+              users: {
+                where: {
+                  userId: user.id
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (!task) {
+    throw new ResponseError(404, "Task not found");
+  }
+
+  if (!file) {
+    throw new ResponseError(400, "PDF File is required");
+  }
+
+  // Update the task with the answer
+  return prismaClient.task.update({
+    where: {
+      id: taskId
+    },
+    data: {
+      taskAnswer: file.path.replace(/\\/g, '/') // Normalize path for cross-platform compatibility
+    },
+    select: {
+      id: true,
+      title: true,
+      taskQuestion: true,
+      taskAnswer: true,
+      taskScore: true,
+      meetingId: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+};
+
+export default { createTask, submitTask };

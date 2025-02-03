@@ -1,10 +1,15 @@
 import { prismaClient } from "../application/database";
 import supertest from "supertest";
 import { web } from "../application/web.js";
+import path from "path";
+import fs from "fs";
 import {
+  createMeeting,
+  createTask,
   createTestInstructor,
   createTestUser,
   createTraining,
+  createTrainingUser,
   removeTestInstructor,
   removeTestUser,
 } from "./test.util";
@@ -76,4 +81,97 @@ describe("POST /api/meetings/:meetingId/tasks", () => {
 
     expect(result.status).toBe(403);
   });
+});
+
+describe("POST /api/tasks/:taskId/submit", () => {
+  beforeEach(async () => {
+    // Create test directories
+    const taskDir = path.join(process.cwd(), "public", "tasks");
+    const testPdfDir = path.join(__dirname, "files");
+
+    // Create directories if they don't exist
+    [taskDir, testPdfDir].forEach((dir) => {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    });
+
+    // Create test PDF file if it doesn't exist
+    const testPdfPath = path.join(testPdfDir, "test.pdf");
+    if (!fs.existsSync(testPdfPath)) {
+      fs.writeFileSync(testPdfPath, "Test PDF content");
+    }
+
+    // Setup test data
+    await createTestUser();
+    await createTestInstructor();
+
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    const training = await createTraining(instructor.id);
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    await createTrainingUser(training.id, user.id);
+
+    const meeting = await createMeeting(training.id);
+    await createTask(meeting.id);
+  });
+
+  afterEach(async () => {
+    // Clean up uploaded files
+    const taskDir = path.join(process.cwd(), "public", "tasks");
+    if (fs.existsSync(taskDir)) {
+      const files = fs.readdirSync(taskDir);
+      files.forEach((file) => {
+        fs.unlinkSync(path.join(taskDir, file));
+      });
+    }
+
+    // Clean up test data in correct order
+    await prismaClient.score.deleteMany({});
+    await prismaClient.task.deleteMany({});
+    await prismaClient.quiz.deleteMany({});
+    await prismaClient.module.deleteMany({});
+    await prismaClient.meeting.deleteMany({});
+    await prismaClient.training_Users.deleteMany({});
+    await prismaClient.training.deleteMany({});
+    await removeTestUser();
+    await removeTestInstructor();
+  });
+
+ it("Should submit task answer successfully", async () => {
+   // Get the task
+   const task = await prismaClient.task.findFirst({
+     where: { title: "Test Task" },
+   });
+
+   if (!task) {
+     throw new Error("Test task not found");
+   }
+
+   const testPdfPath = path.join(__dirname, "files", "test.pdf");
+
+   const result = await supertest(web)
+     .post(`/api/tasks/${task.id}/submit`)
+     .set("Authorization", "Bearer test")
+     .attach("content", testPdfPath);
+
+   expect(result.status).toBe(200);
+   expect(result.body.data.id).toBe(task.id);
+   expect(result.body.data.taskAnswer).toBeDefined();
+
+   // Verify the task was updated in the database
+   const updatedTask = await prismaClient.task.findUnique({
+     where: { id: task.id },
+   });
+
+   expect(updatedTask.taskAnswer).toBeDefined();
+   // Check if file exists using normalized path
+   const normalizedPath = updatedTask.taskAnswer.replace(/\\/g, "/");
+   expect(fs.existsSync(normalizedPath)).toBe(true);
+ });
 });

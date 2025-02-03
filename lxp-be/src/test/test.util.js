@@ -167,6 +167,16 @@ const removeQuiz = async () => {
   });
 };
 
+const createTask = async (meetingId) => {
+  return prismaClient.task.create({
+    data: {
+      meetingId: meetingId,
+      title: "Test Task",
+      taskQuestion: "Sebutkan 5 rukun islam",
+    },
+  });
+};
+
 // Cleanup utility
 const removeAll = async () => {
   await removeModule();
@@ -194,4 +204,5 @@ export {
   removeAll,
   createQuiz,
   removeQuiz,
+  createTask
 };

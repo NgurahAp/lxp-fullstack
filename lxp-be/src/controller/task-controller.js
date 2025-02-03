@@ -1,4 +1,6 @@
-import taskService from "../service/task-service";
+import multer from "multer";
+import { uploadTasks } from "../middleware/upload-middleware.js";
+import taskService from "../service/task-service.js";
 
 const createTask = async (req, res, next) => {
   try {
@@ -13,4 +15,29 @@ const createTask = async (req, res, next) => {
   }
 };
 
-export default { createTask };
+// In task-controller.js
+const submitTask = async (req, res, next) => {
+  uploadTasks(req, res, async function (err) {
+    try {
+      if (err instanceof multer.MulterError) {
+        throw new ResponseError(400, err.message);
+      } else if (err) {
+        throw new ResponseError(400, err.message);
+      }
+
+      const taskId = parseInt(req.params.taskId); // Changed from meetingId to taskId
+      const result = await taskService.submitTask(
+        req.user,
+        taskId,
+        req.file
+      );
+
+      res.status(200).json({
+        data: result
+      });
+    } catch (e) {
+      next(e);
+    }
+  });
+};
+export default { createTask, submitTask };
