@@ -102,6 +102,11 @@ describe("POST /api/tasks/:taskId/submit", () => {
       fs.writeFileSync(testPdfPath, "Test PDF content");
     }
 
+    const testTxtPath = path.join(testPdfDir, "test.txt");
+    if (!fs.existsSync(testTxtPath)) {
+      fs.writeFileSync(testTxtPath, "Test TXT content");
+    }
+
     // Setup test data
     await createTestUser();
     await createTestInstructor();
@@ -143,35 +148,63 @@ describe("POST /api/tasks/:taskId/submit", () => {
     await removeTestInstructor();
   });
 
- it("Should submit task answer successfully", async () => {
-   // Get the task
-   const task = await prismaClient.task.findFirst({
-     where: { title: "Test Task" },
-   });
+  it("Should submit task answer successfully", async () => {
+    // Get the task
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test Task" },
+    });
 
-   if (!task) {
-     throw new Error("Test task not found");
-   }
+    if (!task) {
+      throw new Error("Test task not found");
+    }
 
-   const testPdfPath = path.join(__dirname, "files", "test.pdf");
+    const testPdfPath = path.join(__dirname, "files", "test.pdf");
 
-   const result = await supertest(web)
-     .post(`/api/tasks/${task.id}/submit`)
-     .set("Authorization", "Bearer test")
-     .attach("content", testPdfPath);
+    const result = await supertest(web)
+      .post(`/api/tasks/${task.id}/submit`)
+      .set("Authorization", "Bearer test")
+      .attach("content", testPdfPath);
 
-   expect(result.status).toBe(200);
-   expect(result.body.data.id).toBe(task.id);
-   expect(result.body.data.taskAnswer).toBeDefined();
+    expect(result.status).toBe(200);
+    expect(result.body.data.id).toBe(task.id);
+    expect(result.body.data.taskAnswer).toBeDefined();
 
-   // Verify the task was updated in the database
-   const updatedTask = await prismaClient.task.findUnique({
-     where: { id: task.id },
-   });
+    // Verify the task was updated in the database
+    const updatedTask = await prismaClient.task.findUnique({
+      where: { id: task.id },
+    });
 
-   expect(updatedTask.taskAnswer).toBeDefined();
-   // Check if file exists using normalized path
-   const normalizedPath = updatedTask.taskAnswer.replace(/\\/g, "/");
-   expect(fs.existsSync(normalizedPath)).toBe(true);
- });
+    expect(updatedTask.taskAnswer).toBeDefined();
+    // Check if file exists using normalized path
+    const normalizedPath = updatedTask.taskAnswer.replace(/\\/g, "/");
+    expect(fs.existsSync(normalizedPath)).toBe(true);
+  });
+
+  it("Should reject non-PDF files", async () => {
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test Task" },
+    });
+
+    const testTxtPath = path.join(__dirname, "files", "test.txt");
+
+    const result = await supertest(web)
+      .post(`/api/tasks/${task.id}/submit`)
+      .set("Authorization", "Bearer test")
+      .attach("content", testTxtPath);
+
+    console.log(result.body);
+    expect(result.status).toBe(400);
+  });
+
+  it("Should reject if no file is uploaded", async () => {
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test Task" },
+    });
+
+    const result = await supertest(web)
+      .post(`/api/tasks/${task.id}/submit`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(400);
+  });
 });

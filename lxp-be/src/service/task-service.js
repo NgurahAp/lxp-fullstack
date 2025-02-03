@@ -55,7 +55,6 @@ const createTask = async (user, meetingId, request) => {
   });
 };
 
-// In task-service.js
 const submitTask = async (user, taskId, file) => {
   // Find the task and include all necessary relations
   const task = await prismaClient.task.findFirst({
