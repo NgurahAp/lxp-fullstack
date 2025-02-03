@@ -103,9 +103,8 @@ model Task {
   id         Int      @id @default(autoincrement())
   meetingId  Int
   title      String   @db.VarChar(255)
-  description String?
-  dueDate    DateTime?
-  taskAnswer     String?     
+  taskQuestion String @db.VarChar(255)
+  taskAnswer     String? @db.VarChar(255) 
   taskScore  Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

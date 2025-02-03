@@ -6,6 +6,7 @@ import { instruktorMiddleware } from "../middleware/instructor-middleware.js";
 import meetingController from "../controller/meeting-controller.js";
 import moduleController from "../controller/module-controller.js";
 import quizController from "../controller/quiz-controller.js";
+import taskController from "../controller/task-controller.js";
 
 const userRouter = express.Router();
 
@@ -105,6 +106,14 @@ userRouter.get(
   "/api/meetings/:meetingId/quizzes/:quizId/questions",
   authMiddleware,
   quizController.getQuizQuestions
+);
+
+// Route for Task
+userRouter.post(
+  "/api/meetings/:meetingId/tasks",
+  authMiddleware,
+  instruktorMiddleware,
+  taskController.createTask
 );
 
 export { userRouter };
