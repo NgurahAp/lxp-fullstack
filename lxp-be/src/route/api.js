@@ -96,5 +96,10 @@ userRouter.post(
   authMiddleware,
   quizController.submitQuiz
 );
+userRouter.get(
+  "/api/meetings/:meetingId/quizzes/:quizId",
+  authMiddleware,
+  quizController.getQuizDetail
+);
 
 export { userRouter };

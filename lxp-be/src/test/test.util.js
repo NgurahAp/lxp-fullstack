@@ -130,16 +130,29 @@ const createQuiz = async (meetingId) => {
       quizScore: 100,
       questions: [
         {
-          question: "Test Question 1?",
+          question: "Question 1?",
           options: ["A", "B", "C", "D"],
           correctAnswer: 0,
-          score: 50,
         },
         {
-          question: "Test Question 2?",
+          question: "Question 2?",
           options: ["A", "B", "C", "D"],
           correctAnswer: 1,
-          score: 50,
+        },
+        {
+          question: "Question 3?",
+          options: ["A", "B", "C", "D"],
+          correctAnswer: 2,
+        },
+        {
+          question: "Question 4?",
+          options: ["A", "B", "C", "D"],
+          correctAnswer: 1,
+        },
+        {
+          question: "Question 5?",
+          options: ["A", "B", "C", "D"],
+          correctAnswer: 3,
         },
       ],
     },

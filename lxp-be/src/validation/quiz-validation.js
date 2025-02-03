@@ -28,4 +28,9 @@ const submitQuizValidation = Joi.object({
     .required(),
 });
 
-export { createQuizValidation,submitQuizValidation };
+const getDetailQuizValidation = Joi.object({
+  meetingId: Joi.number().positive().required(),
+  quizId: Joi.number().positive().required(),
+});
+
+export { createQuizValidation, submitQuizValidation, getDetailQuizValidation };

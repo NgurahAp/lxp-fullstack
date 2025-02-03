@@ -82,40 +82,7 @@ describe("POST /api/quizzes/:quizId/submit", () => {
     const meeting = await createMeeting(training.id);
 
     // Create quiz with 5 questions
-    await prismaClient.quiz.create({
-      data: {
-        meetingId: meeting.id,
-        title: "Test Quiz",
-        quizScore: 0,
-        questions: [
-          {
-            question: "Question 1?",
-            options: ["A", "B", "C", "D"],
-            correctAnswer: 0,
-          },
-          {
-            question: "Question 2?",
-            options: ["A", "B", "C", "D"],
-            correctAnswer: 1,
-          },
-          {
-            question: "Question 3?",
-            options: ["A", "B", "C", "D"],
-            correctAnswer: 2,
-          },
-          {
-            question: "Question 4?",
-            options: ["A", "B", "C", "D"],
-            correctAnswer: 1,
-          },
-          {
-            question: "Question 5?",
-            options: ["A", "B", "C", "D"],
-            correctAnswer: 3,
-          },
-        ],
-      },
-    });
+    await createQuiz(meeting.id);
 
     const user = await getTestUser();
     await createTrainingUser(training.id, user.id);
@@ -185,6 +152,72 @@ describe("POST /api/quizzes/:quizId/submit", () => {
       .send({
         answers: [{ questionIndex: 0, selectedAnswer: 0 }],
       });
+
+    expect(result.status).toBe(404);
+  });
+});
+
+describe("GET /api/meetings/:meetingId/quizzes/:quizId", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestInstructor();
+
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    const training = await createTraining(instructor.id);
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    await createTrainingUser(training.id, user.id);
+
+    const meeting = await createMeeting(training.id);
+    await createQuiz(meeting.id);
+  });
+
+  afterEach(async () => {
+    await prismaClient.quiz.deleteMany({});
+    await prismaClient.meeting.deleteMany({});
+    await prismaClient.training_Users.deleteMany({});
+    await prismaClient.training.deleteMany({});
+    await removeTestUser();
+    await removeTestInstructor();
+  });
+
+  it("Should get quiz detail successfully", async () => {
+    const meeting = await prismaClient.meeting.findFirst({
+      where: { title: "Test Meeting" },
+    });
+
+    const quiz = await prismaClient.quiz.findFirst({
+      where: { title: "Test quiz" },
+    });
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/quizzes/${quiz.id}`)
+      .set("Authorization", "Bearer test");
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.id).toBe(quiz.id);
+    expect(result.body.data.title).toBe(quiz.title);
+  });
+
+  it("Should reject if user is not enrolled", async () => {
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+    const training = await createTraining(instructor.id);
+    const meeting = await createMeeting(training.id);
+    const quiz = await createQuiz(meeting.id);
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/modules/${quiz.id}`)
+      .set("Authorization", "Bearer test");
 
     expect(result.status).toBe(404);
   });

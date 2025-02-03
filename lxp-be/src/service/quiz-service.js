@@ -2,6 +2,8 @@ import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {
   createQuizValidation,
+  getDetailQuizValidation,
+  getQuizVaidation,
   submitQuizValidation,
 } from "../validation/quiz-validation.js";
 import { validate } from "../validation/validation.js";
@@ -121,4 +123,56 @@ const submitQuiz = async (user, quizId, request) => {
   };
 };
 
-export default { createQuiz, submitQuiz };
+const getDetailQuiz = async (user, request) => {
+  const validationResult = validate(getDetailQuizValidation, request);
+  const { meetingId, quizId } = validationResult;
+
+  const quiz = await prismaClient.quiz.findFirst({
+    where: {
+      id: quizId,
+      meetingId: meetingId,
+      meeting: {
+        training: {
+          users: {
+            some: {
+              userId: user.id,
+              status: "enrolled",
+            },
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      quizScore: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          meetingDate: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!quiz) {
+    throw new ResponseError(
+      404,
+      "Quiz not found or you're not enrolled in this training"
+    );
+  }
+
+  return quiz;
+};
+
+export default { createQuiz, submitQuiz, getDetailQuiz };
