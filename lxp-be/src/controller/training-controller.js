@@ -1,15 +1,29 @@
+import { uploadTrainingImage } from "../middleware/upload-middleware.js";
 import trainingService from "../service/training-service.js";
+import multer from "multer";
 
 const createTraining = async (req, res, next) => {
-  try {
-    const result = await trainingService.createTraining(req.user, req.body);
+  uploadTrainingImage(req, res, async function (err) {
+    try {
+      if (err instanceof multer.MulterError) {
+        throw new ResponseError(400, err.message);
+      } else if (err) {
+        throw new ResponseError(400, err.message);
+      }
 
-    res.status(200).json({
-      data: result,
-    });
-  } catch (e) {
-    next(e);
-  }
+      const result = await trainingService.createTraining(
+        req.user,
+        req.body,
+        req.file
+      );
+
+      res.status(200).json({
+        data: result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  });
 };
 
 const createTrainingUser = async (req, res, next) => {

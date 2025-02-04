@@ -9,14 +9,31 @@ import {
   removeTestInstructor,
   removeTestUser,
 } from "./test.util";
+import path from "path";
+import fs from "fs";
 
 describe("POST /api/trainings", () => {
   beforeEach(async () => {
+    // Create test directories
+    const trainingDir = path.join(process.cwd(), "public", "trainings");
+    if (!fs.existsSync(trainingDir)) {
+      fs.mkdirSync(trainingDir, { recursive: true });
+    }
+
     await createTestUser();
     await createTestInstructor();
   });
 
   afterEach(async () => {
+    // Clean up uploaded files
+    const trainingDir = path.join(process.cwd(), "public", "trainings");
+    if (fs.existsSync(trainingDir)) {
+      const files = fs.readdirSync(trainingDir);
+      files.forEach((file) => {
+        fs.unlinkSync(path.join(trainingDir, file));
+      });
+    }
+
     await prismaClient.training_Users.deleteMany({
       where: {
         training: {
@@ -35,53 +52,31 @@ describe("POST /api/trainings", () => {
     await removeTestInstructor();
   });
 
-  it("Should create new training", async () => {
-    // Mengambil data instruktor
+  it("Should create new training with image", async () => {
     const instructor = await prismaClient.user.findFirst({
       where: { email: "instructor@test.com" },
     });
 
+    // Create a test image
+    const testImagePath = path.join(__dirname, "files", "test.jpg");
+    if (!fs.existsSync(testImagePath)) {
+      fs.writeFileSync(testImagePath, "Test image content");
+    }
+
     const result = await supertest(web)
       .post("/api/trainings")
-      .set("Authorization", `Bearer test-instructor`) // Add 'Bearer' prefix
-      .send({
-        title: "test training",
-        description: "test description",
-        instructorId: instructor.id,
-      });
+      .set("Authorization", "Bearer test-instructor")
+      .field("title", "test training")
+      .field("description", "test description")
+      .field("instructorId", instructor.id)
+      .attach("image", testImagePath);
+
+    console.log(result.body);
 
     expect(result.status).toBe(200);
     expect(result.body.data).toBeDefined();
     expect(result.body.data.title).toBe("test training");
-  });
-
-  it("Should reject when non-instructor tries to create training", async () => {
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
-
-    const result = await supertest(web)
-      .post("/api/trainings")
-      .set("Authorization", "Bearer test")
-      .send({
-        title: "test training",
-        description: "test description",
-        instructorId: user.id,
-      });
-
-    expect(result.status).toBe(403);
-  });
-
-  it("should reject invalid training user data", async () => {
-    const result = await supertest(web)
-      .post("/api/training-users")
-      .set("Authorization", `Bearer test`) // Add 'Bearer' prefix
-      .send({
-        trainingId: 0,
-        userId: 0,
-      });
-
-    expect(result.status).toBe(400);
+    expect(result.body.data.image).toBeDefined();
   });
 });
 

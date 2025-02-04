@@ -7,8 +7,9 @@ import {
 } from "../validation/training-validation.js";
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response-error.js";
+import path from "path";
 
-const createTraining = async (user, request) => {
+const createTraining = async (user, request, file) => {
   const training = validate(createTrainingValidation, request);
 
   // Ensure the instructorId matches the logged-in user's ID
@@ -19,12 +20,22 @@ const createTraining = async (user, request) => {
     );
   }
 
+  // If file exists, add image path to training data
+  const trainingData = {
+    ...training,
+  };
+
+  if (file) {
+    trainingData.image = "/trainings/" + path.basename(file.path);
+  }
+
   return prismaClient.training.create({
-    data: training,
+    data: trainingData,
     select: {
       id: true,
       title: true,
       description: true,
+      image: true,
       instructorId: true,
       createdAt: true,
       updatedAt: true,
@@ -125,6 +136,7 @@ const getStudentTrainings = async (user, request) => {
           id: true,
           title: true,
           description: true,
+          image: true,
           instructor: {
             select: {
               id: true,
@@ -172,6 +184,7 @@ const getTrainingDetail = async (user, trainingId) => {
       id: true,
       title: true,
       description: true,
+      image: true,
       instructor: {
         select: {
           id: true,

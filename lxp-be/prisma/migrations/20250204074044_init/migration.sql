@@ -18,6 +18,7 @@ CREATE TABLE `trainings` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
     `description` VARCHAR(191) NULL,
+    `image` VARCHAR(191) NULL,
     `instructorId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
