@@ -16,6 +16,9 @@ const createMeeting = async (user, request) => {
     select: {
       id: true,
       instructorId: true,
+      users: {
+        where: { status: "enrolled" },
+      },
     },
   });
 
@@ -30,7 +33,8 @@ const createMeeting = async (user, request) => {
     );
   }
 
-  return prismaClient.meeting.create({
+  // Create meeting
+  const newMeeting = await prismaClient.meeting.create({
     data: meeting,
     select: {
       id: true,
@@ -41,6 +45,27 @@ const createMeeting = async (user, request) => {
       updatedAt: true,
     },
   });
+
+  // Initialize scores for all enrolled users
+  if (training.users.length > 0) {
+    const scoreCreations = training.users.map((trainingUser) =>
+      prismaClient.score.create({
+        data: {
+          trainingUserId: trainingUser.id,
+          meetingId: newMeeting.id,
+          moduleScore: 0,
+          quizScore: 0,
+          taskScore: 0,
+          totalScore: 0,
+        },
+      })
+    );
+
+    // Run score creations in a transaction
+    await prismaClient.$transaction(scoreCreations);
+  }
+
+  return newMeeting;
 };
 
 const getMeetings = async (user, request) => {
