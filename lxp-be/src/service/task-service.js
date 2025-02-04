@@ -1,6 +1,9 @@
 import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
-import { createTaskValidation } from "../validation/task-validation.js";
+import {
+  createTaskValidation,
+  getDetailTaskValidation,
+} from "../validation/task-validation.js";
 import { validate } from "../validation/validation.js";
 import path from "path";
 
@@ -109,4 +112,58 @@ const submitTask = async (user, taskId, file) => {
   });
 };
 
-export default { createTask, submitTask };
+const getDetailTask = async (user, request) => {
+  const validationResult = validate(getDetailTaskValidation, request);
+  const { meetingId, taskId } = validationResult;
+
+  const task = await prismaClient.task.findFirst({
+    where: {
+      id: taskId,
+      meetingId: meetingId,
+      meeting: {
+        training: {
+          users: {
+            some: {
+              userId: user.id,
+              status: "enrolled",
+            },
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      taskQuestion: true,
+      taskAnswer: true,
+      taskScore: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          meetingDate: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!task) {
+    throw new ResponseError(
+      404,
+      "Task not found or you're not enrolled in this training"
+    );
+  }
+
+  return task;
+};
+
+export default { createTask, submitTask, getDetailTask };

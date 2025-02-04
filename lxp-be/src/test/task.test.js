@@ -200,3 +200,67 @@ describe("POST /api/tasks/:taskId/submit", () => {
     expect(result.status).toBe(400);
   });
 });
+
+describe("GET /api/meetings/:meetingId/tasks/:taskId", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestInstructor();
+
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    const training = await createTraining(instructor.id);
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    await createTrainingUser(training.id, user.id);
+
+    const meeting = await createMeeting(training.id);
+    await createTask(meeting.id);
+  });
+
+  afterEach(async () => {
+    // Clean up uploaded files
+    const taskDir = path.join(process.cwd(), "public", "tasks");
+    if (fs.existsSync(taskDir)) {
+      const files = fs.readdirSync(taskDir);
+      files.forEach((file) => {
+        fs.unlinkSync(path.join(taskDir, file));
+      });
+    }
+
+    // Clean up test data in correct order
+    await prismaClient.score.deleteMany({});
+    await prismaClient.task.deleteMany({});
+    await prismaClient.quiz.deleteMany({});
+    await prismaClient.module.deleteMany({});
+    await prismaClient.meeting.deleteMany({});
+    await prismaClient.training_Users.deleteMany({});
+    await prismaClient.training.deleteMany({});
+    await removeTestUser();
+    await removeTestInstructor();
+  });
+
+  it("Should get task detail successfully", async () => {
+    const meeting = await prismaClient.meeting.findFirst({
+      where: { title: "Test Meeting" },
+    });
+
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test task" },
+    });
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/tasks/${task.id}`)
+      .set("Authorization", "Bearer test");
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.id).toBe(task.id);
+    expect(result.body.data.title).toBe(task.title);
+  });
+});

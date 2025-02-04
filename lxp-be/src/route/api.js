@@ -120,5 +120,10 @@ userRouter.post(
   authMiddleware,
   taskController.submitTask
 );
+userRouter.get(
+  "/api/meetings/:meetingId/tasks/:taskId",
+  authMiddleware,
+  taskController.getTaskDetail
+);
 
 export { userRouter };

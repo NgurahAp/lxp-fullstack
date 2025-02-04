@@ -26,18 +26,33 @@ const submitTask = async (req, res, next) => {
       }
 
       const taskId = parseInt(req.params.taskId);
-      const result = await taskService.submitTask(
-        req.user,
-        taskId,
-        req.file
-      );
+      const result = await taskService.submitTask(req.user, taskId, req.file);
 
       res.status(200).json({
-        data: result
+        data: result,
       });
     } catch (e) {
       next(e);
     }
   });
 };
-export default { createTask, submitTask };
+
+const getTaskDetail = async (req, res, next) => {
+  try {
+    const meetingId = parseInt(req.params.meetingId);
+    const taskId = parseInt(req.params.taskId);
+
+    const result = await taskService.getDetailTask(req.user, {
+      meetingId,
+      taskId,
+    });
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { createTask, submitTask, getTaskDetail };
