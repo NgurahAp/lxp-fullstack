@@ -33,7 +33,6 @@ describe("POST /api/meetings/:meetingId/tasks", () => {
       data: {
         trainingId: training.id,
         title: "Test Meeting",
-        meetingDate: new Date(),
       },
     });
   });
