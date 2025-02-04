@@ -163,7 +163,9 @@ describe("POST /api/tasks/:taskId/submit", () => {
     const result = await supertest(web)
       .post(`/api/tasks/${task.id}/submit`)
       .set("Authorization", "Bearer test")
-      .attach("content", testPdfPath);
+      .attach("taskAnswer", testPdfPath);
+
+    console.log(result.body);
 
     expect(result.status).toBe(200);
     expect(result.body.data.id).toBe(task.id);
@@ -190,7 +192,7 @@ describe("POST /api/tasks/:taskId/submit", () => {
     const result = await supertest(web)
       .post(`/api/tasks/${task.id}/submit`)
       .set("Authorization", "Bearer test")
-      .attach("content", testTxtPath);
+      .attach("taskAnswer", testTxtPath);
 
     console.log(result.body);
     expect(result.status).toBe(400);

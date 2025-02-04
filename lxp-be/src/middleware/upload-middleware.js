@@ -50,4 +50,4 @@ export const uploadTasks = multer({
     }
     cb(null, true);
   },
-}).single("content");
+}).single("taskAnswer");
