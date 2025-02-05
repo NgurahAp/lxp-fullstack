@@ -4,11 +4,13 @@ import { web } from "../application/web.js";
 import {
   createMeeting,
   createModule,
+  createScore,
   createTestInstructor,
   createTestUser,
   createTraining,
   createTrainingUser,
   removeAll,
+  removeScore,
 } from "./test.util.js";
 
 describe("GET /api/meetings/:meetingId/scores", () => {
@@ -30,17 +32,7 @@ describe("GET /api/meetings/:meetingId/scores", () => {
     const meeting = await createMeeting(training.id);
     await createModule(meeting.id);
 
-    // Initialize score for the user
-    await prismaClient.score.create({
-      data: {
-        trainingUserId: trainingUser.id,
-        meetingId: meeting.id,
-        moduleScore: 85,
-        quizScore: 90,
-        taskScore: 95,
-        totalScore: 270,
-      },
-    });
+    await createScore(trainingUser.id, meeting.id);
   });
 
   afterEach(async () => {

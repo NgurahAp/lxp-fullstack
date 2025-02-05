@@ -1,15 +1,6 @@
 import bcrypt from "bcrypt";
 import { prismaClient } from "../application/database";
 
-// Existing user utilities
-const removeTestUser = async () => {
-  await prismaClient.user.deleteMany({
-    where: {
-      email: "test@gmail.com",
-    },
-  });
-};
-
 const createTestUser = async () => {
   await prismaClient.user.create({
     data: {
@@ -23,6 +14,14 @@ const createTestUser = async () => {
 
 const getTestUser = async () => {
   return prismaClient.user.findUnique({
+    where: {
+      email: "test@gmail.com",
+    },
+  });
+};
+
+const removeTestUser = async () => {
+  await prismaClient.user.deleteMany({
     where: {
       email: "test@gmail.com",
     },
@@ -47,6 +46,23 @@ const removeTestInstructor = async () => {
       email: "instructor@test.com",
     },
   });
+};
+
+// New Training User utilities
+const createTrainingUser = async (trainingId, userId) => {
+  return prismaClient.training_Users.create({
+    data: {
+      trainingId: trainingId,
+      userId: userId,
+      status: "enrolled",
+    },
+  });
+};
+
+const removeTrainingUser = async () => {
+  // First remove scores as they depend on training_users
+  await removeScore();
+  await prismaClient.training_Users.deleteMany();
 };
 
 // Training utilities
@@ -101,27 +117,8 @@ const createModule = async (meetingId) => {
   });
 };
 
-
 const removeModule = async () => {
   await prismaClient.module.deleteMany({});
-};
-
-
-// New Training User utilities
-const createTrainingUser = async (trainingId, userId) => {
-  return prismaClient.training_Users.create({
-    data: {
-      trainingId: trainingId,
-      userId: userId,
-      status: "enrolled",
-    },
-  });
-};
-
-const removeTrainingUser = async () => {
-  // First remove scores as they depend on training_users
-  await removeScore();
-  await prismaClient.training_Users.deleteMany();
 };
 
 const createQuiz = async (meetingId) => {
@@ -174,12 +171,26 @@ const createTask = async (meetingId) => {
     },
   });
 };
-const removeScore = async () => {
-  await prismaClient.score.deleteMany({});
-};
 
 const removeTask = async () => {
   await prismaClient.task.deleteMany({});
+};
+
+const createScore = async (trainingUserId, meetingId) => {
+  await prismaClient.score.create({
+    data: {
+      trainingUserId: trainingUserId,
+      meetingId: meetingId,
+      moduleScore: 85,
+      quizScore: 90,
+      taskScore: 95,
+      totalScore: 270,
+    },
+  });
+};
+
+const removeScore = async () => {
+  await prismaClient.score.deleteMany({});
 };
 
 // Cleanup utility
@@ -214,4 +225,5 @@ export {
   createQuiz,
   removeQuiz,
   createTask,
+  createScore,
 };
