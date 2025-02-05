@@ -1,4 +1,3 @@
-import { request } from "http";
 import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {

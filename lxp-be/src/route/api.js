@@ -7,6 +7,7 @@ import meetingController from "../controller/meeting-controller.js";
 import moduleController from "../controller/module-controller.js";
 import quizController from "../controller/quiz-controller.js";
 import taskController from "../controller/task-controller.js";
+import scoreController from "../controller/score-controller.js";
 
 const userRouter = express.Router();
 
@@ -124,6 +125,13 @@ userRouter.get(
   "/api/meetings/:meetingId/tasks/:taskId",
   authMiddleware,
   taskController.getTaskDetail
+);
+
+// Route for score
+userRouter.get(
+  "/api/meetings/:meetingId/scores",
+  authMiddleware,
+  scoreController.getScoreDetail
 );
 
 export { userRouter };
