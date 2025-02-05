@@ -60,8 +60,6 @@ const createTrainingUser = async (trainingId, userId) => {
 };
 
 const removeTrainingUser = async () => {
-  // First remove scores as they depend on training_users
-  await removeScore();
   await prismaClient.training_Users.deleteMany();
 };
 
@@ -77,10 +75,6 @@ const createTraining = async (instructorId) => {
 };
 
 const removeTraining = async () => {
-  // First remove all dependent records
-  await removeMeeting();
-  await removeTrainingUser();
-  // Then remove training
   await prismaClient.training.deleteMany();
 };
 
@@ -96,12 +90,6 @@ const createMeeting = async (trainingId) => {
 };
 
 const removeMeeting = async () => {
-  // First remove all related records
-  await removeScore();
-  await removeModule();
-  await removeQuiz();
-  await removeTask();
-  // Then remove meetings
   await prismaClient.meeting.deleteMany();
 };
 
@@ -193,7 +181,6 @@ const removeScore = async () => {
   await prismaClient.score.deleteMany({});
 };
 
-// Cleanup utility
 // Main cleanup utility
 const removeAll = async () => {
   await removeScore();
