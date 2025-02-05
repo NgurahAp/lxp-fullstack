@@ -355,34 +355,41 @@ describe("GET /api/meetings/:meetingId/modules/:moduleId", () => {
 
 describe("POST /api/modules/:moduleId/score", () => {
   beforeEach(async () => {
-    // Create test user and instructor
     await createTestUser();
     await createTestInstructor();
 
-    // Get instructor
     const instructor = await prismaClient.user.findFirst({
       where: { email: "instructor@test.com" },
     });
 
-    // Create training
     const training = await createTraining(instructor.id);
 
-    // Create training user enrollment
     const user = await prismaClient.user.findFirst({
       where: { email: "test@gmail.com" },
     });
-    await createTrainingUser(training.id, user.id);
+    const trainingUser = await createTrainingUser(training.id, user.id);
 
-    // Create meeting and module
     const meeting = await createMeeting(training.id);
     await createModule(meeting.id);
+
+    // Initialize score for the user
+    await prismaClient.score.create({
+      data: {
+        trainingUserId: trainingUser.id,
+        meetingId: meeting.id,
+        moduleScore: 0,
+        quizScore: 0,
+        taskScore: 0,
+        totalScore: 0,
+      },
+    });
   });
 
   afterEach(async () => {
     await removeAll();
   });
 
-  it("Should submit module answer successfully", async () => {
+  it("Should submit module score and update score table successfully", async () => {
     const module = await prismaClient.module.findFirst({
       where: { title: "Test Module" },
     });
@@ -394,22 +401,26 @@ describe("POST /api/modules/:moduleId/score", () => {
         moduleScore: 80,
       });
 
-    if (result.status !== 200) {
-      console.log("Error: ", result.body);
-    }
-
     expect(result.status).toBe(200);
     expect(result.body.data.moduleScore).toBe(80);
+
+    // Verify score table was updated
+    const score = await prismaClient.score.findFirst({
+      where: {
+        meetingId: module.meetingId,
+      },
+    });
+
+    console.log(score.body)
+
+    expect(score.moduleScore).toBe(80);
+    expect(score.totalScore).toBe(80); // Since quiz and task scores are 0
   });
 
-  it("Should reject if module string", async () => {
-    // Create a new training with module but without enrollment
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
+  it("Should reject if module score is string", async () => {
+    const module = await prismaClient.module.findFirst({
+      where: { title: "Test Module" },
     });
-    const training = await createTraining(instructor.id);
-    const meeting = await createMeeting(training.id);
-    const module = await createModule(meeting.id);
 
     const result = await supertest(web)
       .post(`/api/modules/${module.id}/score`)
@@ -430,5 +441,42 @@ describe("POST /api/modules/:moduleId/score", () => {
       });
 
     expect(result.status).toBe(404);
+  });
+
+  it("Should update total score correctly when other scores exist", async () => {
+    const module = await prismaClient.module.findFirst({
+      where: { title: "Test Module" },
+    });
+
+    // First set some quiz and task scores
+    await prismaClient.score.updateMany({
+      where: {
+        meetingId: module.meetingId,
+      },
+      data: {
+        quizScore: 90,
+        taskScore: 85,
+        totalScore: 175,
+      },
+    });
+
+    const result = await supertest(web)
+      .post(`/api/modules/${module.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        moduleScore: 80,
+      });
+
+    expect(result.status).toBe(200);
+
+    // Verify total score includes all components
+    const score = await prismaClient.score.findFirst({
+      where: {
+        meetingId: module.meetingId,
+      },
+    });
+
+    expect(score.moduleScore).toBe(80);
+    expect(score.totalScore).toBe(255); // 80 + 90 + 85
   });
 });

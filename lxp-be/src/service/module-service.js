@@ -270,7 +270,6 @@ const getModuleDetail = async (user, request) => {
 };
 
 const submitModuleScore = async (user, moduleId, request) => {
-  // Kita perlu destructure moduleAnswer dari object hasil validasi tersebut
   const { moduleScore } = validate(submitScoreModuleValidation, request);
 
   const module = await prismaClient.module.findFirst({
@@ -278,14 +277,22 @@ const submitModuleScore = async (user, moduleId, request) => {
       id: moduleId,
       meeting: {
         training: {
-          instructorId: user.id, 
+          instructorId: user.id,
         },
       },
     },
     include: {
       meeting: {
         include: {
-          training: true,
+          training: {
+            include: {
+              users: {
+                where: {
+                  status: "enrolled",
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -297,34 +304,67 @@ const submitModuleScore = async (user, moduleId, request) => {
       "module not found or you're not the instructor"
     );
   }
-  return prismaClient.module.update({
-    where: {
-      id: moduleId,
-    },
-    data: {
-      moduleScore: moduleScore,
-    },
-    select: {
-      id: true,
-      title: true,
-      moduleAnswer: true,
-      moduleScore: true,
-      meetingId: true,
-      createdAt: true,
-      updatedAt: true,
-      meeting: {
-        select: {
-          id: true,
-          title: true,
-          training: {
-            select: {
-              id: true,
-              title: true,
+
+  // Start a transaction to update both module and score
+  return prismaClient.$transaction(async (tx) => {
+    // Update module score
+    const updatedModule = await tx.module.update({
+      where: {
+        id: moduleId,
+      },
+      data: {
+        moduleScore: moduleScore,
+      },
+      select: {
+        id: true,
+        title: true,
+        moduleAnswer: true,
+        moduleScore: true,
+        meetingId: true,
+        createdAt: true,
+        updatedAt: true,
+        meeting: {
+          select: {
+            id: true,
+            title: true,
+            training: {
+              select: {
+                id: true,
+                title: true,
+              },
             },
           },
         },
       },
-    },
+    });
+
+    // Get enrolled users' training_users records
+    const enrolledUsers = module.meeting.training.users;
+
+    // Update scores for all enrolled users
+    for (const trainingUser of enrolledUsers) {
+      const existingScore = await tx.score.findFirst({
+        where: {
+          trainingUserId: trainingUser.id,
+          meetingId: module.meetingId,
+        },
+      });
+
+      if (existingScore) {
+        await tx.score.update({
+          where: {
+            id: existingScore.id,
+          },
+          data: {
+            moduleScore: moduleScore,
+            totalScore:
+              moduleScore + existingScore.quizScore + existingScore.taskScore,
+          },
+        });
+      }
+    }
+
+    return updatedModule;
   });
 };
 
