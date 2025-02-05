@@ -7,6 +7,7 @@ import {
   createTraining,
   createTrainingUser,
   getTestUser,
+  removeAll,
   removeTestInstructor,
   removeTestUser,
 } from "./test.util";
@@ -89,12 +90,7 @@ describe("POST /api/quizzes/:quizId/submit", () => {
   });
 
   afterEach(async () => {
-    await prismaClient.quiz.deleteMany({});
-    await prismaClient.meeting.deleteMany({});
-    await prismaClient.training_Users.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("should get perfect score (100) when all answers are correct", async () => {
@@ -117,8 +113,18 @@ describe("POST /api/quizzes/:quizId/submit", () => {
 
     console.log("Perfect Score Test:", result.body);
     expect(result.status).toBe(200);
-    expect(result.body.data.score).toBe(100);
-    expect(result.body.data.totalQuestions).toBe(5);
+    expect(result.body.data.quizScore).toBe(100);
+
+    // Verify score table was updated
+    const score = await prismaClient.score.findFirst({
+      where: {
+        meetingId: quiz.meetingId,
+      },
+    });
+
+    console.log(score.body);
+
+    expect(score.quizScore).toBe(100);
   });
 
   it("should get perfect score (80) when student dont not mengisi semuanya", async () => {
@@ -141,8 +147,7 @@ describe("POST /api/quizzes/:quizId/submit", () => {
 
     console.log("Perfect Score Test:", result.body);
     expect(result.status).toBe(200);
-    expect(result.body.data.score).toBe(80);
-    expect(result.body.data.totalQuestions).toBe(5);
+    expect(result.body.data.quizScore).toBe(80);
   });
 
   it("should throw error if quiz not found", async () => {

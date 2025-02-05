@@ -108,18 +108,63 @@ const submitQuiz = async (user, quizId, request) => {
   // Round the score to nearest integer
   quizScore = Math.round(quizScore);
 
-  // Update quiz score
-  await prismaClient.quiz.update({
-    where: { id: quizId },
-    data: { quizScore: quizScore },
-  });
+  // Start transaction to update both quiz and score
+  return prismaClient.$transaction(async (tx) => {
+    const updateQuiz = await tx.quiz.update({
+      where: { id: quizId },
+      data: { quizScore: quizScore },
+      select: {
+        id: true,
+        title: true,
+        quizScore: true,
+        meetingId: true,
+        createdAt: true,
+        updatedAt: true,
+        meeting: true,
+      },
+    });
 
-  return {
-    quizId: quiz.id,
-    title: quiz.title,
-    score: quizScore,
-    totalQuestions: questions.length,
-  };
+    // Get enrolled users' training_users records
+    const enrolledUsers = quiz.meeting.training.users;
+
+    // Update scores for all enrolled users
+    for (const trainingUser of enrolledUsers) {
+      const existingScore = await tx.score.findFirst({
+        where: {
+          trainingUserId: trainingUser.id,
+          meetingId: quiz.meetingId, // Changed from quizId to meetingId
+        },
+      });
+
+      if (existingScore) {
+        await tx.score.update({
+          where: {
+            id: existingScore.id,
+          },
+          data: {
+            quizScore: quizScore,
+            totalScore:
+              (quizScore +
+                existingScore.moduleScore +
+                existingScore.taskScore) /
+              3,
+          },
+        });
+      } else {
+        // Create new score if it doesn't exist
+        await tx.score.create({
+          data: {
+            trainingUserId: trainingUser.id,
+            meetingId: quiz.meetingId,
+            quizScore: quizScore,
+            totalScore: quizScore / 3, // Only quiz score available at this point
+          },
+        });
+      }
+    }
+
+    return updateQuiz;
+  });
 };
 
 const getDetailQuiz = async (user, request) => {
