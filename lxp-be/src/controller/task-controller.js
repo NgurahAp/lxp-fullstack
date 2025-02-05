@@ -55,4 +55,21 @@ const getTaskDetail = async (req, res, next) => {
   }
 };
 
-export default { createTask, submitTask, getTaskDetail };
+const submitTaskScore = async (req, res, next) => {
+  try {
+    const taskId = parseInt(req.params.taskId); // Ambil taskId dari URL
+    const result = await taskService.submitTaskScore(
+      req.user,
+      taskId,
+      req.body
+    );
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { createTask, submitTask, getTaskDetail, submitTaskScore };

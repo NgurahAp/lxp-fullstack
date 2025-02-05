@@ -76,6 +76,7 @@ const login = async (request) => {
       email: true,
       token: true,
       role: true,
+      profile: true,
     },
   });
 };

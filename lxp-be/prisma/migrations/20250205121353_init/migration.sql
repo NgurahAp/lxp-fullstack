@@ -6,6 +6,7 @@ CREATE TABLE `users` (
     `password` VARCHAR(255) NOT NULL,
     `role` ENUM('admin', 'instructor', 'student') NOT NULL DEFAULT 'student',
     `token` VARCHAR(100) NULL,
+    `profile` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 

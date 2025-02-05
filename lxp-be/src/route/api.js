@@ -126,6 +126,12 @@ userRouter.get(
   authMiddleware,
   taskController.getTaskDetail
 );
+userRouter.post(
+  "/api/tasks/:taskId/score",
+  authMiddleware,
+  instruktorMiddleware,
+  taskController.submitTaskScore
+);
 
 // Route for score
 userRouter.get(

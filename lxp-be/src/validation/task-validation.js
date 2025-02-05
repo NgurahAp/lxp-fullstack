@@ -11,4 +11,12 @@ const getDetailTaskValidation = Joi.object({
   taskId: Joi.number().positive().required(),
 });
 
-export { createTaskValidation, getDetailTaskValidation };
+const submitScoreTaskValidation = Joi.object({
+  taskScore: Joi.number().required(),
+});
+
+export {
+  createTaskValidation,
+  getDetailTaskValidation,
+  submitScoreTaskValidation,
+};

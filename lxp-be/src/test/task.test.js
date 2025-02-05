@@ -10,6 +10,7 @@ import {
   createTestUser,
   createTraining,
   createTrainingUser,
+  removeAll,
   removeTestInstructor,
   removeTestUser,
 } from "./test.util";
@@ -262,5 +263,109 @@ describe("GET /api/meetings/:meetingId/tasks/:taskId", () => {
     expect(result.body.data).toBeDefined();
     expect(result.body.data.id).toBe(task.id);
     expect(result.body.data.title).toBe(task.title);
+  });
+});
+
+describe("POST /api/tasks/:taskId/score", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestInstructor();
+
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    const training = await createTraining(instructor.id);
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    const trainingUser = await createTrainingUser(training.id, user.id);
+
+    const meeting = await createMeeting(training.id);
+    await createTask(meeting.id);
+
+    // Initialize score for the user
+    await prismaClient.score.create({
+      data: {
+        trainingUserId: trainingUser.id,
+        meetingId: meeting.id,
+        moduleScore: 0,
+        quizScore: 0,
+        taskScore: 0,
+        totalScore: 0,
+      },
+    });
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should submit task score and update score table successfully", async () => {
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test task" },
+    });
+
+    const result = await supertest(web)
+      .post(`/api/tasks/${task.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        taskScore: 90,
+      });
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.taskScore).toBe(90);
+
+    // Verify score table was updated
+    const score = await prismaClient.score.findFirst({
+      where: {
+        meetingId: task.meetingId,
+      },
+    });
+
+    console.log(score.body);
+
+    expect(score.taskScore).toBe(90);
+    expect(score.totalScore).toBe(30); // Since quiz and task scores are 0
+  });
+
+  it("Should update total score correctly when other scores exist", async () => {
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test task" },
+    });
+
+    // First set some quiz and task scores
+    await prismaClient.score.updateMany({
+      where: {
+        meetingId: task.meetingId,
+      },
+      data: {
+        quizScore: 90,
+        moduleScore: 90,
+        totalScore: 60,
+      },
+    });
+
+    const result = await supertest(web)
+      .post(`/api/tasks/${task.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        taskScore: 90,
+      });
+
+    expect(result.status).toBe(200);
+
+    // Verify total score includes all components
+    const score = await prismaClient.score.findFirst({
+      where: {
+        meetingId: task.meetingId,
+      },
+    });
+
+    expect(score.taskScore).toBe(90);
+    expect(score.totalScore).toBe(90); // (90 + 90 + 90) / 3
   });
 });

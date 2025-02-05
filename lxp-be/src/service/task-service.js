@@ -3,6 +3,7 @@ import { ResponseError } from "../error/response-error.js";
 import {
   createTaskValidation,
   getDetailTaskValidation,
+  submitScoreTaskValidation,
 } from "../validation/task-validation.js";
 import { validate } from "../validation/validation.js";
 import path from "path";
@@ -166,4 +167,103 @@ const getDetailTask = async (user, request) => {
   return task;
 };
 
-export default { createTask, submitTask, getDetailTask };
+const submitTaskScore = async (user, taskId, request) => {
+  const { taskScore } = validate(submitScoreTaskValidation, request);
+
+  const task = await prismaClient.task.findFirst({
+    where: {
+      id: taskId,
+      meeting: {
+        training: {
+          instructorId: user.id,
+        },
+      },
+    },
+    include: {
+      meeting: {
+        include: {
+          training: {
+            include: {
+              users: {
+                where: {
+                  status: "enrolled",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!task) {
+    throw new ResponseError(404, "Task not found or you're not the instructor");
+  }
+
+  // Start a transaction to update both task and score
+  return prismaClient.$transaction(async (tx) => {
+    const updateTask = await tx.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        taskScore: taskScore,
+      },
+      select: {
+        id: true,
+        title: true,
+        taskQuestion: true,
+        taskAnswer: true,
+        taskScore: true,
+        meetingId: true,
+        createdAt: true,
+        updatedAt: true,
+        meeting: {
+          select: {
+            id: true,
+            title: true,
+            training: {
+              select: {
+                id: true,
+                title: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Get enrolled users' training_users records
+    const enrolledUsers = task.meeting.training.users;
+
+    // Update scores for all enrolled users
+    for (const trainingUser of enrolledUsers) {
+      const existingScore = await tx.score.findFirst({
+        where: {
+          trainingUserId: trainingUser.id,
+          meetingId: task.meetingId,
+        },
+      });
+
+      if (existingScore) {
+        await tx.score.update({
+          where: {
+            id: existingScore.id,
+          },
+          data: {
+            taskScore: taskScore,
+            totalScore:
+              (taskScore +
+                existingScore.quizScore +
+                existingScore.moduleScore) /
+              3,
+          },
+        });
+      }
+    }
+
+    return updateTask;
+  });
+};
+
+export default { createTask, submitTask, getDetailTask, submitTaskScore };
