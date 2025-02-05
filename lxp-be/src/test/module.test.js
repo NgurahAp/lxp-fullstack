@@ -398,11 +398,11 @@ describe("POST /api/modules/:moduleId/score", () => {
       .post(`/api/modules/${module.id}/score`)
       .set("Authorization", "Bearer test-instructor")
       .send({
-        moduleScore: 80,
+        moduleScore: 90,
       });
 
     expect(result.status).toBe(200);
-    expect(result.body.data.moduleScore).toBe(80);
+    expect(result.body.data.moduleScore).toBe(90);
 
     // Verify score table was updated
     const score = await prismaClient.score.findFirst({
@@ -413,8 +413,8 @@ describe("POST /api/modules/:moduleId/score", () => {
 
     console.log(score.body)
 
-    expect(score.moduleScore).toBe(80);
-    expect(score.totalScore).toBe(80); // Since quiz and task scores are 0
+    expect(score.moduleScore).toBe(90);
+    expect(score.totalScore).toBe(30); // Since quiz and task scores are 0
   });
 
   it("Should reject if module score is string", async () => {
@@ -455,8 +455,8 @@ describe("POST /api/modules/:moduleId/score", () => {
       },
       data: {
         quizScore: 90,
-        taskScore: 85,
-        totalScore: 175,
+        taskScore: 90,
+        totalScore: 60,
       },
     });
 
@@ -464,7 +464,7 @@ describe("POST /api/modules/:moduleId/score", () => {
       .post(`/api/modules/${module.id}/score`)
       .set("Authorization", "Bearer test-instructor")
       .send({
-        moduleScore: 80,
+        moduleScore: 90,
       });
 
     expect(result.status).toBe(200);
@@ -476,7 +476,7 @@ describe("POST /api/modules/:moduleId/score", () => {
       },
     });
 
-    expect(score.moduleScore).toBe(80);
-    expect(score.totalScore).toBe(255); // 80 + 90 + 85
+    expect(score.moduleScore).toBe(90);
+    expect(score.totalScore).toBe(90); // (90 + 90 + 90) / 3
   });
 });

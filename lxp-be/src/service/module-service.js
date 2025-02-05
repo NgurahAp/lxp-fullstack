@@ -357,7 +357,10 @@ const submitModuleScore = async (user, moduleId, request) => {
           data: {
             moduleScore: moduleScore,
             totalScore:
-              moduleScore + existingScore.quizScore + existingScore.taskScore,
+              (moduleScore +
+                existingScore.quizScore +
+                existingScore.taskScore) /
+              3,
           },
         });
       }
