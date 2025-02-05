@@ -127,60 +127,7 @@ const getTrainingScores = async (user, request) => {
     throw new ResponseError(404, "Training not found");
   }
 
-  // Calculate average scores across all meetings
-  let totalModuleScore = 0;
-  let totalQuizScore = 0;
-  let totalTaskScore = 0;
-  let overallTotalScore = 0;
-  let meetingsWithScores = 0;
-
-  const meetingsScores = trainingWithScores.meetings.map((meeting) => {
-    const score = meeting.scores[0] || {
-      moduleScore: 0,
-      quizScore: 0,
-      taskScore: 0,
-      totalScore: 0,
-    };
-
-    if (score.totalScore > 0) {
-      meetingsWithScores++;
-      totalModuleScore += score.moduleScore;
-      totalQuizScore += score.quizScore;
-      totalTaskScore += score.taskScore;
-      overallTotalScore += score.totalScore;
-    }
-
-    return {
-      meetingId: meeting.id,
-      meetingTitle: meeting.title,
-      meetingDate: meeting.meetingDate,
-      scores: score,
-    };
-  });
-
-  // Calculate averages
-  const averageScores =
-    meetingsWithScores > 0
-      ? {
-          averageModuleScore: Math.round(totalModuleScore / meetingsWithScores),
-          averageQuizScore: Math.round(totalQuizScore / meetingsWithScores),
-          averageTaskScore: Math.round(totalTaskScore / meetingsWithScores),
-          averageTotalScore: Math.round(overallTotalScore / meetingsWithScores),
-        }
-      : {
-          averageModuleScore: 0,
-          averageQuizScore: 0,
-          averageTaskScore: 0,
-          averageTotalScore: 0,
-        };
-
-  return {
-    trainingId: trainingWithScores.id,
-    trainingTitle: trainingWithScores.title,
-    trainingDescription: trainingWithScores.description,
-    averageScores,
-    meetings: meetingsScores,
-  };
+  return trainingWithScores;
 };
 
 export default { getScore, getTrainingScores };
