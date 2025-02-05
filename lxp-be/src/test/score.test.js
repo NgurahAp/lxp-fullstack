@@ -135,3 +135,98 @@ describe("GET /api/meetings/:meetingId/scores", () => {
     expect(result.body.data.totalScore).toBe(0);
   });
 });
+
+
+describe("GET /api/trainings/:trainingId/scores", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestInstructor();
+
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+
+    const training = await createTraining(instructor.id);
+
+    const user = await prismaClient.user.findFirst({
+      where: { email: "test@gmail.com" },
+    });
+    const trainingUser = await createTrainingUser(training.id, user.id);
+
+    // Create multiple meetings with scores
+    const meeting1 = await createMeeting(training.id);
+    const meeting2 = await createMeeting(training.id);
+
+    await createScore(trainingUser.id, meeting1.id);
+    await createScore(trainingUser.id, meeting2.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("should get all meeting scores for a training successfully", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "Test Training" },
+    });
+
+    const result = await supertest(web)
+      .get(`/api/trainings/${training.id}/scores`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.trainingId).toBeDefined();
+    expect(result.body.data.trainingTitle).toBeDefined();
+    expect(result.body.data.averageScores).toBeDefined();
+    expect(result.body.data.meetings).toBeInstanceOf(Array);
+    expect(result.body.data.meetings.length).toBeGreaterThan(0);
+
+    // Check average scores
+    expect(result.body.data.averageScores.averageModuleScore).toBeDefined();
+    expect(result.body.data.averageScores.averageQuizScore).toBeDefined();
+    expect(result.body.data.averageScores.averageTaskScore).toBeDefined();
+    expect(result.body.data.averageScores.averageTotalScore).toBeDefined();
+
+    // Check meeting scores
+    const firstMeeting = result.body.data.meetings[0];
+    expect(firstMeeting.meetingId).toBeDefined();
+    expect(firstMeeting.meetingTitle).toBeDefined();
+    expect(firstMeeting.scores.moduleScore).toBeDefined();
+    expect(firstMeeting.scores.quizScore).toBeDefined();
+    expect(firstMeeting.scores.taskScore).toBeDefined();
+    expect(firstMeeting.scores.totalScore).toBeDefined();
+  });
+
+  it("should return 404 when training not found", async () => {
+    const result = await supertest(web)
+      .get("/api/trainings/99999/scores")
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(404);
+  });
+
+  it("should return 404 when user not enrolled", async () => {
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+    const training = await createTraining(instructor.id);
+
+    const result = await supertest(web)
+      .get(`/api/trainings/${training.id}/scores`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(404);
+  });
+
+  it("should return 401 when unauthorized", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "Test Training" },
+    });
+
+    const result = await supertest(web).get(
+      `/api/trainings/${training.id}/scores`
+    );
+
+    expect(result.status).toBe(401);
+  });
+});

@@ -133,5 +133,10 @@ userRouter.get(
   authMiddleware,
   scoreController.getScoreDetail
 );
+userRouter.get(
+  "/api/trainings/:trainingId/scores",
+  authMiddleware,
+  scoreController.getTrainingScores
+);
 
 export { userRouter };

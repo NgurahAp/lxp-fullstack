@@ -16,4 +16,20 @@ const getScoreDetail = async (req, res, next) => {
   }
 };
 
-export default { getScoreDetail };
+const getTrainingScores = async (req, res, next) => {
+  try {
+    const trainingId = parseInt(req.params.trainingId);
+
+    const result = await scoreService.getTrainingScores(req.user, {
+      trainingId,
+    });
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { getScoreDetail, getTrainingScores };
