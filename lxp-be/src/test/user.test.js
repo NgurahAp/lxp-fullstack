@@ -9,7 +9,7 @@ import {
 
 describe("POST /api/users", function () {
   afterEach(async () => {
-    await removeTestUser();
+    await removeAll();
   });
 
   it("should can register new user", async () => {
@@ -67,7 +67,7 @@ describe("POST /api/users/login", function () {
   });
 
   afterEach(async () => {
-    await removeTestUser();
+    await removeAll();
   });
 
   it("Should can login", async () => {
@@ -118,7 +118,7 @@ describe("GET /api/users/current", function () {
   });
 
   afterEach(async () => {
-    await removeTestUser();
+    await removeAll();
   });
 
   it("Should can get current user", async () => {

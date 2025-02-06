@@ -142,7 +142,7 @@ describe("GET /api/trainings/:trainingId/scores", () => {
     await removeAll();
   });
 
-  it("should get all meeting scores for a training successfully", async () => {
+  it("should get all meeting scores and total training score successfully", async () => {
     const training = await prismaClient.training.findFirst({
       where: { title: "Test Training" },
     });
@@ -151,11 +151,57 @@ describe("GET /api/trainings/:trainingId/scores", () => {
       .get(`/api/trainings/${training.id}/scores`)
       .set("Authorization", "Bearer test");
 
-    console.log(result.body);
-
     expect(result.status).toBe(200);
+    expect(result.body.data).toHaveProperty("totalTrainingScore");
+    expect(typeof result.body.data.totalTrainingScore).toBe("number");
+
+    // Karena kita tahu di createScore() total score adalah 270
+    // Dan kita membuat 2 meetings dengan score yang sama
+    // Maka total training score seharusnya 270
+    expect(result.body.data.totalTrainingScore).toBe(270);
+
+    // Verifikasi struktur data untuk setiap meeting
+    result.body.data.meetings.forEach((meeting) => {
+      expect(meeting.scores[0]).toEqual({
+        moduleScore: 85,
+        quizScore: 90,
+        taskScore: 95,
+        totalScore: 270,
+      });
+    });
   });
 
+  it("should calculate total training score correctly with different scores", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "Test Training" },
+    });
+    const trainingUser = await prismaClient.training_Users.findFirst({
+      where: { trainingId: training.id },
+    });
+    const meeting3 = await createMeeting(training.id);
+
+    // Buat score berbeda untuk meeting ketiga
+    await prismaClient.score.create({
+      data: {
+        trainingUserId: trainingUser.id,
+        meetingId: meeting3.id,
+        moduleScore: 80,
+        quizScore: 85,
+        taskScore: 90,
+        totalScore: 255, // Score berbeda
+      },
+    });
+
+    const result = await supertest(web)
+      .get(`/api/trainings/${training.id}/scores`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(200);
+    // Average dari (270 + 270 + 255) / 3 = 265
+    expect(result.body.data.totalTrainingScore).toBe(265);
+  });
+
+  // Test cases lainnya tetap sama
   it("should return 404 when training not found", async () => {
     const result = await supertest(web)
       .get("/api/trainings/99999/scores")

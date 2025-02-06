@@ -127,7 +127,27 @@ const getTrainingScores = async (user, request) => {
     throw new ResponseError(404, "Training not found");
   }
 
-  return trainingWithScores;
+  // Hitung total training score
+  let totalTrainingScore = 0;
+  let totalMeetingsWithScore = 0;
+
+  trainingWithScores.meetings.forEach((meeting) => {
+    if (meeting.scores.length > 0) {
+      totalTrainingScore += meeting.scores[0].totalScore;
+      totalMeetingsWithScore++;
+    }
+  });
+
+  // Menghitung rata-rata jika ada scores
+  const averageTrainingScore =
+    totalMeetingsWithScore > 0
+      ? Math.round(totalTrainingScore / totalMeetingsWithScore)
+      : 0;
+
+  return {
+    ...trainingWithScores,
+    totalTrainingScore: averageTrainingScore,
+  };
 };
 
 export default { getScore, getTrainingScores };
