@@ -93,6 +93,24 @@ const get = async (email) => {
       email: true,
       name: true,
       role: true,
+      trainingUsers: {
+        select: {
+          training: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              image: true,
+            },
+          },
+          status: true,
+        },
+      },
+      _count: {
+        select: {
+          trainingUsers: true,
+        },
+      },
     },
   });
 
@@ -100,7 +118,16 @@ const get = async (email) => {
     throw new ResponseError(404, "User not found");
   }
 
-  return user;
+  return {
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    trainings: user.trainingUsers.map((tu) => ({
+      ...tu.training,
+      status: tu.status,
+    })),
+    totalTrainings: user._count.trainingUsers,
+  };
 };
 
 const logout = async (email) => {
