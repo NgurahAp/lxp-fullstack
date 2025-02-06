@@ -6,6 +6,10 @@ import {
   createTestInstructor,
   removeTestUser,
   removeTestInstructor,
+  createTraining,
+  createTrainingUser,
+  removeAll,
+  createMeeting,
 } from "./test.util.js";
 
 describe("POST /api/meetings", () => {
@@ -25,28 +29,17 @@ describe("POST /api/meetings", () => {
     });
 
     // Create training and enroll the user
-    const training = await prismaClient.training.create({
-      data: {
-        title: "test training",
-        description: "test description",
-        instructorId: instructor.id,
-        users: {
-          create: {
-            userId: user.id,
-            status: "enrolled",
-          },
-        },
-      },
+    await createTraining(instructor.id);
+
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
     });
+
+    await createTrainingUser(training.id, user.id);
   });
 
   afterEach(async () => {
-    await prismaClient.score.deleteMany({});
-    await prismaClient.meeting.deleteMany({});
-    await prismaClient.training_Users.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("should create new meeting", async () => {
@@ -166,42 +159,20 @@ describe("GET /api/trainings/:trainingId/meetings", () => {
       where: { email: "instructor@test.com" },
     });
 
-    const training = await prismaClient.training.create({
-      data: {
-        title: "test training",
-        description: "test description",
-        instructorId: instructor.id,
-      },
-    });
+    const training = await createTraining(instructor.id);
 
     const user = await prismaClient.user.findFirst({
       where: { email: "test@gmail.com" },
     });
 
-    await prismaClient.training_Users.create({
-      data: {
-        trainingId: training.id,
-        userId: user.id,
-        status: "enrolled",
-      },
-    });
+    await createTrainingUser(training.id, user.id);
 
     // Create test meeting
-    await prismaClient.meeting.create({
-      data: {
-        trainingId: training.id,
-        title: "Test Meeting",
-        meetingDate: new Date("2024-02-01T10:00:00Z"),
-      },
-    });
+    await createMeeting(training.id);
   });
 
   afterEach(async () => {
-    await prismaClient.meeting.deleteMany({});
-    await prismaClient.training_Users.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("should return meetings for enrolled student", async () => {
@@ -229,42 +200,20 @@ describe("GET /api/trainings/:trainingId/meetings/:meetingId", () => {
       where: { email: "instructor@test.com" },
     });
 
-    const training = await prismaClient.training.create({
-      data: {
-        title: "test training",
-        description: "test description",
-        instructorId: instructor.id,
-      },
-    });
+    const training = await createTraining(instructor.id);
 
     const user = await prismaClient.user.findFirst({
       where: { email: "test@gmail.com" },
     });
 
-    await prismaClient.training_Users.create({
-      data: {
-        trainingId: training.id,
-        userId: user.id,
-        status: "enrolled",
-      },
-    });
+    await createTrainingUser(training.id, user.id);
 
     // Create test meeting
-    await prismaClient.meeting.create({
-      data: {
-        trainingId: training.id,
-        title: "Test Meeting",
-        meetingDate: new Date("2024-02-01T10:00:00Z"),
-      },
-    });
+    await createMeeting(training.id);
   });
 
   afterEach(async () => {
-    await prismaClient.meeting.deleteMany({});
-    await prismaClient.training_Users.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("should return meeting detail for enrolled student", async () => {

@@ -1,8 +1,11 @@
 import supertest from "supertest";
 import { web } from "../application/web.js";
-import { prismaClient } from "../application/database.js";
-import { logger } from "../application/logging.js";
-import { createTestUser, getTestUser, removeTestUser } from "./test.util.js";
+import {
+  createTestUser,
+  getTestUser,
+  removeAll,
+  removeTestUser,
+} from "./test.util.js";
 
 describe("POST /api/users", function () {
   afterEach(async () => {
@@ -29,7 +32,6 @@ describe("POST /api/users", function () {
       name: "",
     });
 
-    logger.info(result.body);
     expect(result.status).toBe(400);
     expect(result.body.errors).toBeDefined();
   });
@@ -74,8 +76,6 @@ describe("POST /api/users/login", function () {
       password: "password",
     });
 
-    logger.info(result.body);
-
     expect(result.status).toBe(200);
     expect(result.body.data.token).toBeDefined();
     expect(result.body.data.token).not.toBe("test");
@@ -87,8 +87,6 @@ describe("POST /api/users/login", function () {
       password: "",
     });
 
-    logger.info(result.body);
-
     expect(result.status).toBe(400);
     expect(result.body.errors).toBeDefined();
   });
@@ -99,8 +97,6 @@ describe("POST /api/users/login", function () {
       password: "password123",
     });
 
-    logger.info(result.body);
-
     expect(result.status).toBe(401);
     expect(result.body.errors).toBeDefined();
   });
@@ -110,8 +106,6 @@ describe("POST /api/users/login", function () {
       email: "tes@gmail.com",
       password: "password",
     });
-
-    logger.info(result.body);
 
     expect(result.status).toBe(401);
     expect(result.body.errors).toBeDefined();
@@ -153,10 +147,9 @@ describe("DELETE /api/users/current", function () {
   });
 
   afterEach(async () => {
-    await removeTestUser();
+    await removeAll();
   });
 
-  
   it("Should can logout", async () => {
     const result = await supertest(web)
       .delete("/api/users/logout")

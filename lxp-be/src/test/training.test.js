@@ -6,6 +6,7 @@ import {
   createTestInstructor,
   createTestUser,
   createTraining,
+  removeAll,
   removeTestInstructor,
   removeTestUser,
 } from "./test.util";
@@ -34,22 +35,7 @@ describe("POST /api/trainings", () => {
       });
     }
 
-    await prismaClient.training_Users.deleteMany({
-      where: {
-        training: {
-          title: "test training",
-        },
-      },
-    });
-
-    await prismaClient.training.deleteMany({
-      where: {
-        title: "test training",
-      },
-    });
-
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("Should create new training with image", async () => {
@@ -102,9 +88,7 @@ describe("POST /api/training-users", () => {
   });
 
   afterEach(async () => {
-    await prismaClient.training_Users.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await prismaClient.user.deleteMany({});
+    await removeAll();
   });
 
   it("Should reject enrollment if user already enrolled", async () => {
@@ -131,8 +115,6 @@ describe("POST /api/training-users", () => {
         trainingId: training.id,
         userId: user.id,
       });
-
-    logger.info(result.body);
 
     expect(result.status).toBe(400);
     expect(result.body.errors).toBe("User already enrolled in this training");
@@ -169,10 +151,7 @@ describe("GET /api/students/trainings", () => {
   });
 
   afterEach(async () => {
-    await prismaClient.training_Users.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("Should return students training with pagination", async () => {
@@ -254,11 +233,7 @@ describe("GET /api/student/trainings/:trainingId", () => {
   });
 
   afterEach(async () => {
-    await prismaClient.meeting.deleteMany({});
-    await prismaClient.training_Users.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("Should return training detail with meetings", async () => {
