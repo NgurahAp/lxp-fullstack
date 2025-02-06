@@ -1,14 +1,13 @@
 import supertest from "supertest";
 import { prismaClient } from "../application/database";
 import { web } from "../application/web";
-import { logger } from "../application/logging";
 import {
+  createMeeting,
   createTestInstructor,
   createTestUser,
   createTraining,
+  createTrainingUser,
   removeAll,
-  removeTestInstructor,
-  removeTestUser,
 } from "./test.util";
 import path from "path";
 import fs from "fs";
@@ -57,8 +56,6 @@ describe("POST /api/trainings", () => {
       .field("instructorId", instructor.id)
       .attach("image", testImagePath);
 
-    console.log(result.body);
-
     expect(result.status).toBe(200);
     expect(result.body.data).toBeDefined();
     expect(result.body.data.title).toBe("test training");
@@ -70,21 +67,9 @@ describe("POST /api/training-users", () => {
   beforeEach(async () => {
     await createTestUser();
 
-    await createTestInstructor();
-    const instructor = await prismaClient.user.findFirst({
-      where: {
-        email: "instructor@test.com",
-        role: "instructor",
-      },
-    });
+    const instructor = await createTestInstructor();
 
-    await prismaClient.training.create({
-      data: {
-        title: "test training",
-        description: "test description",
-        instructorId: instructor.id,
-      },
-    });
+    await createTraining(instructor.id);
   });
 
   afterEach(async () => {
@@ -123,31 +108,13 @@ describe("POST /api/training-users", () => {
 
 describe("GET /api/students/trainings", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
+    const user = await createTestUser();
 
-    // Create a test training
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
+    const instructor = await createTestInstructor();
 
-    await createTraining(instructor.id);
+    const training = await createTraining(instructor.id);
 
-    // Enroll test user in training
-    const training = await prismaClient.training.findFirst({
-      where: { title: "test training" },
-    });
-
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
-
-    await prismaClient.training_Users.create({
-      data: {
-        trainingId: training.id,
-        userId: user.id,
-      },
-    });
+    await createTrainingUser(training.id, user.id);
   });
 
   afterEach(async () => {
@@ -196,40 +163,11 @@ describe("GET /api/students/trainings", () => {
 
 describe("GET /api/student/trainings/:trainingId", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-
-    // Create a test training
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
-    await createTraining(instructor.id);
-
-    // Enroll test user in training
-    const training = await prismaClient.training.findFirst({
-      where: { title: "test training" },
-    });
-
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
-
-    await prismaClient.training_Users.create({
-      data: {
-        trainingId: training.id,
-        userId: user.id,
-      },
-    });
-
-    // Create test meeting
-    await prismaClient.meeting.create({
-      data: {
-        trainingId: training.id,
-        title: "Test Meeting",
-        meetingDate: new Date(),
-      },
-    });
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
+    const training = await createTraining(instructor.id);
+    await createTrainingUser(training.id, user.id);
+    await createMeeting(training.id);
   });
 
   afterEach(async () => {

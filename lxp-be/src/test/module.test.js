@@ -4,6 +4,7 @@ import { web } from "../application/web.js";
 import path from "path";
 import fs from "fs";
 import {
+  createInitScore,
   createMeeting,
   createModule,
   createTestInstructor,
@@ -11,8 +12,6 @@ import {
   createTraining,
   createTrainingUser,
   removeAll,
-  removeTestInstructor,
-  removeTestUser,
 } from "./test.util.js";
 
 describe("POST /api/meetings/:meetingId/modules", () => {
@@ -41,26 +40,11 @@ describe("POST /api/meetings/:meetingId/modules", () => {
       fs.writeFileSync(testTxtPath, "Test TXT content");
     }
 
-    await createTestUser();
-    await createTestInstructor();
+    const instructor = await createTestInstructor();
 
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
+    const training = await createTraining(instructor.id);
 
-    await createTraining(instructor.id);
-
-    const training = await prismaClient.training.findFirst({
-      where: { title: "test training" },
-    });
-
-    await prismaClient.meeting.create({
-      data: {
-        trainingId: training.id,
-        title: "Test Meeting",
-        meetingDate: new Date(),
-      },
-    });
+    await createMeeting(training.id);
   });
 
   afterEach(async () => {
@@ -73,11 +57,7 @@ describe("POST /api/meetings/:meetingId/modules", () => {
       });
     }
 
-    await prismaClient.module.deleteMany({});
-    await prismaClient.meeting.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("Should create new module", async () => {
@@ -93,12 +73,6 @@ describe("POST /api/meetings/:meetingId/modules", () => {
       .field("title", "Test Module")
       .field("moduleScore", "100")
       .attach("content", testPdfPath);
-
-    // Tambahkan ini untuk debugging
-    if (result.status !== 200) {
-      console.log("Error response:", result.body);
-      console.log("Status:", result.status);
-    }
 
     expect(result.status).toBe(200);
     expect(result.body.data).toBeDefined();
@@ -142,24 +116,10 @@ describe("POST /api/meetings/:meetingId/modules", () => {
 describe("POST /api/modules/:moduleId/answer", () => {
   beforeEach(async () => {
     // Create test user and instructor
-    await createTestUser();
-    await createTestInstructor();
-
-    // Get instructor
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
-    // Create training
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-
-    // Create training user enrollment
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
     await createTrainingUser(training.id, user.id);
-
-    // Create meeting and module
     const meeting = await createMeeting(training.id);
     await createModule(meeting.id);
   });
@@ -219,25 +179,10 @@ describe("POST /api/modules/:moduleId/answer", () => {
 
 describe("GET /api/meetings/:meetingId/modules", () => {
   beforeEach(async () => {
-    // Create test user and instructor
-    await createTestUser();
-    await createTestInstructor();
-
-    // Get instructor
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
-    // Create training
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-
-    // Create training user enrollment
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
     await createTrainingUser(training.id, user.id);
-
-    // Create meeting and modules
     const meeting = await createMeeting(training.id);
     await createModule(meeting.id);
     await createModule(meeting.id); // Create multiple modules for pagination testing
@@ -255,11 +200,6 @@ describe("GET /api/meetings/:meetingId/modules", () => {
     const result = await supertest(web)
       .get(`/api/meetings/${meeting.id}/modules?page=1&size=10`)
       .set("Authorization", "Bearer test");
-
-    if (result.status !== 200) {
-      console.log("Error response:", result.body);
-      console.log("Status:", result.status);
-    }
 
     expect(result.status).toBe(200);
     expect(result.body.data).toBeDefined();
@@ -296,20 +236,10 @@ describe("GET /api/meetings/:meetingId/modules", () => {
 
 describe("GET /api/meetings/:meetingId/modules/:moduleId", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
     await createTrainingUser(training.id, user.id);
-
     const meeting = await createMeeting(training.id);
     await createModule(meeting.id);
   });
@@ -355,34 +285,15 @@ describe("GET /api/meetings/:meetingId/modules/:moduleId", () => {
 
 describe("POST /api/modules/:moduleId/score", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
     const trainingUser = await createTrainingUser(training.id, user.id);
-
     const meeting = await createMeeting(training.id);
     await createModule(meeting.id);
 
     // Initialize score for the user
-    await prismaClient.score.create({
-      data: {
-        trainingUserId: trainingUser.id,
-        meetingId: meeting.id,
-        moduleScore: 0,
-        quizScore: 0,
-        taskScore: 0,
-        totalScore: 0,
-      },
-    });
+    await createInitScore(trainingUser.id, meeting.id);
   });
 
   afterEach(async () => {
@@ -410,8 +321,6 @@ describe("POST /api/modules/:moduleId/score", () => {
         meetingId: module.meetingId,
       },
     });
-
-    console.log(score.body)
 
     expect(score.moduleScore).toBe(90);
     expect(score.totalScore).toBe(30); // Since quiz and task scores are 0

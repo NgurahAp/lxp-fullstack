@@ -4,8 +4,6 @@ import { web } from "../application/web.js";
 import {
   createTestUser,
   createTestInstructor,
-  removeTestUser,
-  removeTestInstructor,
   createTraining,
   createTrainingUser,
   removeAll,
@@ -14,27 +12,9 @@ import {
 
 describe("POST /api/meetings", () => {
   beforeEach(async () => {
-    // Create test instructor
-    await createTestInstructor();
-    await createTestUser(); // Add test user for enrollment
-
-    // Get instructor
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
-    // Get test user
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
-
-    // Create training and enroll the user
-    await createTraining(instructor.id);
-
-    const training = await prismaClient.training.findFirst({
-      where: { title: "test training" },
-    });
-
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
+    const training = await createTraining(instructor.id);
     await createTrainingUser(training.id, user.id);
   });
 
@@ -151,23 +131,12 @@ describe("POST /api/meetings", () => {
 
 describe("GET /api/trainings/:trainingId/meetings", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-
-    // Create test training and enroll user
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
 
     const training = await createTraining(instructor.id);
 
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
-
     await createTrainingUser(training.id, user.id);
-
-    // Create test meeting
     await createMeeting(training.id);
   });
 
@@ -192,23 +161,10 @@ describe("GET /api/trainings/:trainingId/meetings", () => {
 
 describe("GET /api/trainings/:trainingId/meetings/:meetingId", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-
-    // Create test training and enroll user
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
-
     await createTrainingUser(training.id, user.id);
-
-    // Create test meeting
     await createMeeting(training.id);
   });
 

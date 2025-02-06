@@ -17,22 +17,13 @@ import { web } from "../application/web.js";
 describe("POST /api/meetings/:meetingId/quizzes", () => {
   beforeEach(async () => {
     await createTestUser();
-    await createTestInstructor();
-
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
     await createMeeting(training.id);
   });
 
   afterEach(async () => {
-    await prismaClient.quiz.deleteMany({});
-    await prismaClient.meeting.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("Should create new quiz", async () => {
@@ -74,18 +65,11 @@ describe("POST /api/meetings/:meetingId/quizzes", () => {
 
 describe("POST /api/quizzes/:quizId/submit", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
     const meeting = await createMeeting(training.id);
-
-    // Create quiz with 5 questions
     await createQuiz(meeting.id);
-
-    const user = await getTestUser();
     await createTrainingUser(training.id, user.id);
   });
 
@@ -164,31 +148,16 @@ describe("POST /api/quizzes/:quizId/submit", () => {
 
 describe("GET /api/meetings/:meetingId/quizzes/:quizId", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
     await createTrainingUser(training.id, user.id);
-
     const meeting = await createMeeting(training.id);
     await createQuiz(meeting.id);
   });
 
   afterEach(async () => {
-    await prismaClient.quiz.deleteMany({});
-    await prismaClient.meeting.deleteMany({});
-    await prismaClient.training_Users.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("Should get quiz detail successfully", async () => {
@@ -230,31 +199,16 @@ describe("GET /api/meetings/:meetingId/quizzes/:quizId", () => {
 
 describe("GET /api/meetings/:meetingId/quizzes/:quizId/questions", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
     await createTrainingUser(training.id, user.id);
-
     const meeting = await createMeeting(training.id);
     await createQuiz(meeting.id);
   });
 
   afterEach(async () => {
-    await prismaClient.quiz.deleteMany({});
-    await prismaClient.meeting.deleteMany({});
-    await prismaClient.training_Users.deleteMany({});
-    await prismaClient.training.deleteMany({});
-    await removeTestUser();
-    await removeTestInstructor();
+    await removeAll();
   });
 
   it("Should get quiz questions successfully", async () => {

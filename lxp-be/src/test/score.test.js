@@ -10,28 +10,16 @@ import {
   createTraining,
   createTrainingUser,
   removeAll,
-  removeScore,
 } from "./test.util.js";
 
 describe("GET /api/meetings/:meetingId/scores", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
     const trainingUser = await createTrainingUser(training.id, user.id);
-
     const meeting = await createMeeting(training.id);
     await createModule(meeting.id);
-
     await createScore(trainingUser.id, meeting.id);
   });
 
@@ -138,20 +126,10 @@ describe("GET /api/meetings/:meetingId/scores", () => {
 
 describe("GET /api/trainings/:trainingId/scores", () => {
   beforeEach(async () => {
-    await createTestUser();
-    await createTestInstructor();
-
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
-    });
     const trainingUser = await createTrainingUser(training.id, user.id);
-
     // Create multiple meetings with scores
     const meeting1 = await createMeeting(training.id);
     const meeting2 = await createMeeting(training.id);

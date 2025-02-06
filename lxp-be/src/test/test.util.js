@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { prismaClient } from "../application/database";
 
 const createTestUser = async () => {
-  await prismaClient.user.create({
+  return prismaClient.user.create({
     data: {
       email: "test@gmail.com",
       password: await bcrypt.hash("password", 10),
@@ -21,7 +21,7 @@ const getTestUser = async () => {
 };
 
 const removeTestUser = async () => {
-  await prismaClient.user.deleteMany({
+  return prismaClient.user.deleteMany({
     where: {
       email: "test@gmail.com",
     },
@@ -29,7 +29,7 @@ const removeTestUser = async () => {
 };
 
 const createTestInstructor = async () => {
-  await prismaClient.user.create({
+  return prismaClient.user.create({
     data: {
       name: "test instructor",
       email: "instructor@test.com",
@@ -41,7 +41,7 @@ const createTestInstructor = async () => {
 };
 
 const removeTestInstructor = async () => {
-  await prismaClient.user.deleteMany({
+  return prismaClient.user.deleteMany({
     where: {
       email: "instructor@test.com",
     },
@@ -60,7 +60,7 @@ const createTrainingUser = async (trainingId, userId) => {
 };
 
 const removeTrainingUser = async () => {
-  await prismaClient.training_Users.deleteMany();
+  return prismaClient.training_Users.deleteMany();
 };
 
 // Training utilities
@@ -75,7 +75,7 @@ const createTraining = async (instructorId) => {
 };
 
 const removeTraining = async () => {
-  await prismaClient.training.deleteMany();
+  return prismaClient.training.deleteMany();
 };
 
 // New Meeting utilities
@@ -90,7 +90,7 @@ const createMeeting = async (trainingId) => {
 };
 
 const removeMeeting = async () => {
-  await prismaClient.meeting.deleteMany();
+  return prismaClient.meeting.deleteMany();
 };
 
 // New Module utilities
@@ -106,7 +106,7 @@ const createModule = async (meetingId) => {
 };
 
 const removeModule = async () => {
-  await prismaClient.module.deleteMany({});
+  return prismaClient.module.deleteMany({});
 };
 
 const createQuiz = async (meetingId) => {
@@ -147,7 +147,7 @@ const createQuiz = async (meetingId) => {
 };
 
 const removeQuiz = async () => {
-  await prismaClient.quiz.deleteMany({});
+  return prismaClient.quiz.deleteMany({});
 };
 
 const createTask = async (meetingId) => {
@@ -161,11 +161,24 @@ const createTask = async (meetingId) => {
 };
 
 const removeTask = async () => {
-  await prismaClient.task.deleteMany({});
+  return prismaClient.task.deleteMany({});
+};
+
+const createInitScore = async (trainingUserId, meetingId) => {
+  return prismaClient.score.create({
+    data: {
+      trainingUserId: trainingUserId,
+      meetingId: meetingId,
+      moduleScore: 0,
+      quizScore: 0,
+      taskScore: 0,
+      totalScore: 0,
+    },
+  });
 };
 
 const createScore = async (trainingUserId, meetingId) => {
-  await prismaClient.score.create({
+  return prismaClient.score.create({
     data: {
       trainingUserId: trainingUserId,
       meetingId: meetingId,
@@ -178,7 +191,7 @@ const createScore = async (trainingUserId, meetingId) => {
 };
 
 const removeScore = async () => {
-  await prismaClient.score.deleteMany({});
+  return prismaClient.score.deleteMany({});
 };
 
 // Main cleanup utility
@@ -213,4 +226,5 @@ export {
   removeQuiz,
   createTask,
   createScore,
+  createInitScore,
 };
