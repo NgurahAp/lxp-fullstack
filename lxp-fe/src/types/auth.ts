@@ -16,6 +16,7 @@ interface Training {
   description: string;
   image: string | null;
   status: string;
+  averageScore: number;
 }
 
 export interface UserData {
@@ -26,6 +27,7 @@ export interface UserData {
   avatar: string;
   trainings: Training[];
   totalTrainings: number;
+  overallAverageScore: number;
 }
 
 export interface UserResponse {

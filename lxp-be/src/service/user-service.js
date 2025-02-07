@@ -100,8 +100,19 @@ const get = async (email) => {
               title: true,
               description: true,
               image: true,
+              meetings: {
+                select: {
+                  id: true,
+                  scores: {
+                    select: {
+                      totalScore: true,
+                    },
+                  },
+                },
+              },
             },
           },
+          id: true,
           status: true,
         },
       },
@@ -117,17 +128,50 @@ const get = async (email) => {
     throw new ResponseError(404, "User not found");
   }
 
+  // Transform data dan hitung average score untuk setiap training
+  const trainingsWithScores = user.trainingUsers.map((tu) => {
+    let totalScore = 0;
+    let meetingsWithScore = 0;
+
+    tu.training.meetings.forEach((meeting) => {
+      if (meeting.scores.length > 0) {
+        totalScore += meeting.scores[0].totalScore;
+        meetingsWithScore++;
+      }
+    });
+
+    const averageScore =
+      meetingsWithScore > 0 ? Math.round(totalScore / meetingsWithScore) : 0;
+
+    return {
+      id: tu.training.id,
+      title: tu.training.title,
+      description: tu.training.description,
+      image: tu.training.image,
+      status: tu.status,
+      averageScore: averageScore,
+    };
+  });
+
+  // Hitung overall average score dari semua training
+  const totalUserScore = trainingsWithScores.reduce(
+    (sum, training) => sum + training.averageScore,
+    0
+  );
+  const overallAverageScore =
+    trainingsWithScores.length > 0
+      ? Math.round(totalUserScore / trainingsWithScores.length)
+      : 0;
+
   return {
     id: user.id,
     email: user.email,
     name: user.name,
     role: user.role,
     avatar: user.profile,
-    trainings: user.trainingUsers.map((tu) => ({
-      ...tu.training,
-      status: tu.status,
-    })),
+    trainings: trainingsWithScores,
     totalTrainings: user._count.trainingUsers,
+    overallAverageScore: overallAverageScore,
   };
 };
 

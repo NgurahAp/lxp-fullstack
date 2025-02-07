@@ -42,7 +42,7 @@ const Dashboard: React.FC = () => {
                   Hello, {user?.name}
                 </h2>
                 <p className=" text-base font-light text-white">
-                  Kamu mengambil 2 pelatihan
+                  Kamu mengambil {user?.totalTrainings} pelatihan
                 </p>
               </div>
               <div className="mt-6 flex-grow">
@@ -50,23 +50,23 @@ const Dashboard: React.FC = () => {
                   {[
                     {
                       icon: "/dashboard/pelatihan.png",
-                      value: 2,
+                      value: user?.totalTrainings,
                       label: "Pelatihan",
                     },
                     {
                       icon: "/dashboard/sertifikat.png",
-                      value: 3,
+                      value: 0,
                       label: "Sertifikat",
                     },
                     {
-                      icon: "/dashboard/poin-avg.png",
-                      value: 5,
-                      label: "Rata-rata",
+                      icon: "/dashboard/poin-total.png",
+                      value: 0,
+                      label: "Total Poin",
                     },
                     {
-                      icon: "/dashboard/poin-total.png",
-                      value: 7,
-                      label: "Total Poin",
+                      icon: "/dashboard/poin-avg.png",
+                      value: user?.overallAverageScore,
+                      label: "Rata-rata",
                     },
                   ].map((item, index) => (
                     <li
