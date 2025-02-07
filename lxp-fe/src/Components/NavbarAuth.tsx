@@ -41,7 +41,7 @@ const NavbarAuth: React.FC = () => {
   useEffect(() => {
     const getUserProfile = () => {
       try {
-        const storedUser = localStorage.getItem("user_profile");
+        const storedUser = localStorage.getItem("user_data");
         if (storedUser) {
           const userData: UserData = JSON.parse(storedUser);
           setProfileData(userData);
@@ -134,9 +134,30 @@ const NavbarAuth: React.FC = () => {
               <img src="/navbar/moon.png" className="px-1 w-7" alt="" />
               <img src="/navbar/bell.png" className="px-1 w-7" alt="" />
               <img src="/navbar/separator.png" className="px-4 " alt="" />
-              <button onClick={toggleProfileMenu}>
-                <CgProfile className="text-5xl text-gray-600" />
+              <button
+                onClick={toggleProfileMenu}
+                className="relative w-10 h-10 rounded-full overflow-hidden"
+              >
+                {profileData?.avatar ? (
+                  <img
+                    src={profileData.avatar}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-300 rounded-full text-gray-700 font-semibold">
+                    {profileData?.name
+                      ? profileData.name
+                          .split(" ")
+                          .slice(0, 2) // Ambil maksimal 2 kata pertama
+                          .map((word) => word[0]) // Ambil huruf pertama setiap kata
+                          .join("")
+                          .toUpperCase() // Ubah ke huruf besar
+                      : "?"}
+                  </div>
+                )}
               </button>
+
               {showProfileMenu && (
                 <ProfileBox
                   offset="right-[5rem]"

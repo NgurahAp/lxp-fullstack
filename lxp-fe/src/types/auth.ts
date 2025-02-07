@@ -5,8 +5,11 @@ export interface LoginCredentials {
 
 export interface LoginResponse {
   data: {
+    id: number;
+    name: string;
+    email: string;
     token: string;
-    role: string;
+    profile: string | undefined;
   };
 }
 

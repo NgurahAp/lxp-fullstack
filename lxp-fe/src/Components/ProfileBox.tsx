@@ -17,7 +17,7 @@ const ProfileBox: React.FC<FeatureBoxProps> = ({ offset, onClose }) => {
   const { logout } = useAuth();
 
   useEffect(() => {
-    const storedProfile = localStorage.getItem("user_profile");
+    const storedProfile = localStorage.getItem("user_data");
     if (storedProfile) {
       setProfileData(JSON.parse(storedProfile));
     }
@@ -28,7 +28,26 @@ const ProfileBox: React.FC<FeatureBoxProps> = ({ offset, onClose }) => {
       className={`absolute top-[4.5rem] w-96 rounded-lg bg-[#f5f5f5] shadow-lg ${offset}`}
     >
       <div className="flex p-4">
-        <img src={profileData?.avatar} className="w-12 rounded-full" alt="" />
+        <div className="w-10 h-10 mt-1">
+          {profileData?.avatar ? (
+            <img
+              src={profileData.avatar}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-300 rounded-full text-gray-700 font-semibold">
+              {profileData?.name
+                ? profileData.name
+                    .split(" ")
+                    .slice(0, 2) // Ambil maksimal 2 kata pertama
+                    .map((word) => word[0]) // Ambil huruf pertama setiap kata
+                    .join("")
+                    .toUpperCase() // Ubah ke huruf besar
+                : "?"}
+            </div>
+          )}
+        </div>
         <div className="flex flex-col pl-3 ">
           <h1 className="font-bold">{profileData?.name}</h1>
           <h1 className="font-normal">{profileData?.email}</h1>

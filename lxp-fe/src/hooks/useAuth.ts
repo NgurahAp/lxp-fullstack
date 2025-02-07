@@ -24,6 +24,15 @@ export const useAuth = (): UseAuthReturn => {
       const { token } = response.data;
 
       Cookies.set("token", token, { expires: 7 });
+      const userDataForStorage = {
+        role: response.data.id,
+        name: response.data.name,
+        email: response.data.email,
+        avatar: response.data.profile,
+      };
+
+      localStorage.setItem("user_data", JSON.stringify(userDataForStorage));
+
       navigate("/dashboard");
     },
   });
@@ -47,16 +56,6 @@ export const useUser = (): UseQueryResult<UserData, Error> => {
     queryFn: async () => {
       const response = await UserService.getCurrentUser();
       const userData = response.data;
-
-      // Simpan ke localStorage
-      localStorage.setItem("user_email", userData.email);
-      localStorage.setItem("user_name", userData.name);
-      localStorage.setItem("user_role", userData.role);
-      localStorage.setItem("user_avatar", userData.avatar);
-      localStorage.setItem(
-        "user_totalTrainings",
-        userData.totalTrainings.toString()
-      );
 
       return userData;
     },
