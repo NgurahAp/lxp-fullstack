@@ -28,6 +28,6 @@ export interface UserData {
   totalTrainings: number;
 }
 
-export interface getUserReponse {
+export interface UserResponse {
   data: UserData;
 }

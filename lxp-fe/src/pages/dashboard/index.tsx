@@ -1,6 +1,17 @@
 import React from "react";
+import { useUser } from "../../hooks/useAuth";
 
 const Dashboard: React.FC = () => {
+  const { data: user, isLoading, error } = useUser();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+  
   return (
     <div className="h-full w-screen flex flex-col md:pt-36 pt-24 md:px-24 px-4 bg-gray-100">
       <div className="bg-white w-full h-14 flex items-center pl-5 rounded-xl">
@@ -28,7 +39,7 @@ const Dashboard: React.FC = () => {
             <div className="relative z-2 shadow-lg md:px-7 px-4 md:py-9 py-5 flex flex-col">
               <div>
                 <h2 className="font-semibold md:text-2xl text-2xl text-white md:pb-2">
-                  Hello, Ngurah
+                  Hello, {user?.name}
                 </h2>
                 <p className=" text-base font-light text-white">
                   Kamu mengambil 2 pelatihan
