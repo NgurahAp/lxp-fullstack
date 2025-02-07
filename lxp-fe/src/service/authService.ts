@@ -14,6 +14,9 @@ export const AuthService = {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Email atau password salah");
+        }
         throw new Error(
           error.response?.data?.message || "Terjadi kesalahan pada server"
         );
@@ -28,11 +31,14 @@ export const UserService = {
     const token = Cookies.get("token");
 
     try {
-      const response = await axios.get<UserResponse>(`${API_URL}/users/current`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get<UserResponse>(
+        `${API_URL}/users/current`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
