@@ -8,7 +8,7 @@ const queryClient = new QueryClient();
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster position="top-right" />
+      <Toaster position="bottom-left" />
       <AppRoutes />
     </QueryClientProvider>
   );

@@ -49,7 +49,7 @@ const FormInput: React.FC<FormInputProps> = ({
         onBlur={() => setIsFocused(false)}
       />
     </div>
-  );
+);
 };
 
 export default FormInput;
