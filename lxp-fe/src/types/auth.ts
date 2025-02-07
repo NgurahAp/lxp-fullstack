@@ -5,10 +5,11 @@ export interface LoginCredentials {
 
 export interface UserData {
   id: number;
+  name: string;
   email: string;
   token: string;
   role: string;
-  profile: null | string;
+  profile: string | undefined;
 }
 
 export interface LoginResponse {
