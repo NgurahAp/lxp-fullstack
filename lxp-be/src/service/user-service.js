@@ -72,11 +72,8 @@ const login = async (request) => {
       email: user.email,
     },
     select: {
-      id: true,
-      email: true,
       token: true,
       role: true,
-      profile: true,
     },
   });
 };
@@ -90,9 +87,11 @@ const get = async (email) => {
       email: email,
     },
     select: {
+      id: true,
       email: true,
       name: true,
       role: true,
+      profile: true,
       trainingUsers: {
         select: {
           training: {
@@ -119,9 +118,11 @@ const get = async (email) => {
   }
 
   return {
+    id: user.id,
     email: user.email,
     name: user.name,
     role: user.role,
+    avatar: user.profile,
     trainings: user.trainingUsers.map((tu) => ({
       ...tu.training,
       status: tu.status,

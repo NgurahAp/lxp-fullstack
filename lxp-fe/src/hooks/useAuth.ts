@@ -16,11 +16,9 @@ export const useAuth = (): UseAuthReturn => {
   const login = useMutation<LoginResponse, Error, LoginCredentials>({
     mutationFn: AuthService.login,
     onSuccess: (response) => {
-      const { token, role, id } = response.data;
+      const { token } = response.data;
 
       Cookies.set("token", token, { expires: 7 });
-      Cookies.set("user_role", role, { expires: 7 });
-      Cookies.set("user_id", String(id), { expires: 7 });
 
       navigate("/dashboard");
     },
@@ -28,8 +26,6 @@ export const useAuth = (): UseAuthReturn => {
 
   const logout = () => {
     Cookies.remove("token");
-    Cookies.remove("user_role");
-    Cookies.remove("user_id");
     navigate("/login");
   };
 

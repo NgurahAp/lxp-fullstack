@@ -178,7 +178,7 @@ const NavbarAuth: React.FC = () => {
         <div className="">
           <div className="p-4 flex items-center border-b">
             <img
-              src={profileData?.profile}
+              src={profileData?.avatar}
               className="w-12 h-12 rounded-lg"
               alt="Profile"
             />

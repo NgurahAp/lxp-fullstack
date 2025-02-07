@@ -28,7 +28,7 @@ const ProfileBox: React.FC<FeatureBoxProps> = ({ offset, onClose }) => {
       className={`absolute top-[4.5rem] w-96 rounded-lg bg-[#f5f5f5] shadow-lg ${offset}`}
     >
       <div className="flex p-4">
-        <img src={profileData?.profile} className="w-12 rounded-full" alt="" />
+        <img src={profileData?.avatar} className="w-12 rounded-full" alt="" />
         <div className="flex flex-col pl-3 ">
           <h1 className="font-bold">{profileData?.name}</h1>
           <h1 className="font-normal">{profileData?.email}</h1>
