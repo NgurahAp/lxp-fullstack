@@ -1,31 +1,22 @@
-import axios from "axios";
-import { LoginCredentials, LoginResponse } from "../types/auth";
 import { API_URL } from "../config/api";
+import { LoginCredentials, LoginResponse } from "../types/auth";
+import axios from "axios";
 
-
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export const loginService = async (
-  credentials: LoginCredentials
-): Promise<LoginResponse> => {
-  try {
-    const response = await api.post<LoginResponse>("/users/login", credentials);
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        // Log untuk debugging
-        console.log("Error response:", error.response.data);
-        throw new Error(error.response.data.message || "Login gagal");
-      } else if (error.request) {
-        throw new Error("Tidak dapat terhubung ke server");
+export const AuthService = {
+  login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
+    try {
+      const response = await axios.post<LoginResponse>(
+        `${API_URL}/users/login`,
+        credentials
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.message || "Terjadi kesalahan pada server"
+        );
       }
+      throw new Error("Terjadi kesalahan yang tidak diketahui");
     }
-    throw new Error("Terjadi kesalahan yang tidak diketahui");
-  }
+  },
 };

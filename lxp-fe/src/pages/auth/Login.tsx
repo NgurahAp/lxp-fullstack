@@ -1,27 +1,25 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { useAuth } from "../../hooks/useAuth";
 import { AuthCarousel } from "./components/AuthCarousel";
 import FormInput from "./components/FormInput";
-import { useAuth } from "../../hooks/useAuth";
 
 export const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState(""); // Ubah dari username ke email
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { login, isLoading, error } = useAuth();
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const success = await login({
-      email,
-      password,
-    });
-
-    if (success) {
-      navigate("/dashboard");
+    try {
+      await login.mutateAsync({ email, password });
+      toast.success("Login berhasil!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Login gagal");
     }
   };
 
@@ -44,17 +42,19 @@ export const Login: React.FC = () => {
 
           {/* Title */}
           <h1 className="self-start font-bold text-4xl pb-3">Masuk</h1>
+
           {/* Form Login */}
           <form className="w-full relative" onSubmit={handleSubmit}>
             <FormInput
-              type="email" // Ubah type menjadi email
-              id="email" // Ubah id
-              name="email" // Ubah name
-              placeholder="Masukan Email" // Sesuaikan placeholder
-              label="Email" // Sesuaikan label
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Masukan Email"
+              label="Email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={login.status === "pending"}
             />
             <div className="relative">
               <FormInput
@@ -66,6 +66,7 @@ export const Login: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={login.status === "pending"}
               />
               <span
                 className="absolute right-3 top-[45%] cursor-pointer"
@@ -137,14 +138,12 @@ export const Login: React.FC = () => {
                 Lupa kata sandi?
               </Link>
             </div>
-            {error && ( // Tambahkan error message display
-              <div className="text-red-500 text-sm mb-4">{error}</div>
-            )}
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-300"
+              disabled={login.status === "pending"}
             >
-              Masuk
+              {login.status === "pending" ? "Memproses..." : "Masuk"}
             </button>
           </form>
         </div>

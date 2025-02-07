@@ -1,13 +1,16 @@
 import React from "react";
 import AppRoutes from "./routes";
 import { Toaster } from "react-hot-toast";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 const App: React.FC = () => {
   return (
-    <>
-      <Toaster position="bottom-left" />
+    <QueryClientProvider client={queryClient}>
+      <Toaster position="top-right" />
       <AppRoutes />
-    </>
+    </QueryClientProvider>
   );
 };
 
