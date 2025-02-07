@@ -129,7 +129,7 @@ const NavbarAuth: React.FC = () => {
           {!isMobile && (
             <>
               <Link to={"/allFeatures"}>
-                <img src="/navbar/square.png" className="px-1 w-6" alt="" />
+                <img src="/navbar/square.png" className="px-1 w-6" alt="" />=
               </Link>
               <img src="/navbar/moon.png" className="px-1 w-7" alt="" />
               <img src="/navbar/bell.png" className="px-1 w-7" alt="" />
@@ -145,7 +145,7 @@ const NavbarAuth: React.FC = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-300 rounded-full text-gray-700 font-semibold">
+                  <div className="w-full h-full flex items-center justify-center bg-yellow-300 rounded-full text-gray-700 font-semibold">
                     {profileData?.name
                       ? profileData.name
                           .split(" ")

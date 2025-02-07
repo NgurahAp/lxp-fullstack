@@ -36,7 +36,7 @@ const ProfileBox: React.FC<FeatureBoxProps> = ({ offset, onClose }) => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-300 rounded-full text-gray-700 font-semibold">
+            <div className="w-full h-full flex items-center justify-center bg-yellow-300 rounded-full text-gray-700 font-semibold">
               {profileData?.name
                 ? profileData.name
                     .split(" ")
