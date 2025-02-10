@@ -129,7 +129,7 @@ const NavbarAuth: React.FC = () => {
           {!isMobile && (
             <>
               <Link to={"/allFeatures"}>
-                <img src="/navbar/square.png" className="px-1 w-6" alt="" />=
+                <img src="/navbar/square.png" className="px-1 w-6" alt="" />
               </Link>
               <img src="/navbar/moon.png" className="px-1 w-7" alt="" />
               <img src="/navbar/bell.png" className="px-1 w-7" alt="" />

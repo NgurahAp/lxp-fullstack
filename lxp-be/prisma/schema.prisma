@@ -27,7 +27,7 @@ model User {
 model Training {
   id           Int      @id @default(autoincrement())
   title        String   @db.VarChar(255)
-  description  String?
+  description  String?  @db.Text 
   image        String?  
   instructorId Int
   createdAt    DateTime @default(now())

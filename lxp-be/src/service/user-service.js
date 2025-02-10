@@ -103,6 +103,7 @@ const get = async (email) => {
               title: true,
               description: true,
               image: true,
+              instructor: true,
               meetings: {
                 select: {
                   id: true,
@@ -152,6 +153,7 @@ const get = async (email) => {
       description: tu.training.description,
       image: tu.training.image,
       status: tu.status,
+      instructor: tu.training.instructor.name,
       averageScore: averageScore,
     };
   });

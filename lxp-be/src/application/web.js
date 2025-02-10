@@ -14,6 +14,11 @@ web.use(
     credentials: true, // Jika Anda menggunakan cookies/credentials
   })
 );
+
+// Digunakan agar FE bisa mengakses file public yang ada di BE
+web.use("/public", express.static("public"));
+
+
 // 1. Middleware untuk parsing JSON
 web.use(express.json());
 // 2. Routers

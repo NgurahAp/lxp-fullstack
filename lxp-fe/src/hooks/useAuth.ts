@@ -50,7 +50,7 @@ export const useAuth = (): UseAuthReturn => {
   };
 };
 
-export const useUser = (): UseQueryResult<UserData, Error> => {
+export const useGetUser = (): UseQueryResult<UserData, Error> => {
   return useQuery({
     queryKey: ["user"],
     queryFn: async () => {
