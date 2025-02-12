@@ -11,6 +11,15 @@ interface BreadcrumbProps {
 }
 
 export const Breadcrumb = ({ items }: BreadcrumbProps) => {
+  // Function to truncate label
+  const truncateLabel = (
+    label: string | undefined,
+    maxLength: number = 20
+  ): string => {
+    if (!label) return "";
+    return label.length > maxLength ? `${label.slice(0, maxLength)}...` : label;
+  };
+
   return (
     <div className="bg-white w-full min-h-14 flex items-center px-5 rounded-xl py-2">
       <div className="flex items-center flex-wrap whitespace-normal gap-x-1">
@@ -30,16 +39,16 @@ export const Breadcrumb = ({ items }: BreadcrumbProps) => {
                 <span
                   className={`${
                     index === 0 ? "md:px-2 px-0" : ""
-                  } text-blue-500 md:text-sm text-xs  md:font-semibold`}
+                  } text-blue-500 md:text-sm text-xs md:font-semibold`}
                 >
-                  {item.label}
+                  {truncateLabel(item.label)}
                 </span>
               </Link>
             ) : (
               <span
                 className={`${
                   index === 0 ? "md:px-2 px-0" : ""
-                } text-gray-400 md:text-sm text-xs  md:font-semibold`}
+                } text-gray-400 md:text-sm text-xs md:font-semibold`}
               >
                 {item.label}
               </span>

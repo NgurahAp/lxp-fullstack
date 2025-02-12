@@ -3,6 +3,8 @@ import { useGetModule } from "../../hooks/useModule";
 import { Breadcrumb } from "../../Components/BreadCrumbs";
 import { BackLink } from "../../Components/BackLink";
 import { IoDocumentText } from "react-icons/io5";
+import { ModuleSubmitDialog } from "./components/ModuleSubmitDialog";
+import { FaCheck } from "react-icons/fa6";
 
 export const Module = () => {
   const { meetingId, moduleId } = useParams<{
@@ -10,7 +12,7 @@ export const Module = () => {
     moduleId: string;
   }>();
 
-  const { data, isLoading, error } = useGetModule(meetingId, moduleId);
+  const { data, isLoading, error, refetch } = useGetModule(meetingId, moduleId);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -26,8 +28,7 @@ export const Module = () => {
     },
     {
       label: data?.meeting.title,
-      // TODO
-      path: ``,
+      path: `/pelatihanku/${data?.meeting.training.id}`,
     },
     {
       label: data?.title,
@@ -44,7 +45,7 @@ export const Module = () => {
         </h1>
         <div className="flex flex-col md:flex-row justify-center items-start md:gap-6 gap-16  bg-white w-full">
           {/* Left Section */}
-          <div className="flex flex-col items-center h-full bg-white rounded-lg shadow-md md:p-6 p-4 w-full md:w-1/2">
+          <div className="flex flex-col items-center h-full bg-white  md:p-6 p-4 w-full md:w-1/2">
             <div className="flex flex-col items-center">
               <img
                 src="/dashboard/empty-state.png"
@@ -63,7 +64,7 @@ export const Module = () => {
             </div>
             <div className="w-full flex items-center md:pt-0 pt-4 justify-between">
               {/* TODO */}
-              <BackLink to={``} />
+              <BackLink to={`/pelatihanku/${data?.meeting.training.id}`} />
               <Link
                 to={``}
                 className=" px-4 md:py-2 py-3 bg-blue-600 text-white rounded text-center md:text-base text-xs hover:bg-blue-700"
@@ -73,7 +74,7 @@ export const Module = () => {
             </div>
           </div>
           {/* Right Section */}
-          <div className="flex flex-col h-full justify-between bg-white rounded-lg shadow-md p-10 w-full md:w-1/2 ">
+          <div className="flex flex-col h-full justify-between bg-white  p-10 w-full md:w-1/2 ">
             <div>
               <div className="mb-4">
                 <h2 className="text-gray-700 md:text-xl text-base font-semibold">
@@ -87,7 +88,12 @@ export const Module = () => {
               <div className="mb-4">
                 <h2 className="text-gray-700 font-semibold ">Dokumen</h2>
                 <button
-                  onClick={() => window.open(`http://localhost:3001/public/${data?.content}`, "_blank")}
+                  onClick={() =>
+                    window.open(
+                      `http://localhost:3001/public/${data?.content}`,
+                      "_blank"
+                    )
+                  }
                   className="text-gray-500 flex items-center w-full border-[1px] rounded-lg p-4 my-5 gap-3"
                 >
                   <IoDocumentText className="text-3xl text-red-500" />
@@ -117,8 +123,8 @@ export const Module = () => {
               </div>
             </div>
             <div className="flex justify-center">
-              {/* <div className="flex justify-center">
-                {data?.module.status === "FINISHED" ? (
+              <div className="flex justify-center">
+                {data?.moduleAnswer != null ? (
                   <button className="mt-4 md:px-20 px-10 py-4 flex rounded-lg items-center bg-green-500 text-base md:text-xl gap-3 text-white hover:bg-green-600">
                     <div className="bg-white rounded-full">
                       <FaCheck className="text-green-600 p-1 text-xl" />
@@ -126,14 +132,14 @@ export const Module = () => {
                     Modul Selesai
                   </button>
                 ) : (
-                  <ModuleCompletionDialog
-                    moduleId={data?.module.id}
+                  <ModuleSubmitDialog
+                    moduleId={data?.id}
                     onComplete={() => {
                       refetch();
                     }}
                   />
                 )}
-              </div> */}
+              </div>
             </div>
           </div>
         </div>
