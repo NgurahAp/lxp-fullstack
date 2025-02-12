@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { RiFileEditLine } from "react-icons/ri";
+import { RiFileEditLine, RiLoader4Line } from "react-icons/ri";
+import { useSubmitModuleAnswer } from "../../../hooks/useModule";
+import { UseMutationResult } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 interface ModuleSubmitDialogProps {
   onComplete?: () => void;
@@ -13,8 +16,8 @@ export const ModuleSubmitDialog: React.FC<ModuleSubmitDialogProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [summary, setSummary] = useState("");
 
-  // const { mutate: submitAnswer, isPending } =
-  //   useSubmitModuleAnswer() as UseMutationResult;
+  const { mutate: submitAnswer, isPending } =
+    useSubmitModuleAnswer() as UseMutationResult;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -51,30 +54,30 @@ export const ModuleSubmitDialog: React.FC<ModuleSubmitDialogProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // const loadingToast = toast.loading("Sedang mengirim rangkuman...");
-    // submitAnswer(
-    //   {
-    //     moduleId,
-    //     module_answer: summary,
-    //   },
-    //   {
-    //     onSuccess: () => {
-    //       toast.dismiss(loadingToast);
-    //       toast.success("Rangkuman berhasil dikirim!");
-    //       onComplete?.();
-    //       setSummary("");
-    //       setIsOpen(false);
-    //     },
-    //     onError: (error) => {
-    //       toast.dismiss(loadingToast);
-    //       toast.error("Terjadi kesalahan saat mengirim rangkuman");
-    //       console.log(error);
-    //     },
-    //   }
-    // );
+    const loadingToast = toast.loading("Sedang mengirim rangkuman...");
+    submitAnswer(
+      {
+        moduleId,
+        moduleAnswer: summary,
+      },
+      {
+        onSuccess: () => {
+          toast.dismiss(loadingToast);
+          toast.success("Rangkuman berhasil dikirim!");
+          onComplete?.();
+          setSummary("");
+          setIsOpen(false);
+        },
+        onError: (error) => {
+          toast.dismiss(loadingToast);
+          toast.error("Terjadi kesalahan saat mengirim rangkuman");
+          console.log(error);
+        },
+      }
+    );
   };
 
-  // const isSubmitDisabled = summary.length < 52 || isPending;
+  const isSubmitDisabled = summary.length < 52 || isPending;
 
   return (
     <>
@@ -147,7 +150,7 @@ export const ModuleSubmitDialog: React.FC<ModuleSubmitDialogProps> = ({
                 </div>
               </div>
 
-              {/* <div className="flex justify-end">
+              <div className="flex justify-end">
                 <button
                   type="submit"
                   disabled={isSubmitDisabled}
@@ -166,7 +169,7 @@ export const ModuleSubmitDialog: React.FC<ModuleSubmitDialogProps> = ({
                     "Kirim"
                   )}
                 </button>
-              </div> */}
+              </div>
             </form>
           </div>
         </div>
@@ -174,4 +177,3 @@ export const ModuleSubmitDialog: React.FC<ModuleSubmitDialogProps> = ({
     </>
   );
 };
-

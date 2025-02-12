@@ -25,3 +25,7 @@ export interface Module {
 export interface ModuleResponse {
   data: Module;
 }
+
+export interface SubmitModuleResponse {
+  data: Module;
+}
