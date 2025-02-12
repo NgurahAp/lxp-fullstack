@@ -11,7 +11,7 @@ interface Meeting {
   training: Training;
 }
 
-interface Module {
+export interface Module {
   id: number;
   title: string;
   content: string;

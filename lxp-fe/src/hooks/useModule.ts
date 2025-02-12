@@ -1,11 +1,11 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { ModuleResponse } from "../types/module";
+import { Module } from "../types/module";
 import { getModule } from "../service/moduleService";
 
 export const useGetModule = (
   meetingId: string | undefined,
   moduleId: string | undefined
-): UseQueryResult<ModuleResponse, Error> => {
+): UseQueryResult<Module, Error> => {
   return useQuery({
     queryKey: ["module"],
     queryFn: async () => {
