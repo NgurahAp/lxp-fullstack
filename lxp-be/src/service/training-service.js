@@ -203,7 +203,7 @@ const getTrainingDetail = async (user, trainingId) => {
             select: {
               id: true,
               title: true,
-              moduleScore: true,
+              moduleAnswer: true,
             },
           },
           quizzes: {
@@ -217,7 +217,7 @@ const getTrainingDetail = async (user, trainingId) => {
             select: {
               id: true,
               title: true,
-              taskScore: true,
+              taskAnswer: true,
             },
           },
         },

@@ -30,7 +30,7 @@ export interface TrainingResponse {
 export interface Module {
   id: number;
   title: string;
-  moduleScore: number;
+  moduleAnswer: string;
 }
 
 export interface Quiz {
@@ -42,7 +42,7 @@ export interface Quiz {
 export interface Task {
   id: number;
   title: string;
-  taskScore: number;
+  taskAnswer: string;
 }
 
 export interface Meeting {
