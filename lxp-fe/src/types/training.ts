@@ -45,7 +45,7 @@ export interface Task {
   taskScore: number;
 }
 
-interface Meeting {
+export interface Meeting {
   id: number;
   title: string;
   meetingDate: string | null;
@@ -60,7 +60,7 @@ interface Count {
   meetings: number;
 }
 
-interface DetailTrainingData {
+export interface DetailTrainingData {
   id: number;
   title: string;
   description: string;
