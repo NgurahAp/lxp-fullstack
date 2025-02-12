@@ -7,6 +7,7 @@ import Dashboard from "../pages/dashboard";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { Pelatihanku } from "../pages/pelatihanku";
 import { PelatihankuDetail } from "../pages/pelatihanku/DetailPelatihanku";
+import { Module } from "../pages/pelatihanku/Module";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -36,6 +37,14 @@ const AppRoutes: React.FC = () => {
             element={
               <ProtectedRoute>
                 <PelatihankuDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/module/:meetingId/:moduleId"
+            element={
+              <ProtectedRoute>
+                <Module />
               </ProtectedRoute>
             }
           />

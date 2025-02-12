@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FaCheckCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useState } from "react";
 import { useGetDetailTrainings } from "../../hooks/useTrainings";
@@ -16,8 +16,6 @@ export const PelatihankuDetail: React.FC = () => {
       [sessionId]: !prev[sessionId],
     }));
   };
-
-  console.log(data);
 
   const getModuleIcon = (answer: string): JSX.Element | null => {
     return answer ? <FaCheckCircle className="text-green-500 ml-2" /> : null;
@@ -37,45 +35,39 @@ export const PelatihankuDetail: React.FC = () => {
     <div className="bg-gray-50">
       <ul>
         {session.modules.map((module) => (
-          <li
+          <Link
             key={module.id}
-            onClick={() => {
-              // Add your navigation logic here
-            }}
+            to={`/module/${session.id}/${module.id}`}
             className="flex h-14 items-center px-4 py-2 border-b-2 border-gray-200 hover:bg-gray-100 cursor-pointer"
           >
             <img src="/pelatihanku/modul.png" className="mr-4" alt="" />
             <span className="flex-1 md:text-sm text-xs">{module.title}</span>
             {getModuleIcon(module.moduleAnswer)}
-          </li>
+          </Link>
         ))}
 
         {session.quizzes.map((quiz) => (
-          <li
+          <Link
             key={quiz.id}
-            onClick={() => {
-              // Add your navigation logic here
-            }}
+            to={""}
             className="flex h-14 items-center px-4 py-2 border-b-2 border-gray-200 hover:bg-gray-100 cursor-pointer"
           >
             <img src="/pelatihanku/quiz.png" className="mr-4" alt="" />
             <span className="flex-1 md:text-sm text-xs">{quiz.title}</span>
             {getQuizIcon(quiz.quizScore)}
-          </li>
+          </Link>
         ))}
 
         {session.tasks.map((task) => (
-          <li
+          <Link
             key={task.id}
-            onClick={() => {
-              // Add your navigation logic here
-            }}
+            to={""}
             className="flex h-14 items-center px-4 py-2 border-b-2 border-gray-200 hover:bg-gray-100 cursor-pointer"
           >
             <img src="/pelatihanku/tugas.png" className="mr-4" alt="" />
             <span className="flex-1 md:text-sm text-xs">{task.title}</span>
             {getTaskIcon(task.taskAnswer)}
-          </li>
+          </Link>
         ))}
       </ul>
     </div>
