@@ -1,16 +1,29 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { TrainingResponse } from "../types/training";
-import { getTrainings } from "../service/trainingService.ts";
+import { DetailTrainingResponse, TrainingResponse } from "../types/training";
+import { getDetailTraining, getTrainings } from "../service/trainingService.ts";
 
 export const useGetTrainings = (): UseQueryResult<TrainingResponse, Error> => {
   return useQuery({
-    queryKey: ["user"],
+    queryKey: ["training"],
     queryFn: async () => {
       const response = await getTrainings();
-      const userData = response.data;
+      const trainingData = response.data;
 
-      return userData;
+      return trainingData;
     },
   });
 };
-  
+
+export const useGetDetailTrainings = (
+  trainingId: string | undefined
+): UseQueryResult<DetailTrainingResponse, Error> => {
+  return useQuery({
+    queryKey: ["detailTraining"],
+    queryFn: async () => {
+      const response = await getDetailTraining(trainingId);
+      const detailTrainingData = response.data;
+
+      return detailTrainingData;
+    },
+  });
+};

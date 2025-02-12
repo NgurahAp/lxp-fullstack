@@ -203,18 +203,21 @@ const getTrainingDetail = async (user, trainingId) => {
             select: {
               id: true,
               title: true,
+              moduleScore: true,
             },
           },
           quizzes: {
             select: {
               id: true,
               title: true,
+              quizScore: true,
             },
           },
           tasks: {
             select: {
               id: true,
               title: true,
+              taskScore: true,
             },
           },
         },

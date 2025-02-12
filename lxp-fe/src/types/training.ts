@@ -1,3 +1,4 @@
+// GET ALL TRAINING
 export interface Instructor {
   id: number;
   name: string;
@@ -22,4 +23,53 @@ export interface TrainingData {
 
 export interface TrainingResponse {
   data: TrainingData[];
+}
+
+// GET DETAIL TRAINING
+
+export interface Module {
+  id: number;
+  title: string;
+  moduleScore: number;
+}
+
+export interface Quiz {
+  id: number;
+  title: string;
+  quizScore: number;
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  taskScore: number;
+}
+
+interface Meeting {
+  id: number;
+  title: string;
+  meetingDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+  modules: Module[];
+  quizzes: Quiz[];
+  tasks: Task[];
+}
+
+interface Count {
+  meetings: number;
+}
+
+interface DetailTrainingData {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  instructor: Instructor;
+  meetings: Meeting[];
+  _count: Count;
+}
+
+export interface DetailTrainingResponse {
+  data: DetailTrainingData;
 }
