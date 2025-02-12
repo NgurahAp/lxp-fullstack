@@ -1,0 +1,55 @@
+{
+    "title": "Quiz - Sesi 2",
+    "questions": [
+        {
+            "question": "Apa yang menjadi salah satu faktor utama dalam komunikasi antar budaya?",
+            "options": [
+                "Menjaga bahasa tubuh yang kaku",
+                "Menghindari kontak mata",
+                "Memahami perbedaan budaya dan menyesuaikan komunikasi",
+                "Menggunakan satu gaya komunikasi yang sama untuk semua orang"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "question": "Tipe kepribadian 'Pemikir' dalam komunikasi biasanya memiliki karakteristik seperti?",
+            "options": [
+                "Ekspresif dan suka bercerita",
+                "Analitis, detail, dan objektif",
+                "Mudah bergaul dan spontan",
+                "Mendominasi percakapan dan tegas"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "question": "Apa pendekatan yang digunakan untuk menjual ide dengan memberikan jaminan kualitas dan referensi?",
+            "options": [
+                "Pendekatan Pengendalian",
+                "Pendekatan Ekspresif",
+                "Pendekatan Pasif",
+                "Pendekatan Intelektual"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "question": "Bagaimana cara mengenali kepribadian seseorang saat berkomunikasi via telepon?",
+            "options": [
+                "Melalui nada suara dan pola bicara",
+                "Melihat ekspresi wajah",
+                "Memeriksa gaya berpakaian",
+                "Menganalisis tulisan tangan mereka"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "question": "Karakteristik utama dari tipe kepribadian 'Harmoni' dalam komunikasi adalah?",
+            "options": [
+                "Berani mengambil risiko dan suka tantangan",
+                "Sensitif, peduli, dan mendukung",
+                "Struktural dan disiplin",
+                "Analitis dan suka berdebat"
+            ],
+            "correctAnswer": 1
+        }
+    ]
+}

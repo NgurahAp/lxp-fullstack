@@ -122,7 +122,7 @@ export const PelatihankuDetail: React.FC = () => {
             <h3 className="md:text-base text-xs font-semibold mb-2">
               Deskripsi
             </h3>
-            <p className="md:text-base text-xs text-gray-500 mb-2 text-justify">
+            <p className="md:text-sm text-xs text-gray-500 mb-2 text-justify">
               {data?.description}
             </p>
           </div>
@@ -131,16 +131,14 @@ export const PelatihankuDetail: React.FC = () => {
 
       {/* Pertemuan Section */}
       <div className="mt-6">
-        {data?.meetings.map((session, index) => (
+        {data?.meetings.map((session) => (
           <div key={session.id} className="mb-4">
             <div className="mx-auto my-4 bg-white rounded-lg shadow">
               <button
                 onClick={() => toggleDropdown(session.id)}
                 className="w-full flex justify-between text-sm text-left items-center bg-blue-500 text-white px-4 py-5 rounded-t-lg"
               >
-                <span className="pr-5">
-                  Pertemuan {index + 1}: {session.title}
-                </span>
+                <span className="pr-5">{session.title}</span>
                 {openSessions[session.id] ? <FaChevronUp /> : <FaChevronDown />}
               </button>
 
