@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useGetUser } from "../../hooks/useAuth";
-import { UserData } from "../../types/auth";
 import Sidebar from "./components/Sidebar";
 
 const Dashboard: React.FC = () => {
@@ -22,12 +21,31 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, [bannerImages.length]);
 
+  // Show loading state while data is being fetched
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div>Loading...</div>
+      </div>
+    );
   }
 
+  // Show error state if there's an error
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div>Error: {error.message}</div>
+      </div>
+    );
+  }
+
+  // Ensure user exists before rendering the main content
+  if (!user) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div>No user data available</div>
+      </div>
+    );
   }
 
   return (
@@ -45,7 +63,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="md:flex flex-1 gap-6">
-          <Sidebar user={user as UserData} />
+          <Sidebar user={user} />
 
           <div className="md:w-[70%] w-full bg-gray-100 py-6">
             <div className="relative overflow-hidden h-72 rounded-3xl hidden md:block group">
@@ -56,17 +74,17 @@ const Dashboard: React.FC = () => {
                     src={banner}
                     alt={`Banner ${index + 1}`}
                     className={`
-            absolute max-w-full max-h-full object-contain 
-            transition-all duration-500 ease-in-out 
-            will-change-transform 
-            transform-gpu 
-            ${
-              index === currentImageIndex
-                ? "opacity-100 visible translate-x-0"
-                : "opacity-0 invisible translate-x-full"
-            }
-            hover:brightness-105
-          `}
+                      absolute max-w-full max-h-full object-contain 
+                      transition-all duration-500 ease-in-out 
+                      will-change-transform 
+                      transform-gpu 
+                      ${
+                        index === currentImageIndex
+                          ? "opacity-100 visible translate-x-0"
+                          : "opacity-0 invisible translate-x-full"
+                      }
+                      hover:brightness-105
+                    `}
                     loading="lazy"
                     decoding="async"
                   />
@@ -85,40 +103,47 @@ const Dashboard: React.FC = () => {
                 </a>
               </div>
 
-              {user?.trainings.map((subject) => (
-                <div
-                  key={subject.id}
-                  className="bg-white rounded-lg shadow-md md:flex items-center justify-between mb-8 p-4"
-                >
-                  <div className="md:w-48 w-full">
-                    <img
-                      src={`http://localhost:3001/public${subject.image}`}
-                      alt={`${subject.title} Thumbnail`}
-                      className="rounded-lg object-cover w-full"
-                    />
-                  </div>
-
-                  <div className="md:w-3/4 w-full px-5 py-3 md:py-5 flex justify-between items-center">
-                    <div>
-                      <h2 className="font-semibold md:text-lg mb-1">
-                        {subject.title.length > 35
-                          ? `${subject.title.slice(0, 35)}...`
-                          : subject.title}
-                      </h2>
-                      <p className="text-gray-500 text-sm">
-                        {subject.instructor}
-                      </p>
+              {/* Add null check for trainings array */}
+              {user.trainings && user.trainings.length > 0 ? (
+                user.trainings.map((subject) => (
+                  <div
+                    key={subject.id}
+                    className="bg-white rounded-lg shadow-md md:flex items-center justify-between mb-8 p-4"
+                  >
+                    <div className="md:w-48 w-full">
+                      <img
+                        src={`http://localhost:3001/public${subject.image}`}
+                        alt={`${subject.title} Thumbnail`}
+                        className="rounded-lg object-cover w-full"
+                      />
                     </div>
 
-                    <a
-                      href={`/training/${subject.id}`}
-                      className="text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg text-sm font-medium"
-                    >
-                      Lihat
-                    </a>
+                    <div className="md:w-3/4 w-full px-5 py-3 md:py-5 flex justify-between items-center">
+                      <div>
+                        <h2 className="font-semibold md:text-lg mb-1">
+                          {subject.title.length > 35
+                            ? `${subject.title.slice(0, 35)}...`
+                            : subject.title}
+                        </h2>
+                        <p className="text-gray-500 text-sm">
+                          {subject.instructor}
+                        </p>
+                      </div>
+
+                      <a
+                        href={`/training/${subject.id}`}
+                        className="text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg text-sm font-medium"
+                      >
+                        Lihat
+                      </a>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  Belum ada pelatihan yang diikuti
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

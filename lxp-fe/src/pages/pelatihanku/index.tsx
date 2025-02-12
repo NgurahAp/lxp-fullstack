@@ -24,22 +24,20 @@ export const Pelatihanku = () => {
     },
   ];
 
-  // Safely handle the data array
-  const trainingsData = (data || []) as TrainingData[];
+  // Ensure data is an array and has the correct type
+  const trainingsData: TrainingData[] = Array.isArray(data) ? data : [];
 
-  console.log(trainingsData);
+  // Filter trainings based on status with type safety
+  const trainingOngoing =
+    trainingsData.filter((item: TrainingData) => item?.status === "enrolled") ||
+    [];
 
-  // Filter trainings based on status
-  const trainingOngoing = trainingsData.filter(
-    (item) => item.status === "enrolled"
-  );
-
-  const trainingCompleted = trainingsData.filter(
-    (item) => item.status === "complete"
-  );
+  const trainingCompleted =
+    trainingsData.filter((item: TrainingData) => item?.status === "complete") ||
+    [];
 
   const renderTraining = (trainings: TrainingData[]) => {
-    if (trainings.length === 0) {
+    if (!Array.isArray(trainings) || trainings.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center p-8">
           <p className="text-gray-500 mb-4">Tidak ada pelatihan</p>
@@ -55,14 +53,13 @@ export const Pelatihanku = () => {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trainings.map((item) => (
+        {trainings.map((item: TrainingData) => (
           <Link
             key={item.training.id}
             to={`/pelatihanku/${item.training.id}`}
             className="block w-full"
           >
             <div className="border rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-white max-w-sm mx-auto w-full">
-              {/* Image Container with natural aspect ratio */}
               <div className="relative w-full h-48">
                 <img
                   src={`http://localhost:3001/public${item.training.image}`}
@@ -71,7 +68,6 @@ export const Pelatihanku = () => {
                 />
               </div>
 
-              {/* Content Container */}
               <div className="p-4">
                 <h3 className="font-semibold text-base md:text-lg truncate">
                   {item.training.title}
