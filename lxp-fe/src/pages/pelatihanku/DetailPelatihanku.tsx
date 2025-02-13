@@ -49,7 +49,7 @@ export const PelatihankuDetail: React.FC = () => {
         {session.quizzes.map((quiz) => (
           <Link
             key={quiz.id}
-            to={""}
+            to={`/quiz/${session.id}/${quiz.id}`}
             className="flex h-14 items-center px-4 py-2 border-b-2 border-gray-200 hover:bg-gray-100 cursor-pointer"
           >
             <img src="/pelatihanku/quiz.png" className="mr-4" alt="" />

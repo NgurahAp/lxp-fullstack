@@ -8,6 +8,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { Pelatihanku } from "../pages/pelatihanku";
 import { PelatihankuDetail } from "../pages/pelatihanku/DetailPelatihanku";
 import { Module } from "../pages/pelatihanku/Module";
+import { Quiz } from "../pages/pelatihanku/Quiz";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -45,6 +46,14 @@ const AppRoutes: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Module />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/quiz/:meetingId/:quizId"
+            element={
+              <ProtectedRoute>
+                <Quiz />
               </ProtectedRoute>
             }
           />
