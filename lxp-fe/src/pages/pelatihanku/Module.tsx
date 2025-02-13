@@ -124,7 +124,7 @@ export const Module = () => {
             </div>
             <div className="flex justify-center">
               <div className="flex justify-center">
-                {data?.moduleAnswer != null ? (
+                {data?.moduleAnswer ? (
                   <button className="mt-4 md:px-20 px-10 py-4 flex rounded-lg items-center bg-green-500 text-base md:text-xl gap-3 text-white hover:bg-green-600">
                     <div className="bg-white rounded-full">
                       <FaCheck className="text-green-600 p-1 text-xl" />

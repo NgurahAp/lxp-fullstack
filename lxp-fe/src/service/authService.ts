@@ -17,6 +17,9 @@ export const AuthService = {
         if (error.response?.status === 401) {
           throw new Error("Email atau password salah");
         }
+        if (error.response?.status === 400) {
+          throw new Error("Password harus lebih dari 6 karakter");
+        }
         throw new Error(
           error.response?.data?.message || "Terjadi kesalahan pada server"
         );

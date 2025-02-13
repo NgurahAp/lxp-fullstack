@@ -63,15 +63,12 @@ export const ModuleSubmitDialog: React.FC<ModuleSubmitDialogProps> = ({
       {
         onSuccess: () => {
           toast.dismiss(loadingToast);
-          toast.success("Rangkuman berhasil dikirim!");
           onComplete?.();
           setSummary("");
           setIsOpen(false);
         },
-        onError: (error) => {
+        onError: () => {
           toast.dismiss(loadingToast);
-          toast.error("Terjadi kesalahan saat mengirim rangkuman");
-          console.log(error);
         },
       }
     );

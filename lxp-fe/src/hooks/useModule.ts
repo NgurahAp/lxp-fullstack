@@ -37,12 +37,13 @@ export const useSubmitModuleAnswer = () => {
       });
 
       // Show success notification
-      toast.success("Jawaban berhasil dikirim");
+      toast.success("Rangkuman berhasil dikirim");
     },
 
     onError: (error: Error) => {
       // Show error notification with specific message
-      toast.error(error.message);
+      console.log(error.message);
+      toast.error("Terjadi kesalahan saat mengirim rangkuman");
     },
 
     // Retry configuration
