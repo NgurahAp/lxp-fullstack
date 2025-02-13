@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useGetDetailTrainings } from "../../hooks/useTrainings";
 import { Meeting } from "../../types/training";
 import { Breadcrumb } from "../../Components/BreadCrumbs";
+import LoadingSpinner from "../../Components/LoadingSpinner";
 
 export const PelatihankuDetail: React.FC = () => {
   const { trainingId } = useParams<{ trainingId: string }>();
@@ -73,8 +74,17 @@ export const PelatihankuDetail: React.FC = () => {
     </div>
   );
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isLoading) {
+    return <LoadingSpinner text="Loading..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[85vh] w-screen flex items-center justify-center">
+        Error loading data
+      </div>
+    );
+  }
 
   const breadcrumbItems = [
     {

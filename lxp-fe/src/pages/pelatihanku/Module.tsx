@@ -5,6 +5,7 @@ import { BackLink } from "../../Components/BackLink";
 import { IoDocumentText } from "react-icons/io5";
 import { ModuleSubmitDialog } from "./components/ModuleSubmitDialog";
 import { FaCheck } from "react-icons/fa6";
+import LoadingSpinner from "../../Components/LoadingSpinner";
 
 export const Module = () => {
   const { meetingId, moduleId } = useParams<{
@@ -14,8 +15,17 @@ export const Module = () => {
 
   const { data, isLoading, error, refetch } = useGetModule(meetingId, moduleId);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isLoading) {
+    return <LoadingSpinner text="Loading..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[85vh] w-screen flex items-center justify-center">
+        Error loading data
+      </div>
+    );
+  }
 
   const breadcrumbItems = [
     {

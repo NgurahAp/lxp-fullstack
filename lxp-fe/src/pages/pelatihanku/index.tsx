@@ -4,6 +4,7 @@ import { TrainingData } from "../../types/training";
 import { Breadcrumb } from "../../Components/BreadCrumbs";
 import { Link } from "react-router-dom";
 import { SearchBar } from "../../Components/SearchBar";
+import LoadingSpinner from "../../Components/LoadingSpinner";
 
 export const Pelatihanku = () => {
   const { data, isLoading, error } = useGetTrainings();
@@ -11,8 +12,17 @@ export const Pelatihanku = () => {
     "enrolled"
   );
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isLoading) {
+    return <LoadingSpinner text="Loading..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[85vh] w-screen flex items-center justify-center">
+        Error loading data
+      </div>
+    );
+  }
 
   const breadcrumbItems = [
     {
