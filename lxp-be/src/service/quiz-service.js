@@ -246,6 +246,7 @@ const getQuizQuestions = async (user, request) => {
         select: {
           id: true,
           title: true,
+          meetingDate: true,
           training: {
             select: {
               id: true,

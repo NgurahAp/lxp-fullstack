@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { Quiz } from "../types/quiz";
-import { getQuiz } from "../service/quizService";
+import { Quiz, QuizQuestion } from "../types/quiz";
+import { getQuiz, getQuizQuestion } from "../service/quizService";
 
 export const useGetQuiz = (
   meetingId: string | undefined,
@@ -13,6 +13,21 @@ export const useGetQuiz = (
       const quizData = response.data;
 
       return quizData;
+    },
+  });
+};
+
+export const useGetQuizQuestion = (
+  meetingId: string | undefined,
+  quizId: string | undefined
+): UseQueryResult<QuizQuestion, Error> => {
+  return useQuery({
+    queryKey: ["quizQuestion"],
+    queryFn: async () => {
+      const response = await getQuizQuestion(meetingId, quizId);
+      const quizQuestionData = response.data;
+
+      return quizQuestionData;
     },
   });
 };

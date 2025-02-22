@@ -11,12 +11,24 @@ interface Meeting {
   training: Training;
 }
 
+interface Question {
+  question: string;
+  options: string[];
+}
+
 export interface Quiz {
   id: number;
   title: string;
   quizScore: number;
   createdAt: string;
   updatedAt: string;
+  meeting: Meeting;
+}
+
+export interface QuizQuestion {
+  id: number;
+  title: string;
+  questions: Question[];
   meeting: Meeting;
 }
 
