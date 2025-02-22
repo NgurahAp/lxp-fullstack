@@ -1,4 +1,4 @@
-import {  useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetQuiz } from "../../hooks/useQuiz";
 import LoadingSpinner from "../../Components/LoadingSpinner";
 import { Breadcrumb } from "../../Components/BreadCrumbs";
@@ -17,7 +17,7 @@ export const Quiz = () => {
   }>();
 
   const { data, isLoading, error } = useGetQuiz(meetingId, quizId);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return <LoadingSpinner text="Loading..." />;
@@ -51,11 +51,11 @@ export const Quiz = () => {
 
   const handleQuizStart = () => {
     setDialogOpen(false);
-    // navigate(`/quizAttempt/${subjectId}/${sessionId}/${quizId}`);
+    navigate(`/quizAttempt/${meetingId}/${quizId}`);
   };
 
   return (
-    <div className="min-h-[85vh] w-screen flex flex-col md:pt-36 pt-24 md:px-24 px-4 bg-gray-100">
+    <div className="min-h-[85vh] flex flex-col md:pt-36 pt-24 md:px-24 px-4 bg-gray-100">
       {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
       <PageInfo title={data?.title} />
