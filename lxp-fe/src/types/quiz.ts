@@ -42,6 +42,7 @@ export interface QuizSubmissionParams {
 export interface QuizQuestion {
   id: number;
   title: string;
+  quizScore: number;
   questions: Question[];
   meeting: Meeting;
 }

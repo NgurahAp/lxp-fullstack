@@ -240,6 +240,7 @@ const getQuizQuestions = async (user, request) => {
     select: {
       id: true,
       title: true,
+      quizScore: true,
       questions: true,
       meeting: {
         select: {
@@ -268,11 +269,13 @@ const getQuizQuestions = async (user, request) => {
   const questionsForStudent = quiz.questions.map((question) => ({
     question: question.question,
     options: question.options,
+    // answer : question.correctAnswer
   }));
 
   return {
     id: quiz.id,
     title: quiz.title,
+    quizScore: quiz.quizScore,
     questions: questionsForStudent,
     meeting: quiz.meeting,
   };
