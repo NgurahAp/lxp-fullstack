@@ -1,6 +1,7 @@
 import {
   useMutation,
   useQuery,
+  useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
 import { Quiz, QuizQuestion, QuizSubmissionParams } from "../types/quiz";
@@ -12,13 +13,13 @@ export const useGetQuiz = (
   quizId: string | undefined
 ): UseQueryResult<Quiz, Error> => {
   return useQuery({
-    queryKey: ["quiz"],
+    queryKey: ["quiz", meetingId, quizId],
     queryFn: async () => {
       const response = await getQuiz(meetingId, quizId);
       const quizData = response.data;
-
       return quizData;
     },
+    enabled: !!meetingId && !!quizId,
   });
 };
 
@@ -27,35 +28,39 @@ export const useGetQuizQuestion = (
   quizId: string | undefined
 ): UseQueryResult<QuizQuestion, Error> => {
   return useQuery({
-    queryKey: ["quizQuestion"],
+    queryKey: ["quizQuestion", meetingId, quizId],
     queryFn: async () => {
       const response = await getQuizQuestion(meetingId, quizId);
       const quizQuestionData = response.data;
-
       return quizQuestionData;
     },
+    enabled: !!meetingId && !!quizId,
   });
 };
 
 export const useSubmitQuiz = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({ quizId, answers }: QuizSubmissionParams) =>
       submitQuiz(quizId, { answers }),
 
     onSuccess: () => {
+      // Invalidate related queries to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["quiz"],
+      });
+
       // Show success notification
       toast.success("Quiz berhasil dikumpulkan");
     },
 
     onError: (error: Error) => {
-      // Show error notification
       console.log(error.message);
       toast.error("Gagal mengumpulkan quiz");
     },
 
-    // Retry configuration
     retry: (failureCount, error) => {
-      // Only retry network errors, not validation or not found errors
       if (
         error.message.includes("tidak ditemukan") ||
         error.message.includes("validasi")
