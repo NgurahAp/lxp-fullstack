@@ -30,7 +30,7 @@ export const useSubmitModuleAnswer = () => {
     mutationFn: ({ moduleId, moduleAnswer }: SubmitModuleAnswerParams) =>
       submitModuleAnswer(moduleId, moduleAnswer),
 
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       // Invalidate related queries to refetch updated data
       queryClient.invalidateQueries({
         queryKey: ["module", variables.moduleId],
