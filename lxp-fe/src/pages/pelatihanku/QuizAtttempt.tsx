@@ -19,6 +19,7 @@ export const QuizAttempt = () => {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const submitQuizMutation = useSubmitQuiz();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Early returns for loading and error states
   if (isLoading) {
@@ -72,31 +73,52 @@ export const QuizAttempt = () => {
   };
 
   const handleTimesUp = () => {
-    // TODO: Implement navigation logic
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const answers = questions.map((_, index) => ({
+        questionIndex: index,
+        selectedAnswer: selectedAnswers[index] ?? null, // Handle undefined case
+      }));
+
+      // Use await here if you're using async/await
+      submitQuizMutation.mutate({
+        quizId: quizId!,
+        answers,
+      });
+
+      navigate(`/quiz/${meetingId}/${quizId}`);
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+      setIsSubmitting(false); // Reset on error
+    }
   };
 
   const handleQuizSubmit = () => {
-    const answers = questions.map((_, index) => {
-      const answerObj: { questionIndex: number; selectedAnswer?: number } = {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const answers = questions.map((_, index) => ({
         questionIndex: index,
-      };
+        ...(selectedAnswers[index] !== undefined && {
+          selectedAnswer: selectedAnswers[index],
+        }),
+      }));
 
-      if (selectedAnswers[index] !== undefined) {
-        answerObj.selectedAnswer = selectedAnswers[index];
-      }
+      submitQuizMutation.mutate({
+        quizId: quizId!,
+        answers,
+      });
 
-      return answerObj;
-    });
-
-    // console.log("Quiz Submission:", { answers });
-
-    submitQuizMutation.mutate({
-      quizId: quizId!,
-      answers,
-    });
-
-    setDialogOpen(false);
-    navigate(`/quiz/${meetingId}/${quizId}`);
+      setDialogOpen(false);
+      navigate(`/quiz/${meetingId}/${quizId}`);
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -109,7 +131,7 @@ export const QuizAttempt = () => {
             {data?.title}
           </h1>
           <p className="text-sm md:text-base">Tipe: Quiz</p>
-          <p className="text-sm md:text-base">Durasi: 10 menit</p>
+          <p className="text-sm md:text-base">Durasi: 5 menit</p>
         </div>
 
         {/* Question List with Answer Status */}
@@ -120,13 +142,12 @@ export const QuizAttempt = () => {
               <button
                 key={index}
                 onClick={() => navigateToQuestion(index)}
-                className={`w-8 h-8 text-sm flex items-center justify-center border rounded ${
-                  index === currentQuestionIndex
-                    ? "bg-blue-500 text-white"
-                    : selectedAnswers[index]
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700"
-                }`}
+                className={`w-8 h-8 text-sm flex items-center justify-center border rounded
+          ${
+            selectedAnswers[index] !== undefined
+              ? "bg-blue-500 text-white"
+              : "bg-white text-gray-700"
+          } ${index === currentQuestionIndex ? "ring-1 ring-blue-500" : ""}`}
               >
                 {index + 1}
               </button>
@@ -138,7 +159,7 @@ export const QuizAttempt = () => {
         <div className="bg-white p-6 mt-5 rounded-lg shadow-lg">
           <h1 className="text-end text-red-500 font-bold text-xs pb-3">
             Sisa waktu:{" "}
-            <CountdownTimer initialDuration={600} onTimeUp={handleTimesUp} />
+            <CountdownTimer initialDuration={30} onTimeUp={handleTimesUp} />
           </h1>
           <h2 className="text-lg font-semibold">{currentQuestion.question}</h2>
           <p className="md:pt-2 pb-4 md:pb-7 text-xs text-gray-500">

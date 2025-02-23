@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface CountdownTimerProps {
   initialDuration: number;
@@ -10,9 +10,11 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
   onTimeUp,
 }) => {
   const [timeLeft, setTimeLeft] = useState<number>(initialDuration);
+  const hasTimedUp = useRef<boolean>(false);
 
   useEffect(() => {
-    if (timeLeft <= 0) {
+    if (timeLeft <= 0 && !hasTimedUp.current) {
+      hasTimedUp.current = true;
       onTimeUp();
       return;
     }
@@ -23,6 +25,13 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
 
     return () => clearInterval(timer);
   }, [timeLeft, onTimeUp]);
+
+  // Reset the ref when the component unmounts
+  useEffect(() => {
+    return () => {
+      hasTimedUp.current = false;
+    };
+  }, []);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
