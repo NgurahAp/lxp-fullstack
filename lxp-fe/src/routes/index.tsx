@@ -10,6 +10,7 @@ import { PelatihankuDetail } from "../pages/pelatihanku/DetailPelatihanku";
 import { Module } from "../pages/pelatihanku/Module";
 import { Quiz } from "../pages/pelatihanku/Quiz";
 import { QuizAttempt } from "../pages/pelatihanku/QuizAtttempt";
+import { Task } from "../pages/pelatihanku/Task";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -63,6 +64,14 @@ const AppRoutes: React.FC = () => {
             element={
               <ProtectedRoute>
                 <QuizAttempt />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/task/:meetingId/:taskId"
+            element={
+              <ProtectedRoute>
+                <Task />
               </ProtectedRoute>
             }
           />

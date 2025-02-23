@@ -62,7 +62,7 @@ export const PelatihankuDetail: React.FC = () => {
         {session.tasks.map((task) => (
           <Link
             key={task.id}
-            to={""}
+            to={`/task/${session.id}/${task.id}`}
             className="flex h-14 items-center px-4 py-2 border-b-2 border-gray-200 hover:bg-gray-100 cursor-pointer"
           >
             <img src="/pelatihanku/tugas.png" className="mr-4" alt="" />
