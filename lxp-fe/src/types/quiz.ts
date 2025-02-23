@@ -20,8 +20,8 @@ export interface Quiz {
   id: number;
   title: string;
   quizScore: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | number | Date;
+  updatedAt: string | number | Date;
   meeting: Meeting;
 }
 

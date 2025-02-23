@@ -7,6 +7,7 @@ import { QuizInfo } from "./components/QuizInfo";
 import { MdOutlineTaskAlt } from "react-icons/md";
 import QuizDialog from "./components/QuizDialog";
 import { useState } from "react";
+import { QuizHistory } from "./components/QuizHistory";
 
 export const Quiz = () => {
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -65,9 +66,7 @@ export const Quiz = () => {
           <img src="/pelatihanku/quiz-left.png" alt="" />
         </div>
         <div className="md:w-1/2 py-5 md:py-10">
-          {/* {data?.quizScore != 0 && (
-            <QuizHistory historyData={historyData} quizData={quizData} />
-          )} */}
+          {data && data.quizScore != 0 && <QuizHistory data={data} />}{" "}
           <QuizInfo />
           <div>
             <div>
