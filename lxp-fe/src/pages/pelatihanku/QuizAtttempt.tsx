@@ -1,5 +1,5 @@
-import { useParams } from "react-router-dom";
-import { useGetQuizQuestion } from "../../hooks/useQuiz";
+import { useNavigate, useParams } from "react-router-dom";
+import { useGetQuizQuestion, useSubmitQuiz } from "../../hooks/useQuiz";
 import LoadingSpinner from "../../Components/LoadingSpinner";
 import { NavbarQuiz } from "./components/NavbarQuiz";
 import { useState } from "react";
@@ -17,6 +17,8 @@ export const QuizAttempt = () => {
     [key: number]: number;
   }>({});
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const submitQuizMutation = useSubmitQuiz();
+  const navigate = useNavigate();
 
   // Early returns for loading and error states
   if (isLoading) {
@@ -74,7 +76,27 @@ export const QuizAttempt = () => {
   };
 
   const handleQuizSubmit = () => {
-    // TODO: Implement quiz submission logic
+    const answers = questions.map((_, index) => {
+      const answerObj: { questionIndex: number; selectedAnswer?: number } = {
+        questionIndex: index,
+      };
+
+      if (selectedAnswers[index] !== undefined) {
+        answerObj.selectedAnswer = selectedAnswers[index];
+      }
+
+      return answerObj;
+    });
+
+    // console.log("Quiz Submission:", { answers });
+
+    submitQuizMutation.mutate({
+      quizId: quizId!,
+      answers,
+    });
+
+    setDialogOpen(false);
+    navigate(`/quiz/${meetingId}/${quizId}`);
   };
 
   return (

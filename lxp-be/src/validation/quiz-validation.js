@@ -20,7 +20,7 @@ const submitQuizValidation = Joi.object({
     .items(
       Joi.object({
         questionIndex: Joi.number().min(0).required(),
-        selectedAnswer: Joi.number().min(0).max(3).required(),
+        selectedAnswer: Joi.number().min(0).max(3),
       })
     )
     .min(1)

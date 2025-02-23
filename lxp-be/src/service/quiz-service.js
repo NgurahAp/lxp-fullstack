@@ -117,7 +117,6 @@ const submitQuiz = async (user, quizId, request) => {
         id: true,
         title: true,
         quizScore: true,
-        meetingId: true,
         createdAt: true,
         updatedAt: true,
         meeting: true,

@@ -25,6 +25,20 @@ export interface Quiz {
   meeting: Meeting;
 }
 
+interface QuizSubmissionAnswer {
+  questionIndex: number;
+  selectedAnswer?: number;
+}
+
+export interface QuizSubmissionPayload {
+  answers: QuizSubmissionAnswer[];
+}
+
+export interface QuizSubmissionParams {
+  quizId: string;
+  answers: QuizSubmissionAnswer[];
+}
+
 export interface QuizQuestion {
   id: number;
   title: string;
