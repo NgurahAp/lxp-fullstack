@@ -59,7 +59,7 @@ export const Task = () => {
         {data?.taskAnswer != null ? (
           <FinishedAssignment assignmentData={data} />
         ) : (
-          <FileUploadForm meetingId={meetingId} taskId={taskId} />
+          <FileUploadForm taskId={taskId} />
         )}
         <BackLink to={`/pelatihanku/${data?.meeting.training.id}`} />
       </div>

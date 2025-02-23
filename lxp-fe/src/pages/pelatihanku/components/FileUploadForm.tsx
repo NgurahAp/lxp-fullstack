@@ -6,24 +6,22 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SubmitDialog from "./dialog/SubmitDialog";
 import CancelDialog from "./dialog/CancelDialog";
+import { useSubmitTaskAnswer } from "../../../hooks/useTask";
+import { UseMutationResult } from "@tanstack/react-query";
 
 type FileUploadFormProps = {
-  meetingId: string | undefined;
   taskId: string | undefined;
 };
 
-export const FileUploadForm = ({
-  meetingId,
-  taskId,
-}: FileUploadFormProps) => {
-  const [description, setDescription] = useState("");
+export const FileUploadForm = ({ taskId }: FileUploadFormProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const navigate = useNavigate();
   const [isFileTooLarge, setIsFileTooLarge] = useState(false); // State baru
 
-  // const { mutate: submitAssignment, isPending } = useSubmit();
+  const { mutate: submitAnswer, isPending } =
+    useSubmitTaskAnswer() as UseMutationResult;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -40,29 +38,26 @@ export const FileUploadForm = ({
   };
 
   const handleSubmit = () => {
-    // const loadingToast = toast.loading("Sedang mengirim rangkuman...");
-    // submitAssignment(
-    //   {
-    //     meetingId,
-    //     sessionId,
-    //     taskId,
-    //     text: description,
-    //     file,
-    //   },
-    //   {
-    //     onSuccess: () => {
-    //       toast.dismiss(loadingToast);
-    //       toast.success("Tugas berhasil dikirim!");
-    //       resetForm();
-    //       navigate(0); // Refresh the page
-    //     },
-    //     onError: (error) => {
-    //       toast.dismiss(loadingToast);
-    //       toast.error("Terjadi kesalahan saat mengirim tugas");
-    //       console.log(error);
-    //     },
-    //   }
-    // );
+    const loadingToast = toast.loading("Sedang mengirim rangkuman...");
+    submitAnswer(
+      {
+        taskId,
+        file,
+      },
+      {
+        onSuccess: () => {
+          toast.dismiss(loadingToast);
+          toast.success("Tugas berhasil dikirim!");
+          resetForm();
+          navigate(0); // Refresh the page
+        },
+        onError: (error) => {
+          toast.dismiss(loadingToast);
+          toast.error("Terjadi kesalahan saat mengirim tugas");
+          console.log(error);
+        },
+      }
+    );
     setShowSubmitDialog(false);
   };
 
@@ -72,12 +67,10 @@ export const FileUploadForm = ({
   };
 
   const resetForm = () => {
-    setDescription("");
     setFile(null);
   };
 
-  // const isSubmitDisabled =
-  //   (!description.trim() && !file) || isPending || isFileTooLarge;
+  const isSubmitDisabled = !file || isPending || isFileTooLarge;
 
   return (
     <div>
@@ -152,7 +145,7 @@ export const FileUploadForm = ({
             type="button"
             onClick={() => setShowCancelDialog(true)}
             className="md:px-14 px-8 py-2 text-xs md:text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors disabled:bg-red-300 disabled:cursor-not-allowed"
-            // disabled={""}
+            disabled={isSubmitDisabled}
           >
             Batal
           </button>
@@ -160,9 +153,9 @@ export const FileUploadForm = ({
             type="button"
             className="md:px-14 px-8 py-2 text-xs md:text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
             onClick={() => setShowSubmitDialog(true)}
-            // disabled={(!description.trim() && !file) || isPending}
+            disabled={isSubmitDisabled}
           >
-            {/* {isPending ? "Mengirim..." : "Kirim"} */}
+            {isPending ? "Mengirim..." : "Kirim"}
           </button>
         </div>
       </div>

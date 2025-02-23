@@ -11,6 +11,11 @@ interface Meeting {
   training: Training;
 }
 
+export interface SubmitTaskRequest {
+  taskId: string | undefined;
+  file: File | null;
+}
+
 export interface TaskData {
   id: number;
   title: string;
@@ -22,6 +27,6 @@ export interface TaskData {
   meeting: Meeting;
 }
 
-export interface TrainingResponse {
+export interface TaskResponse {
   data: TaskData;
 }
