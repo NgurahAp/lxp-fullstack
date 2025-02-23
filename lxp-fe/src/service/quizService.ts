@@ -1,12 +1,12 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { API_URL } from "../config/api";
-import { GetQuizResponse, QuizSubmissionPayload } from "../types/quiz";
+import {  QuizResponse, QuizSubmissionPayload } from "../types/quiz";
 
 export const getQuiz = async (
   meetingId: string | undefined,
   quizId: string | undefined
-): Promise<GetQuizResponse> => {
+): Promise<QuizResponse> => {
   const token = Cookies.get("token");
 
   try {
@@ -35,7 +35,7 @@ export const getQuiz = async (
 export const getQuizQuestion = async (
   meetingId: string | undefined,
   quizId: string | undefined
-): Promise<GetQuizResponse> => {
+): Promise<QuizResponse> => {
   const token = Cookies.get("token");
 
   try {
@@ -64,7 +64,7 @@ export const getQuizQuestion = async (
 export const submitQuiz = async (
   quizId: string | undefined,
   payload: QuizSubmissionPayload
-): Promise<GetQuizResponse> => {
+): Promise<QuizResponse> => {
   const token = Cookies.get("token");
 
   try {

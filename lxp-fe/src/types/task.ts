@@ -11,21 +11,17 @@ interface Meeting {
   training: Training;
 }
 
-export interface ModuleData {
+export interface TaskData {
   id: number;
   title: string;
-  content: string;
-  moduleScore: number;
-  moduleAnswer: string | null;
+  taskQuestion: string;
+  taskAnswer: string | null;
+  taskScore: number;
   createdAt: string;
   updatedAt: string;
   meeting: Meeting;
 }
 
-export interface ModuleResponse {
-  data: ModuleData;
-}
-
-export interface SubmitModuleResponse {
-  data: ModuleData;
+export interface TrainingResponse {
+  data: TaskData;
 }

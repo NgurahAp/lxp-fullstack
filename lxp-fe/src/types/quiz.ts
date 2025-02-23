@@ -16,7 +16,7 @@ interface Question {
   options: string[];
 }
 
-export interface Quiz {
+export interface QuizData {
   id: number;
   title: string;
   quizScore: number;
@@ -47,6 +47,6 @@ export interface QuizQuestion {
   meeting: Meeting;
 }
 
-export interface GetQuizResponse {
-  data: Quiz;
+export interface QuizResponse {
+  data: QuizData;
 }

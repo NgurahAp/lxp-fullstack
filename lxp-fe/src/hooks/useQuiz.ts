@@ -4,14 +4,14 @@ import {
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
-import { Quiz, QuizQuestion, QuizSubmissionParams } from "../types/quiz";
+import {  QuizData, QuizQuestion, QuizSubmissionParams } from "../types/quiz";
 import { getQuiz, getQuizQuestion, submitQuiz } from "../service/quizService";
 import toast from "react-hot-toast";
 
 export const useGetQuiz = (
   meetingId: string | undefined,
   quizId: string | undefined
-): UseQueryResult<Quiz, Error> => {
+): UseQueryResult<QuizData, Error> => {
   return useQuery({
     queryKey: ["quiz", meetingId, quizId],
     queryFn: async () => {

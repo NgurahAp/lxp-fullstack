@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
-import { Module } from "../types/module";
 import { getModule, submitModuleAnswer } from "../service/moduleService";
 import toast from "react-hot-toast";
+import { ModuleData } from "../types/module";
 
 export const useGetModule = (
   meetingId: string | undefined,
   moduleId: string | undefined
-): UseQueryResult<Module, Error> => {
+): UseQueryResult<ModuleData, Error> => {
   return useQuery({
     queryKey: ["module"],
     queryFn: async () => {
