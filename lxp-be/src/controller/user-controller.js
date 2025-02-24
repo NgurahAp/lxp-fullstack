@@ -45,4 +45,15 @@ const logout = async (req, res, next) => {
   }
 };
 
-export default { register, login, get, logout };
+const resetToken = async (req, res, next) => {
+  try {
+    const result = await userService.resetToken(req.body.email);
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { register, login, get, logout, resetToken };

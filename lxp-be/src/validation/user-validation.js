@@ -15,4 +15,6 @@ const loginUserValidation = Joi.object({
 // Digunakan untuk get dan juga logout user API
 const getUserValidation = Joi.string().max(100).required();
 
-export { registerUserValidation, loginUserValidation, getUserValidation };
+const resetTokenValidation = Joi.string().email().required()
+
+export { registerUserValidation, loginUserValidation, getUserValidation, resetTokenValidation };

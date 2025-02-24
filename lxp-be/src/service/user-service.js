@@ -4,6 +4,7 @@ import {
   getUserValidation,
   loginUserValidation,
   registerUserValidation,
+  resetTokenValidation,
 } from "../validation/user-validation.js";
 import { validate } from "../validation/validation.js";
 import bcrypt from "bcrypt";
@@ -210,4 +211,30 @@ const logout = async (email) => {
   });
 };
 
-export default { register, login, get, logout };
+const resetToken = async (email) => {
+  email = validate(resetTokenValidation, email);
+
+  const user = await prismaClient.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+
+  if (!user) {
+    throw new ResponseError(401, "Email not found");
+  }
+
+  const token = uuid().toString();
+  const resetTokenExpiration = new Date(Date.now() + 3600000); // Token reset dalam 1 jam
+
+  return prismaClient.user.update({
+    where: { email: email },
+    data: { resetToken: token, resetTokenExpiration: resetTokenExpiration },
+    select: {
+      email: true,
+      resetToken: true,
+    },
+  });
+};
+
+export default { register, login, get, logout, resetToken };

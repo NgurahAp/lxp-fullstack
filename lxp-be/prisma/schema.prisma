@@ -15,6 +15,8 @@ model User {
   role      Role     @default(student)
   token     String?  @db.VarChar(100)
   profile   String?
+  resetToken     String?  @db.VarChar(100)
+  resetTokenExpiration DateTime?  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

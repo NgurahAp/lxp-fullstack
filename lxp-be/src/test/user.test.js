@@ -56,7 +56,7 @@ describe("POST /api/users", function () {
       password: "password",
     });
 
-    expect(result.status).toBe(400);
+    expect(result.status).toBe(401);
     expect(result.body.errors).toBeDefined();
   });
 });
@@ -167,6 +167,35 @@ describe("DELETE /api/users/current", function () {
     const result = await supertest(web)
       .delete("/api/users/logout")
       .set("Authorization", "salah");
+
+    expect(result.status).toBe(401);
+  });
+});
+
+describe("POST /api/users/forgotPassword", function () {
+  beforeEach(async () => {
+    await createTestUser();
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should can get reset password", async () => {
+    const result = await supertest(web).post("/api/users/forgotPassword").send({
+      email: "test@gmail.com",
+    });
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.resetToken).toBeDefined();
+  });
+
+  it("Should reject if email invalid", async () => {
+    const result = await supertest(web).post("/api/users/forgotPassword").send({
+      email: "wrong@gmail.com",
+    });
 
     expect(result.status).toBe(401);
   });

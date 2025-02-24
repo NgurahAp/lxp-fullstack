@@ -7,6 +7,8 @@ CREATE TABLE `users` (
     `role` ENUM('admin', 'instructor', 'student') NOT NULL DEFAULT 'student',
     `token` VARCHAR(100) NULL,
     `profile` VARCHAR(191) NULL,
+    `resetToken` VARCHAR(100) NULL,
+    `resetTokenExpiration` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
