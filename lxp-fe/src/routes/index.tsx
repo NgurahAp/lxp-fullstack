@@ -14,6 +14,7 @@ import { Task } from "../pages/pelatihanku/Task";
 import { Score } from "../pages/score";
 import { DetailScore } from "../pages/score/DetailScore";
 import { Register } from "../pages/auth/register";
+import { ForgotPassword } from "../pages/auth/ForgotPassword";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgetpw" element={<ForgotPassword />} />
           <Route
             path="/dashboard"
             element={
