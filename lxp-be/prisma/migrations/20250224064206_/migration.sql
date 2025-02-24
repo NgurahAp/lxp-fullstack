@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE `users` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(36) NOT NULL,
     `name` VARCHAR(255) NOT NULL,
     `email` VARCHAR(255) NOT NULL,
     `password` VARCHAR(255) NOT NULL,
@@ -16,11 +16,11 @@ CREATE TABLE `users` (
 
 -- CreateTable
 CREATE TABLE `trainings` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(36) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `description` TEXT NULL,
     `image` VARCHAR(191) NULL,
-    `instructorId` INTEGER NOT NULL,
+    `instructorId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -29,9 +29,9 @@ CREATE TABLE `trainings` (
 
 -- CreateTable
 CREATE TABLE `training_users` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `trainingId` INTEGER NOT NULL,
-    `userId` INTEGER NOT NULL,
+    `id` VARCHAR(36) NOT NULL,
+    `trainingId` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
     `status` ENUM('enrolled', 'completed', 'dropped') NOT NULL DEFAULT 'enrolled',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -41,8 +41,8 @@ CREATE TABLE `training_users` (
 
 -- CreateTable
 CREATE TABLE `meetings` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `trainingId` INTEGER NOT NULL,
+    `id` VARCHAR(36) NOT NULL,
+    `trainingId` VARCHAR(191) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `meetingDate` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -53,8 +53,8 @@ CREATE TABLE `meetings` (
 
 -- CreateTable
 CREATE TABLE `modules` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `meetingId` INTEGER NOT NULL,
+    `id` VARCHAR(36) NOT NULL,
+    `meetingId` VARCHAR(191) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `content` VARCHAR(255) NOT NULL,
     `moduleAnswer` VARCHAR(191) NULL,
@@ -67,8 +67,8 @@ CREATE TABLE `modules` (
 
 -- CreateTable
 CREATE TABLE `quizzes` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `meetingId` INTEGER NOT NULL,
+    `id` VARCHAR(36) NOT NULL,
+    `meetingId` VARCHAR(191) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `questions` JSON NOT NULL,
     `quizScore` INTEGER NOT NULL DEFAULT 0,
@@ -80,8 +80,8 @@ CREATE TABLE `quizzes` (
 
 -- CreateTable
 CREATE TABLE `tasks` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `meetingId` INTEGER NOT NULL,
+    `id` VARCHAR(36) NOT NULL,
+    `meetingId` VARCHAR(191) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `taskQuestion` VARCHAR(255) NOT NULL,
     `taskAnswer` VARCHAR(255) NULL,
@@ -94,9 +94,9 @@ CREATE TABLE `tasks` (
 
 -- CreateTable
 CREATE TABLE `scores` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `trainingUserId` INTEGER NOT NULL,
-    `meetingId` INTEGER NOT NULL,
+    `id` VARCHAR(36) NOT NULL,
+    `trainingUserId` VARCHAR(191) NOT NULL,
+    `meetingId` VARCHAR(191) NOT NULL,
     `moduleScore` INTEGER NOT NULL DEFAULT 0,
     `quizScore` INTEGER NOT NULL DEFAULT 0,
     `taskScore` INTEGER NOT NULL DEFAULT 0,

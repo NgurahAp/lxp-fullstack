@@ -3,12 +3,12 @@ import Joi from "joi";
 const createTrainingValidation = Joi.object({
   title: Joi.string().max(255).required(),
   description: Joi.string().optional(),
-  instructorId: Joi.number().positive().required(),
+  instructorId: Joi.string().required(),
 });
 
 const createTrainingUserValidation = Joi.object({
-  trainingId: Joi.number().positive().required(),
-  userId: Joi.number().positive().required(),
+  trainingId: Joi.string().required(),
+  userId: Joi.string().required(),
   status: Joi.string()
     .valid("enrolled", "completed", "dropped")
     .default("enrolled"),
@@ -21,7 +21,7 @@ const getStudentTrainingsValidation = Joi.object({
 });
 
 const getTrainingDetailValidation = Joi.object({
-  trainingId: Joi.number().positive().required(),
+  trainingId: Joi.string().required(),
 });
 
 export {

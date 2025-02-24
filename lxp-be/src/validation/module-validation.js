@@ -10,14 +10,14 @@ const submitModuleAnswerValidation = Joi.object({
 });
 
 const getModulesValidation = Joi.object({
-  meetingId: Joi.number().positive().required(),
+  meetingId: Joi.string().required(),
   page: Joi.number().positive().default(1),
   size: Joi.number().positive().min(1).max(100).default(10),
 });
 
 const getDetailModuleValidation = Joi.object({
-  meetingId: Joi.number().positive().required(),
-  moduleId: Joi.number().positive().required(),
+  meetingId: Joi.string().required(),
+  moduleId: Joi.string().required(),
 });
 
 const submitScoreModuleValidation = Joi.object({

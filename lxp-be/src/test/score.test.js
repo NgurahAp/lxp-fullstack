@@ -85,7 +85,7 @@ describe("GET /api/meetings/:meetingId/scores", () => {
       .get("/api/meetings/invalid/scores")
       .set("Authorization", "Bearer test");
 
-    expect(result.status).toBe(400);
+    expect(result.status).toBe(404);
   });
 
   it("should get score with zero values for new enrollment", async () => {

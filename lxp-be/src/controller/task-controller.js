@@ -5,7 +5,7 @@ import { ResponseError } from "../error/response-error.js";
 
 const createTask = async (req, res, next) => {
   try {
-    const meetingId = parseInt(req.params.meetingId); // Changed from taskId to meetingId
+    const meetingId = (req.params.meetingId); // Changed from taskId to meetingId
     const result = await taskService.createTask(req.user, meetingId, req.body);
 
     res.status(200).json({
@@ -25,7 +25,7 @@ const submitTask = async (req, res, next) => {
         throw new ResponseError(400, err.message);
       }
 
-      const taskId = parseInt(req.params.taskId);
+      const taskId = (req.params.taskId);
       const result = await taskService.submitTask(req.user, taskId, req.file);
 
       res.status(200).json({
@@ -39,8 +39,8 @@ const submitTask = async (req, res, next) => {
 
 const getTaskDetail = async (req, res, next) => {
   try {
-    const meetingId = parseInt(req.params.meetingId);
-    const taskId = parseInt(req.params.taskId);
+    const meetingId = (req.params.meetingId);
+    const taskId = (req.params.taskId);
 
     const result = await taskService.getDetailTask(req.user, {
       meetingId,
@@ -57,7 +57,7 @@ const getTaskDetail = async (req, res, next) => {
 
 const submitTaskScore = async (req, res, next) => {
   try {
-    const taskId = parseInt(req.params.taskId); // Ambil taskId dari URL
+    const taskId = (req.params.taskId); // Ambil taskId dari URL
     const result = await taskService.submitTaskScore(
       req.user,
       taskId,

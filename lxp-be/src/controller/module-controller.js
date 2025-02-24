@@ -12,7 +12,7 @@ const createModule = async (req, res, next) => {
         throw new ResponseError(400, err.message); // Ensure the error message is passed
       }
 
-      const meetingId = parseInt(req.params.meetingId); // Ambil meetingId dari URL
+      const meetingId = (req.params.meetingId); // Ambil meetingId dari URL
       const result = await moduleService.createModule(
         req.user,
         meetingId,
@@ -31,7 +31,7 @@ const createModule = async (req, res, next) => {
 
 const submitModuleAnswer = async (req, res, next) => {
   try {
-    const moduleId = parseInt(req.params.moduleId); // Ambil moduleId dari URL
+    const moduleId = (req.params.moduleId); // Ambil moduleId dari URL
     const result = await moduleService.submitModuleAnswer(
       req.user,
       moduleId,
@@ -48,9 +48,9 @@ const submitModuleAnswer = async (req, res, next) => {
 
 const getModules = async (req, res, next) => {
   try {
-    const meetingId = parseInt(req.params.meetingId); // Ambil meetingId dari URL
-    const page = parseInt(req.query.page) || 1; // Ambil page dari query, default 1
-    const size = parseInt(req.query.size) || 10; // Ambil size dari query, default 10
+    const meetingId = (req.params.meetingId); // Ambil meetingId dari URL
+    const page = (req.query.page) || 1; // Ambil page dari query, default 1
+    const size = (req.query.size) || 10; // Ambil size dari query, default 10
 
     const result = await moduleService.getModules(req.user, {
       meetingId,
@@ -69,8 +69,8 @@ const getModules = async (req, res, next) => {
 
 const getModuleDetail = async (req, res, next) => {
   try {
-    const meetingId = parseInt(req.params.meetingId);
-    const moduleId = parseInt(req.params.moduleId);
+    const meetingId = (req.params.meetingId);
+    const moduleId = (req.params.moduleId);
 
     const result = await moduleService.getModuleDetail(req.user, {
       meetingId,
@@ -87,7 +87,7 @@ const getModuleDetail = async (req, res, next) => {
 
 const submitModuleScore = async (req, res, next) => {
   try {
-    const moduleId = parseInt(req.params.moduleId); // Ambil moduleId dari URL
+    const moduleId = (req.params.moduleId); // Ambil moduleId dari URL
     const result = await moduleService.submitModuleScore(
       req.user,
       moduleId,

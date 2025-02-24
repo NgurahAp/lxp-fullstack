@@ -153,6 +153,8 @@ describe("GET /api/trainings/:trainingId/meetings", () => {
       .get(`/api/trainings/${training.id}/meetings`)
       .set("Authorization", "Bearer test");
 
+    console.log(result.body);
+
     expect(result.status).toBe(200);
     expect(result.body.data).toBeDefined();
     expect(result.body.data[0].title).toBe("Test Meeting");

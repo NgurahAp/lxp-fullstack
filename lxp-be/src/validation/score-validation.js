@@ -1,11 +1,11 @@
 import Joi from "joi";
 
 const getScoreValidation = Joi.object({
-  meetingId: Joi.number().positive().required(),
+  meetingId: Joi.string().required(),
 });
 
 const getTrainingScoresValidation = Joi.object({
-  trainingId: Joi.number().positive().required(),
+  trainingId: Joi.string().required(),
 });
 
-export {getScoreValidation, getTrainingScoresValidation}
+export { getScoreValidation, getTrainingScoresValidation };

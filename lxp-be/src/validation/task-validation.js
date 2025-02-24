@@ -7,8 +7,8 @@ const createTaskValidation = Joi.object({
 });
 
 const getDetailTaskValidation = Joi.object({
-  meetingId: Joi.number().positive().required(),
-  taskId: Joi.number().positive().required(),
+  meetingId: Joi.string().required(),
+  taskId: Joi.string().required(),
 });
 
 const submitScoreTaskValidation = Joi.object({

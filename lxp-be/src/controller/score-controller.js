@@ -2,7 +2,7 @@ import scoreService from "../service/score-service.js";
 
 const getScoreDetail = async (req, res, next) => {
   try {
-    const meetingId = parseInt(req.params.meetingId);
+    const meetingId = (req.params.meetingId);
 
     const result = await scoreService.getScore(req.user, {
       meetingId,
@@ -18,7 +18,7 @@ const getScoreDetail = async (req, res, next) => {
 
 const getTrainingScores = async (req, res, next) => {
   try {
-    const trainingId = parseInt(req.params.trainingId);
+    const trainingId = (req.params.trainingId);
 
     const result = await scoreService.getTrainingScores(req.user, {
       trainingId,

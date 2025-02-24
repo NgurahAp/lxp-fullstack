@@ -70,7 +70,7 @@ const createMeeting = async (user, request) => {
 
 const getMeetings = async (user, request) => {
   const validated = validate(getMeetingValidation, {
-    trainingId: parseInt(request.trainingId), // Convert string to number
+    trainingId: (request.trainingId), // Convert string to number
     page: request.page,
     size: request.size,
   });
@@ -139,8 +139,8 @@ const getMeetings = async (user, request) => {
 
 const getMeetingDetail = async (user, request) => {
   const validated = validate(getMeetingDetailValidation, {
-    trainingId: parseInt(request.trainingId),
-    meetingId: parseInt(request.meetingId),
+    trainingId: (request.trainingId),
+    meetingId: (request.meetingId),
   });
 
   // Verify if user has access to this training

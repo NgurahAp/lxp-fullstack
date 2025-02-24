@@ -28,8 +28,8 @@ const submitQuizValidation = Joi.object({
 });
 
 const getDetailQuizValidation = Joi.object({
-  meetingId: Joi.number().positive().required(),
-  quizId: Joi.number().positive().required(),
+  meetingId: Joi.string().required(),
+  quizId: Joi.string().required(),
 });
 
 

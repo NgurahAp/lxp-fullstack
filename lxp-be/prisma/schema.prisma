@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid()) @db.VarChar(36)
   name      String   @db.VarChar(255)
   email     String   @unique @db.VarChar(255)
   password  String   @db.VarChar(255)
@@ -25,11 +25,11 @@ model User {
 }
 
 model Training {
-  id           Int      @id @default(autoincrement())
+  id           String   @id @default(uuid()) @db.VarChar(36)
   title        String   @db.VarChar(255)
   description  String?  @db.Text 
   image        String?  
-  instructorId Int
+  instructorId String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -41,9 +41,9 @@ model Training {
 }
 
 model Training_Users {
-  id         Int      @id @default(autoincrement())
-  trainingId Int
-  userId     Int
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  trainingId String
+  userId     String
   status     Status   @default(enrolled)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -56,8 +56,8 @@ model Training_Users {
 }
 
 model Meeting {
-  id           Int      @id @default(autoincrement())
-  trainingId   Int
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  trainingId   String
   title        String   @db.VarChar(255)
   meetingDate  DateTime?
   createdAt    DateTime @default(now())
@@ -73,8 +73,8 @@ model Meeting {
 }
 
 model Module {
-  id          Int      @id @default(autoincrement())
-  meetingId   Int
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  meetingId   String
   title       String   @db.VarChar(255)
   content     String   @db.VarChar(255)  // PDF file path
   moduleAnswer     String?     
@@ -88,8 +88,8 @@ model Module {
 }
 
 model Quiz {
-  id         Int      @id @default(autoincrement())
-  meetingId  Int
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  meetingId  String
   title      String   @db.VarChar(255)
   questions  Json
   quizScore  Int      @default(0)
@@ -102,8 +102,8 @@ model Quiz {
 }
 
 model Task {
-  id         Int      @id @default(autoincrement())
-  meetingId  Int
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  meetingId  String
   title      String   @db.VarChar(255)
   taskQuestion String @db.VarChar(255)
   taskAnswer     String? @db.VarChar(255) 
@@ -117,9 +117,9 @@ model Task {
 }
 
 model Score {
-  id            Int      @id @default(autoincrement())
-  trainingUserId Int
-  meetingId     Int
+  id            String   @id @default(uuid()) @db.VarChar(36)
+  trainingUserId String
+  meetingId     String
   moduleScore   Int      @default(0)
   quizScore     Int      @default(0)
   taskScore     Int      @default(0)

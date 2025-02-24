@@ -53,7 +53,7 @@ const getStudentsTraining = async (req, res, next) => {
 
 const getTrainingDetail = async (req, res, next) => {
   try {
-    const trainingId = parseInt(req.params.trainingId);
+    const trainingId = req.params.trainingId;
     const result = await trainingService.getTrainingDetail(
       req.user,
       trainingId
