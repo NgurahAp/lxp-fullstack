@@ -8,11 +8,11 @@ import {
 import { validate } from "../validation/validation.js";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
+import { sendWelcomeEmail } from "./email-service.js";
 
 const register = async (request) => {
   const user = validate(registerUserValidation, request);
 
-  // Check email instead of username
   const countUser = await prismaClient.user.count({
     where: {
       email: user.email,
@@ -25,15 +25,19 @@ const register = async (request) => {
 
   user.password = await bcrypt.hash(user.password, 10);
 
-  return prismaClient.user.create({
+  const createdUser = await prismaClient.user.create({
     data: user,
     select: {
       name: true,
       email: true,
       role: true,
-      // Don't select password for security
     },
   });
+
+  // Send welcome email after successful registration
+  await sendWelcomeEmail(createdUser.email, createdUser.name);
+
+  return createdUser;
 };
 
 const login = async (request) => {
