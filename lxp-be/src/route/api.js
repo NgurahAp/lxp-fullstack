@@ -140,7 +140,7 @@ userRouter.get(
   scoreController.getScoreDetail
 );
 userRouter.get(
-  "/api/trainings/:trainingId/score",
+  "/api/trainings/:trainingId/scores",
   authMiddleware,
   scoreController.getTrainingScores
 );

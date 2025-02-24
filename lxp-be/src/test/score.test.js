@@ -144,12 +144,14 @@ describe("GET /api/trainings/:trainingId/scores", () => {
 
   it("should get all meeting scores and total training score successfully", async () => {
     const training = await prismaClient.training.findFirst({
-      where: { title: "Test Training" },
+      where: { title: "test training" },
     });
 
     const result = await supertest(web)
       .get(`/api/trainings/${training.id}/scores`)
       .set("Authorization", "Bearer test");
+
+    console.log(result.body);
 
     expect(result.status).toBe(200);
     expect(result.body.data).toHaveProperty("totalTrainingScore");
