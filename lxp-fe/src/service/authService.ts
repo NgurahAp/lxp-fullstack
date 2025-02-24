@@ -1,5 +1,10 @@
 import { API_URL } from "../config/api";
-import { LoginCredentials, LoginResponse } from "../types/auth";
+import {
+  LoginCredentials,
+  LoginResponse,
+  RegisterCredentials,
+  RegisterResponse,
+} from "../types/auth";
 import axios from "axios";
 import { UserResponse } from "../types/auth";
 import Cookies from "js-cookie";
@@ -16,6 +21,31 @@ export const AuthService = {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           throw new Error("Email atau password salah");
+        }
+        if (error.response?.status === 400) {
+          throw new Error("Password harus lebih dari 6 karakter");
+        }
+        throw new Error(
+          error.response?.data?.message || "Terjadi kesalahan pada server"
+        );
+      }
+      throw new Error("Terjadi kesalahan yang tidak diketahui");
+    }
+  },
+
+  register: async (
+    credentials: RegisterCredentials
+  ): Promise<RegisterResponse> => {
+    try {
+      const response = await axios.post<RegisterResponse>(
+        `${API_URL}/users`,
+        credentials
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Email already exists");
         }
         if (error.response?.status === 400) {
           throw new Error("Password harus lebih dari 6 karakter");

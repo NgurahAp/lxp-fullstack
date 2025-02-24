@@ -1,19 +1,26 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AuthCarousel } from "./components/AuthCarousel";
 import FormInput from "./components/FormInput";
+import { useAuth } from "../../hooks/useAuth";
+import toast from "react-hot-toast";
 
 export const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Untuk navigasi
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { register } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    navigate("/verification");
+    try {
+      await register.mutateAsync({ name, email, password });
+      toast.success("Berhasil mendaftarkan akun");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Login gagal");
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -45,7 +52,7 @@ export const Register: React.FC = () => {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              // disabled={login.status === "pending"}
+              disabled={register.status === "pending"}
             />
             <FormInput
               type="email"
@@ -56,7 +63,7 @@ export const Register: React.FC = () => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              // disabled={login.status === "pending"}
+              disabled={register.status === "pending"}
             />
             <div className="relative">
               <FormInput
@@ -68,7 +75,7 @@ export const Register: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                // disabled={login.status === "pending"}
+                disabled={register.status === "pending"}
               />
               <span
                 className="absolute right-3 top-[45%] cursor-pointer"
@@ -125,10 +132,9 @@ export const Register: React.FC = () => {
             <button
               type="submit"
               className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-300"
-              // disabled={login.status === "pending"}
+              disabled={register.status === "pending"}
             >
-              {/* {login.status === "pending" ? "Memproses..." : "Masuk"} */}
-              Daftar
+              {register.status === "pending" ? "Memproses..." : "Daftar"}
             </button>
           </form>
 

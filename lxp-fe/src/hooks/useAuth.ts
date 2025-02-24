@@ -7,10 +7,17 @@ import {
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { AuthService, UserService } from "../service/authService";
-import { LoginResponse, LoginCredentials, UserData } from "../types/auth";
+import {
+  LoginResponse,
+  LoginCredentials,
+  UserData,
+  RegisterResponse,
+  RegisterCredentials,
+} from "../types/auth";
 
 interface UseAuthReturn {
   login: UseMutationResult<LoginResponse, Error, LoginCredentials>;
+  register: UseMutationResult<RegisterResponse, Error, RegisterCredentials>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -37,6 +44,13 @@ export const useAuth = (): UseAuthReturn => {
     },
   });
 
+  const register = useMutation<RegisterResponse, Error, RegisterCredentials>({
+    mutationFn: AuthService.register,
+    onSuccess: () => {
+      navigate("/login");
+    },
+  });
+
   const logout = () => {
     Cookies.remove("token");
     localStorage.clear();
@@ -46,6 +60,7 @@ export const useAuth = (): UseAuthReturn => {
   return {
     login,
     logout,
+    register,
     isAuthenticated: !!Cookies.get("token"),
   };
 };
