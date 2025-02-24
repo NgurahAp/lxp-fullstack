@@ -119,7 +119,7 @@ export const Score: React.FC = () => {
                             </div>
                             <div className="pt-2 flex justify-end">
                               <Link
-                                to={`/detailScore/${training.id}`}
+                                to={`/score/${training.training.id}`}
                                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-xs md:text-sm"
                               >
                                 Lihat Detail

@@ -12,6 +12,7 @@ import { Quiz } from "../pages/pelatihanku/Quiz";
 import { QuizAttempt } from "../pages/pelatihanku/QuizAtttempt";
 import { Task } from "../pages/pelatihanku/Task";
 import { Score } from "../pages/score";
+import { DetailScore } from "../pages/score/DetailScore";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -81,6 +82,14 @@ const AppRoutes: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Score />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/score/:trainingId"
+            element={
+              <ProtectedRoute>
+                <DetailScore />
               </ProtectedRoute>
             }
           />
