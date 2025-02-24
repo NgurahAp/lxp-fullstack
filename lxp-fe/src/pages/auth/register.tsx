@@ -1,26 +1,19 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { toast } from "react-hot-toast";
-import { useAuth } from "../../hooks/useAuth";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthCarousel } from "./components/AuthCarousel";
 import FormInput from "./components/FormInput";
 
-export const Login: React.FC = () => {
+export const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate(); // Untuk navigasi
 
-  const { login } = useAuth();
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      await login.mutateAsync({ email, password });
-      toast.success("Login berhasil!");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Login gagal");
-    }
+    navigate("/verification");
   };
 
   const togglePasswordVisibility = () => {
@@ -30,21 +23,30 @@ export const Login: React.FC = () => {
   return (
     <section className="h-[100vh] flex items-center justify-center">
       {/* Left Side - Carousel */}
-      <div className="w-3/5 h-full md:block hidden">
+      <div className="w-3/5 h-full">
         <AuthCarousel />
       </div>
 
       {/* Right Side */}
-      <div className="md:w-2/5 w-full h-full flex items-center justify-center">
+      <div className="w-2/5 h-full flex items-center justify-center">
         <div className="w-2/3 flex flex-col items-center">
-          {/* Logo */}
-          <img src="/landing/logo.png" className="mx-auto mb-4" alt="Logo" />
+          {/* Logo berada di tengah */}
+          <img src="/landing/logo.png" className="mx-auto mb-2" alt="Logo" />
 
-          {/* Title */}
-          <h1 className="self-start font-bold text-4xl pb-3">Masuk</h1>
-
-          {/* Form Login */}
+          {/* H1 berada di kiri */}
+          <h1 className="self-start font-bold text-4xl pb-3">Daftar</h1>
           <form className="w-full relative" onSubmit={handleSubmit}>
+            <FormInput
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Masukan Nama Lengkap"
+              label="Nama"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              // disabled={login.status === "pending"}
+            />
             <FormInput
               type="email"
               id="email"
@@ -54,7 +56,7 @@ export const Login: React.FC = () => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={login.status === "pending"}
+              // disabled={login.status === "pending"}
             />
             <div className="relative">
               <FormInput
@@ -66,7 +68,7 @@ export const Login: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={login.status === "pending"}
+                // disabled={login.status === "pending"}
               />
               <span
                 className="absolute right-3 top-[45%] cursor-pointer"
@@ -119,49 +121,23 @@ export const Login: React.FC = () => {
                 )}
               </span>
             </div>
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex">
-                <input
-                  type="checkbox"
-                  id="rememberMe"
-                  name="rememberMe"
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label
-                  htmlFor="rememberMe"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Ingat saya
-                </label>
-              </div>
-              <Link to="/forgetpw" className="text-blue-500 text-sm">
-                Lupa kata sandi?
-              </Link>
-            </div>
+
             <button
               type="submit"
               className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-300"
-              disabled={login.status === "pending"}
+              // disabled={login.status === "pending"}
             >
-              {login.status === "pending" ? "Memproses..." : "Masuk"}
+              {/* {login.status === "pending" ? "Memproses..." : "Masuk"} */}
+              Daftar
             </button>
           </form>
 
-          {/* Tambahan: Forgot Password dan Sign Up */}
-          <div className="w-full flex flex-col items-center mt-4">
-            <div className="flex items-center w-full mt-2">
-              <hr className="flex-grow border-gray-300" />
-              <span className="px-2 text-gray-500 text-sm">atau</span>
-              <hr className="flex-grow border-gray-300" />
-            </div>
-
-            <Link
-              to="/register"
-              className="w-full mt-3 bg-gray-100 text-gray-800 font-semibold py-2 px-4 rounded text-center hover:bg-gray-200 transition"
-            >
-              Buat Akun Baru
+          <p className="mt-4 text-sm text-gray-600">
+            Sudah punya akun?{" "}
+            <Link to="/login" className="text-blue-500 hover:underline">
+              Masuk
             </Link>
-          </div>
+          </p>
         </div>
       </div>
     </section>
