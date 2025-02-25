@@ -4,6 +4,6 @@ import userController from "../controller/user-controller.js";
 const publicRouter = new exress.Router();
 publicRouter.post("/api/users", userController.register);
 publicRouter.post("/api/users/login", userController.login);
-publicRouter.post("/api/users/forgotPassword", userController.resetToken)
+publicRouter.post("/api/users/forgetPassword", userController.resetToken);
 
 export { publicRouter };

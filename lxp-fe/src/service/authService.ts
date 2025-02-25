@@ -1,5 +1,6 @@
 import { API_URL } from "../config/api";
 import {
+  ForgetPasswordCredentials,
   LoginCredentials,
   LoginResponse,
   RegisterCredentials,
@@ -49,6 +50,28 @@ export const AuthService = {
         }
         if (error.response?.status === 400) {
           throw new Error("Password harus lebih dari 6 karakter");
+        }
+        throw new Error(
+          error.response?.data?.message || "Terjadi kesalahan pada server"
+        );
+      }
+      throw new Error("Terjadi kesalahan yang tidak diketahui");
+    }
+  },
+
+  forgetPw: async (
+    credentials: ForgetPasswordCredentials
+  ): Promise<RegisterResponse> => {
+    try {
+      const response = await axios.post<RegisterResponse>(
+        `${API_URL}/users/forgetPassword`,
+        credentials
+      );
+    return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Email tidak ditemukan");
         }
         throw new Error(
           error.response?.data?.message || "Terjadi kesalahan pada server"
