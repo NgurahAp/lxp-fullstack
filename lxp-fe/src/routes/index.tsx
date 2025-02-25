@@ -15,6 +15,7 @@ import { Score } from "../pages/score";
 import { DetailScore } from "../pages/score/DetailScore";
 import { Register } from "../pages/auth/register";
 import { ForgotPassword } from "../pages/auth/ForgotPassword";
+import { ResetPassword } from "../pages/auth/ResetPassword";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgetpw" element={<ForgotPassword />} />
+          <Route path="/resetpw" element={<ResetPassword />} />
           <Route
             path="/dashboard"
             element={

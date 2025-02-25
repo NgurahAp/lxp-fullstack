@@ -14,6 +14,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     location.pathname === "/login" ||
     location.pathname === "/register" ||
     location.pathname === "/forgetpw" ||
+    location.pathname === "/resetpw" ||
     location.pathname === "/verification";
 
   // Add check for QuizAttempt page using regex to match the pattern
