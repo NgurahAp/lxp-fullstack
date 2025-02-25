@@ -15,7 +15,7 @@ export const ForgotPassword: React.FC = () => {
 
     try {
       await forgetPw.mutateAsync({ email });
-      toast.success("Token berhasil dikirim");
+      toast.success("Token berhasil dikirim, silahkan cek email anda!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Token gagal");
     }

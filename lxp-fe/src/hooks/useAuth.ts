@@ -14,6 +14,7 @@ import {
   RegisterResponse,
   RegisterCredentials,
   ForgetPasswordCredentials,
+  ResetPasswordProps,
 } from "../types/auth";
 
 interface UseAuthReturn {
@@ -24,6 +25,7 @@ interface UseAuthReturn {
     Error,
     ForgetPasswordCredentials
   >;
+  resetPw: UseMutationResult<RegisterResponse, Error, ResetPasswordProps>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -57,6 +59,12 @@ export const useAuth = (): UseAuthReturn => {
     },
   });
 
+  const logout = () => {
+    Cookies.remove("token");
+    localStorage.clear();
+    navigate("/");
+  };
+
   const forgetPw = useMutation<
     RegisterResponse,
     Error,
@@ -68,17 +76,20 @@ export const useAuth = (): UseAuthReturn => {
     },
   });
 
-  const logout = () => {
-    Cookies.remove("token");
-    localStorage.clear();
-    navigate("/");
-  };
+  const resetPw = useMutation<RegisterResponse, Error, ResetPasswordProps>({
+    mutationFn: (props: ResetPasswordProps) =>
+      AuthService.resetPw(props.credentials, props.resetToken),
+    onSuccess: () => {
+      navigate("/login");
+    },
+  });
 
   return {
     login,
     logout,
     register,
     forgetPw,
+    resetPw,
     isAuthenticated: !!Cookies.get("token"),
   };
 };

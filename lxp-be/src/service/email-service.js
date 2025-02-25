@@ -74,7 +74,7 @@ export const sendPasswordResetEmail = async (
   resetToken
 ) => {
   // The frontend URL where your reset password page is located
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+  const resetUrl = `http://localhost:5173/resetpw/${resetToken}`;
 
   const mailOptions = {
     from: process.env.EMAIL_USER,

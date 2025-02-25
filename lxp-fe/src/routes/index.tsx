@@ -26,7 +26,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgetpw" element={<ForgotPassword />} />
-          <Route path="/resetpw" element={<ResetPassword />} />
+          <Route path="/resetpw/:token" element={<ResetPassword />} />
           <Route
             path="/dashboard"
             element={

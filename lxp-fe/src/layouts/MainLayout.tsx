@@ -10,12 +10,16 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+
+  // Periksa resetpw dengan regex
+  const isResetPasswordPage = /^\/resetpw\/.*$/.test(location.pathname);
+
   const isAuthPage =
     location.pathname === "/login" ||
     location.pathname === "/register" ||
     location.pathname === "/forgetpw" ||
-    location.pathname === "/resetpw" ||
-    location.pathname === "/verification";
+    location.pathname === "/verification" ||
+    isResetPasswordPage;
 
   // Add check for QuizAttempt page using regex to match the pattern
   const isQuizAttemptPage = /^\/quizAttempt\/.*\/.*\/.*$/.test(

@@ -1,7 +1,3 @@
-export interface ForgetPasswordCredentials {
-  email: string;
-}
-
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -11,6 +7,19 @@ export interface RegisterCredentials {
   name: string;
   email: string;
   password: string;
+}
+
+export interface ForgetPasswordCredentials {
+  email: string;
+}
+
+export interface ResetPasswordCredentials {
+  password: string;
+}
+
+export interface ResetPasswordProps {
+  credentials: ResetPasswordCredentials;
+  resetToken: string;
 }
 
 export interface RegisterResponse {

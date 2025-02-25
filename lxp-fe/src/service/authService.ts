@@ -5,6 +5,7 @@ import {
   LoginResponse,
   RegisterCredentials,
   RegisterResponse,
+  ResetPasswordCredentials,
 } from "../types/auth";
 import axios from "axios";
 import { UserResponse } from "../types/auth";
@@ -67,11 +68,37 @@ export const AuthService = {
         `${API_URL}/users/forgetPassword`,
         credentials
       );
-    return response.data;
+      return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           throw new Error("Email tidak ditemukan");
+        }
+        throw new Error(
+          error.response?.data?.message || "Terjadi kesalahan pada server"
+        );
+      }
+      throw new Error("Terjadi kesalahan yang tidak diketahui");
+    }
+  },
+
+  resetPw: async (
+    credentials: ResetPasswordCredentials,
+    token: string
+  ): Promise<RegisterResponse> => {
+    try {
+      const response = await axios.post<RegisterResponse>(
+        `${API_URL}/users/resetPassword/${token}`,
+        credentials
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error("Invalid reset token");
+        }
+        if (error.response?.status === 403) {
+          throw new Error("Token reset kadaluarsa");
         }
         throw new Error(
           error.response?.data?.message || "Terjadi kesalahan pada server"

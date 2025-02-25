@@ -3,11 +3,12 @@ import { toast } from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
 import { AuthCarousel } from "./components/AuthCarousel";
 import FormInput from "./components/FormInput";
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export const ResetPassword: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
+  const { token } = useParams<{
+    token: string;
+  }>();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -16,7 +17,7 @@ export const ResetPassword: React.FC = () => {
   const [isValid, setIsValid] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
-  const { login } = useAuth();
+  const { resetPw } = useAuth();
 
   // Password validation
   useEffect(() => {
@@ -60,14 +61,13 @@ export const ResetPassword: React.FC = () => {
     }
 
     try {
-      // Here you would call your API to reset the password
-      // await resetPassword(token, password);
-
+      await resetPw.mutateAsync({
+        credentials: { password: password },
+        resetToken: token,
+      });
       toast.success(
-        "Password berhasil diubah! Silahkan login dengan kata sandi baru."
+        "Password berhasil diubah! Silahkan resetPw dengan kata sandi baru."
       );
-      // Redirect to login page after successful reset
-      // navigate("/login");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Reset password gagal"
@@ -115,7 +115,7 @@ export const ResetPassword: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={login.status === "pending"}
+                disabled={resetPw.status === "pending"}
               />
               <span
                 className="absolute right-3 top-[45%] cursor-pointer text-gray-500 hover:text-gray-700"
@@ -211,7 +211,7 @@ export const ResetPassword: React.FC = () => {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={login.status === "pending"}
+                disabled={resetPw.status === "pending"}
               />
               <span
                 className="absolute right-3 top-[45%] cursor-pointer text-gray-500 hover:text-gray-700"
@@ -323,9 +323,9 @@ export const ResetPassword: React.FC = () => {
                   ? "bg-blue-500 hover:bg-blue-600 active:bg-blue-700"
                   : "bg-gray-400 cursor-not-allowed"
               }`}
-              disabled={!isValid || login.status === "pending"}
+              disabled={!isValid || resetPw.status === "pending"}
             >
-              {login.status === "pending" ? (
+              {resetPw.status === "pending" ? (
                 <div className="flex items-center justify-center">
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
