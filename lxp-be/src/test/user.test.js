@@ -172,7 +172,7 @@ describe("DELETE /api/users/current", function () {
   });
 });
 
-describe("POST /api/users/forgotPassword", function () {
+describe("POST /api/users/forgetPassword", function () {
   beforeEach(async () => {
     await createTestUser();
   });
@@ -182,7 +182,7 @@ describe("POST /api/users/forgotPassword", function () {
   });
 
   it("Should can get reset password", async () => {
-    const result = await supertest(web).post("/api/users/forgotPassword").send({
+    const result = await supertest(web).post("/api/users/forgetPassword").send({
       email: "test@gmail.com",
     });
 
@@ -193,7 +193,7 @@ describe("POST /api/users/forgotPassword", function () {
   });
 
   it("Should reject if email invalid", async () => {
-    const result = await supertest(web).post("/api/users/forgotPassword").send({
+    const result = await supertest(web).post("/api/users/forgetPassword").send({
       email: "wrong@gmail.com",
     });
 

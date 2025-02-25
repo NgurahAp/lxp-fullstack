@@ -9,7 +9,7 @@ import {
 import { validate } from "../validation/validation.js";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
-import { sendWelcomeEmail } from "./email-service.js";
+import { sendPasswordResetEmail, sendWelcomeEmail } from "./email-service.js";
 
 const register = async (request) => {
   const user = validate(registerUserValidation, request);
@@ -226,6 +226,8 @@ const resetToken = async (email) => {
 
   const token = uuid().toString();
   const resetTokenExpiration = new Date(Date.now() + 3600000); // Token reset dalam 1 jam
+
+  await sendPasswordResetEmail(user.email, user.name, token);
 
   return prismaClient.user.update({
     where: { email: email },
