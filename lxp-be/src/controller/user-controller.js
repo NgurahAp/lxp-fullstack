@@ -56,4 +56,17 @@ const resetToken = async (req, res, next) => {
   }
 };
 
-export default { register, login, get, logout, resetToken };
+const resetPassword = async (req, res, next) => {
+  try {
+    const token = req.params.token;
+    const result = await userService.resetPassword(req.body, token);
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { register, login, get, logout, resetToken, resetPassword };

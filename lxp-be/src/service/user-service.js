@@ -4,6 +4,7 @@ import {
   getUserValidation,
   loginUserValidation,
   registerUserValidation,
+  resetPasswordValidation,
   resetTokenValidation,
 } from "../validation/user-validation.js";
 import { validate } from "../validation/validation.js";
@@ -239,4 +240,46 @@ const resetToken = async (email) => {
   });
 };
 
-export default { register, login, get, logout, resetToken };
+// user-service.js
+const resetPassword = async (request, token) => {
+  // Validate password format
+  const { password } = validate(resetPasswordValidation, request);
+
+  // Find user with the reset token
+  const user = await prismaClient.user.findFirst({
+    where: { resetToken: token },
+  });
+
+  // Handle invalid token
+  if (!user) {
+    throw new ResponseError(401, "Invalid reset token");
+  }
+
+  // Check if token has expired
+  const now = new Date();
+  if (!user.resetTokenExpiration || user.resetTokenExpiration < now) {
+    throw new ResponseError(403, "Reset token has expired");
+  }
+
+  // Hash the new password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Update user record with new password and clear reset token data
+  const updatedUser = await prismaClient.user.update({
+    where: { id: user.id },
+    data: {
+      password: hashedPassword,
+      resetToken: null,
+      resetTokenExpiration: null,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  });
+
+  return updatedUser;
+};
+
+export default { register, login, get, logout, resetToken, resetPassword };

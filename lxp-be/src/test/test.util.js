@@ -8,6 +8,8 @@ const createTestUser = async () => {
       password: await bcrypt.hash("password", 10),
       name: "test",
       token: "test",
+      resetToken: "test",
+      resetTokenExpiration: new Date(Date.now() + 3600000),
     },
   });
 };
@@ -21,11 +23,7 @@ const getTestUser = async () => {
 };
 
 const removeTestUser = async () => {
-  return prismaClient.user.deleteMany({
-    where: {
-      email: "test@gmail.com",
-    },
-  });
+  await prismaClient.user.deleteMany({});
 };
 
 const createTestInstructor = async () => {

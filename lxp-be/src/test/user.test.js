@@ -6,6 +6,8 @@ import {
   removeAll,
   removeTestUser,
 } from "./test.util.js";
+import bcrypt from "bcrypt";
+import { prismaClient } from "../application/database";
 
 describe("POST /api/users", function () {
   afterEach(async () => {
@@ -198,5 +200,80 @@ describe("POST /api/users/forgetPassword", function () {
     });
 
     expect(result.status).toBe(401);
+  });
+});
+
+describe("POST /api/users/resetPassword/:token", () => {
+  beforeEach(async () => {
+    await createTestUser();
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should successfully reset password with valid token", async () => {
+    const result = await supertest(web)
+      .post("/api/users/resetPassword/test")
+      .send({
+        password: "newPassword123",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toHaveProperty("name", "test");
+    expect(result.body.data).toHaveProperty("email", "test@gmail.com");
+
+    // Verify the new password works for login
+    const loginResult = await supertest(web).post("/api/users/login").send({
+      email: "test@gmail.com",
+      password: "newPassword123",
+    });
+
+    expect(loginResult.status).toBe(200);
+  });
+
+  it("Should reject reset with invalid token", async () => {
+    const result = await supertest(web)
+      .post("/api/users/resetPassword/invalidtoken")
+      .send({
+        password: "newPassword123",
+      });
+
+    expect(result.status).toBe(401);
+    expect(result.body).toHaveProperty("errors", "Invalid reset token");
+  });
+
+  it("Should reject reset with expired token", async () => {
+    // First create a user with an expired token
+    await prismaClient.user.create({
+      data: {
+        email: "expired@gmail.com",
+        password: await bcrypt.hash("password", 10),
+        name: "expired",
+        resetToken: "expired-token",
+        resetTokenExpiration: new Date(Date.now() - 3600000), // 1 hour in the past
+      },
+    });
+
+    const result = await supertest(web)
+      .post("/api/users/resetPassword/expired-token")
+      .send({
+        password: "newPassword123",
+      });
+
+    expect(result.status).toBe(403);
+    expect(result.body).toHaveProperty("errors", "Reset token has expired");
+  });
+
+  it("Should reject reset with invalid password format", async () => {
+    const result = await supertest(web)
+      .post("/api/users/resetPassword/test")
+      .send({
+        password: "short", // Too short
+      });
+
+    expect(result.status).toBe(400);
+    // Specific error message depends on your validation error format
+    expect(result.body).toHaveProperty("errors");
   });
 });
