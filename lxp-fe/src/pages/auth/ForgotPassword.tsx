@@ -61,7 +61,7 @@ export const ForgotPassword: React.FC = () => {
           {/* Tambahan: Forgot Password dan Sign Up */}
           <div className="w-full flex flex-col items-center mt-4">
             <Link
-              to="/forgetPw"
+              to="/login"
               className="w-full mt-3 bg-gray-100 text-gray-800 font-semibold py-2 px-4 rounded text-center hover:bg-gray-200 transition"
             >
               Masuk

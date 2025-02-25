@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
@@ -9,11 +9,31 @@ export const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isValid, setIsValid] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const { login } = useAuth();
 
+  // Form validation
+  useEffect(() => {
+    // Validate email
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Format email tidak valid");
+      setIsValid(false);
+    } else {
+      setEmailError("");
+      // Form is valid if both email and password are provided
+      setIsValid(!!email && !!password);
+    }
+  }, [email, password]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isValid) {
+      toast.error("Mohon periksa kembali email dan kata sandi Anda");
+      return;
+    }
 
     try {
       await login.mutateAsync({ email, password });
@@ -42,26 +62,37 @@ export const Login: React.FC = () => {
 
           {/* Title */}
           <h1 className="self-start font-bold text-4xl pb-3">Masuk</h1>
+          <p className="self-start text-gray-600 mb-6">
+            Selamat datang kembali! Silahkan masuk ke akun Anda
+          </p>
 
           {/* Form Login */}
-          <form className="w-full relative" onSubmit={handleSubmit}>
-            <FormInput
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Masukan Email"
-              label="Email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={login.status === "pending"}
-            />
+          <form className="w-full relative space-y-5" onSubmit={handleSubmit}>
+            {/* Email Field */}
+            <div>
+              <FormInput
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Masukkan Email"
+                label="Email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={login.status === "pending"}
+              />
+              {emailError && (
+                <p className="text-red-500 text-sm mt-1">{emailError}</p>
+              )}
+            </div>
+
+            {/* Password Field */}
             <div className="relative">
               <FormInput
                 type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
-                placeholder="Masukan Kata Sandi"
+                placeholder="Masukkan Kata Sandi"
                 label="Kata Sandi"
                 required
                 value={password}
@@ -69,7 +100,7 @@ export const Login: React.FC = () => {
                 disabled={login.status === "pending"}
               />
               <span
-                className="absolute right-3 top-[45%] cursor-pointer"
+                className="absolute right-3 top-[45%] cursor-pointer text-gray-500 hover:text-gray-700"
                 onClick={togglePasswordVisibility}
                 role="button"
                 aria-label={showPassword ? "Hide password" : "Show password"}
@@ -119,49 +150,82 @@ export const Login: React.FC = () => {
                 )}
               </span>
             </div>
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex">
-                <input
-                  type="checkbox"
-                  id="rememberMe"
-                  name="rememberMe"
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label
-                  htmlFor="rememberMe"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Ingat saya
-                </label>
-              </div>
-              <Link to="/forgetpw" className="text-blue-500 text-sm">
+
+            {/* Forgot Password Link */}
+            <div className="flex justify-end">
+              <Link
+                to="/forgetpw"
+                className="text-sm text-blue-500 hover:underline"
+              >
                 Lupa kata sandi?
               </Link>
             </div>
+
+            {/* Remember Me Checkbox */}
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                type="checkbox"
+                className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300"
+              />
+              <label
+                htmlFor="remember-me"
+                className="ml-2 text-sm text-gray-600"
+              >
+                Ingat saya
+              </label>
+            </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-300"
-              disabled={login.status === "pending"}
+              className={`w-full mt-6 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-all duration-300 ${
+                isValid
+                  ? "bg-blue-500 hover:bg-blue-600 active:bg-blue-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
+              disabled={!isValid || login.status === "pending"}
             >
-              {login.status === "pending" ? "Memproses..." : "Masuk"}
+              {login.status === "pending" ? (
+                <div className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Memproses...
+                </div>
+              ) : (
+                "Masuk"
+              )}
             </button>
           </form>
 
-          {/* Tambahan: Forgot Password dan Sign Up */}
-          <div className="w-full flex flex-col items-center mt-4">
-            <div className="flex items-center w-full mt-2">
-              <hr className="flex-grow border-gray-300" />
-              <span className="px-2 text-gray-500 text-sm">atau</span>
-              <hr className="flex-grow border-gray-300" />
-            </div>
-
+          {/* Sign Up Link */}
+          <p className="mt-6 text-sm text-gray-600">
+            Belum punya akun?{" "}
             <Link
               to="/register"
-              className="w-full mt-3 bg-gray-100 text-gray-800 font-semibold py-2 px-4 rounded text-center hover:bg-gray-200 transition"
+              className="text-blue-500 hover:underline font-medium"
             >
-              Buat Akun Baru
+              Daftar
             </Link>
-          </div>
+          </p>
         </div>
       </div>
     </section>

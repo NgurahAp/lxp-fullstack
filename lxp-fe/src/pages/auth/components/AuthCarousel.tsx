@@ -33,7 +33,7 @@ const CarouselItem: React.FC<CarouselItemProps> = ({
   description,
 }) => (
   <div className="flex flex-col items-center justify-center h-full">
-    <img src={image} alt="Illustration" className="w-auto h-[40%] pb-10" />
+    <img src={image} alt="Illustration" className="w-auto h-72 pb-10" />
     <h1 className="text-3xl font-bold text-white pb-5">{title}</h1>
     <p className="w-1/2 text-lg text-white text-center">{description}</p>
   </div>
