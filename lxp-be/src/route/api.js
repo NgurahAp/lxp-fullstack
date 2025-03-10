@@ -8,12 +8,19 @@ import moduleController from "../controller/module-controller.js";
 import quizController from "../controller/quiz-controller.js";
 import taskController from "../controller/task-controller.js";
 import scoreController from "../controller/score-controller.js";
+import dashboardController from "../controller/dashboard-controller.js";
 
 const userRouter = express.Router();
 
 // Router for user
 userRouter.get("/api/users/current", authMiddleware, userController.get);
 userRouter.delete("/api/users/logout", authMiddleware, userController.logout);
+
+userRouter.get(
+  "/api/dashboard",
+  authMiddleware,
+  dashboardController.getStudentDashboard
+);
 
 // Router for training
 userRouter.post(
