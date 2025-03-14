@@ -137,6 +137,7 @@ const getStudentTrainings = async (user, request) => {
           title: true,
           description: true,
           image: true,
+          
           instructor: {
             select: {
               id: true,
