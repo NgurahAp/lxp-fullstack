@@ -137,7 +137,7 @@ const getStudentTrainings = async (user, request) => {
           title: true,
           description: true,
           image: true,
-          
+
           instructor: {
             select: {
               id: true,
@@ -145,16 +145,96 @@ const getStudentTrainings = async (user, request) => {
               email: true,
             },
           },
+          // Include meetings to calculate progress
+          meetings: {
+            select: {
+              id: true,
+              title: true,
+              modules: true,
+              quizzes: true,
+              tasks: true,
+            },
+          },
         },
       },
+      // Include scores to calculate progress
+      scores: true,
     },
     orderBy: {
       createdAt: "desc",
     },
   });
 
+  // Calculate progress for each training
+  const trainingsWithProgress = await Promise.all(
+    trainings.map(async (training) => {
+      // Calculate progress for each meeting
+      const meetingsProgress = training.training.meetings.map((meeting) => {
+        // Find the user's score for this meeting
+        const userScore = training.scores.find(
+          (score) => score.meetingId === meeting.id
+        );
+
+        // Calculate module progress
+        const totalModules = meeting.modules.length;
+        const completedModules = meeting.modules.filter(
+          (module) => module.moduleAnswer !== null && module.moduleAnswer !== ""
+        ).length;
+
+        // Calculate quiz progress (based on scores)
+        const totalQuizzes = meeting.quizzes.length;
+        const completedQuizzes = userScore
+          ? userScore.quizScore > 0
+            ? totalQuizzes
+            : 0
+          : 0;
+
+        // Calculate task progress
+        const totalTasks = meeting.tasks.length;
+        const completedTasks = meeting.tasks.filter(
+          (task) => task.taskAnswer !== null && task.taskAnswer !== ""
+        ).length;
+
+        // Calculate total progress
+        const totalItems = totalModules + totalQuizzes + totalTasks;
+        const completedItems =
+          completedModules + completedQuizzes + completedTasks;
+
+        const progressPercentage =
+          totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+        return {
+          meetingId: meeting.id,
+          title: meeting.title,
+          progress: progressPercentage,
+        };
+      });
+
+      // Calculate overall training progress
+      const overallProgress =
+        meetingsProgress.length > 0
+          ? Math.round(
+              meetingsProgress.reduce(
+                (sum, meeting) => sum + meeting.progress,
+                0
+              ) / meetingsProgress.length
+            )
+          : 0;
+
+      // Remove unnecessary fields before returning
+      delete training.scores;
+      delete training.training.meetings;
+
+      return {
+        ...training,
+        progress: overallProgress,
+        meetingsProgress,
+      };
+    })
+  );
+
   return {
-    data: trainings,
+    data: trainingsWithProgress,
     paging: {
       page: option.page,
       total_items: total,
