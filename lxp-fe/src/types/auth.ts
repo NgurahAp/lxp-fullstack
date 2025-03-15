@@ -33,6 +33,7 @@ export interface LoginResponse {
     email: string;
     token: string;
     profile: string | undefined;
+    role: string;
   };
 }
 

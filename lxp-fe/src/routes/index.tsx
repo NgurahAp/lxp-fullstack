@@ -16,6 +16,7 @@ import { DetailScore } from "../pages/score/DetailScore";
 import { Register } from "../pages/auth/register";
 import { ForgotPassword } from "../pages/auth/ForgotPassword";
 import { ResetPassword } from "../pages/auth/ResetPassword";
+import InstructorDashboard from "../pages/instructor/dashboard";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -32,6 +33,14 @@ const AppRoutes: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/instructorDashboard"
+            element={
+              <ProtectedRoute>
+                <InstructorDashboard />
               </ProtectedRoute>
             }
           />

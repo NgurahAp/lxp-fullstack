@@ -48,7 +48,15 @@ export const useAuth = (): UseAuthReturn => {
 
       localStorage.setItem("user_data", JSON.stringify(userDataForStorage));
 
-      navigate("/dashboard");
+      // Conditional routing berdasarkan role
+      if (response.data.role === "student") {
+        navigate("/dashboard");
+      } else if (response.data.role === "instructor") {
+        navigate("/instructorDashboard");
+      } else {
+        // Default route jika role tidak dikenali
+        navigate("/dashboard");
+      }
     },
   });
 

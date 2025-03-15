@@ -19,6 +19,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     location.pathname === "/register" ||
     location.pathname === "/forgetpw" ||
     location.pathname === "/verification" ||
+    location.pathname === "/instructorDashboard" ||
     isResetPasswordPage;
 
   // Add check for QuizAttempt page using regex to match the pattern
