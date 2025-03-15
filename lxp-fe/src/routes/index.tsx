@@ -1,6 +1,6 @@
-// AppRoutes.tsx
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
+import InstructorLayout from "../layouts/InstructorLayout";
 import Home from "../pages/Home";
 import { Login } from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard";
@@ -21,95 +21,162 @@ import InstructorDashboard from "../pages/instructor/dashboard";
 const AppRoutes: React.FC = () => {
   return (
     <Router>
-      <MainLayout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgetpw" element={<ForgotPassword />} />
-          <Route path="/resetpw/:token" element={<ResetPassword />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/instructorDashboard"
-            element={
-              <ProtectedRoute>
+      <Routes>
+        {/* Instructor Routes with InstructorLayout */}
+        <Route
+          path="/instructorDashboard"
+          element={
+            <ProtectedRoute>
+              <InstructorLayout>
                 <InstructorDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/pelatihanku"
-            element={
-              <ProtectedRoute>
+              </InstructorLayout>
+            </ProtectedRoute>
+          }
+        />
+     
+        {/* Regular routes with MainLayout */}
+        <Route
+          path="/"
+          element={
+            <MainLayout>
+              <Home />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/login"
+          element={
+            <MainLayout>
+              <Login />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/register"
+          element={
+            <MainLayout>
+              <Register />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/forgetpw"
+          element={
+            <MainLayout>
+              <ForgotPassword />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/resetpw/:token"
+          element={
+            <MainLayout>
+              <ResetPassword />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Dashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/pelatihanku"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
                 <Pelatihanku />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/pelatihanku/:trainingId"
-            element={
-              <ProtectedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/pelatihanku/:trainingId"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
                 <PelatihankuDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/module/:meetingId/:moduleId"
-            element={
-              <ProtectedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/module/:meetingId/:moduleId"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
                 <Module />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/quiz/:meetingId/:quizId"
-            element={
-              <ProtectedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/quiz/:meetingId/:quizId"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
                 <Quiz />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/quizAttempt/:meetingId/:quizId"
-            element={
-              <ProtectedRoute>
-                <QuizAttempt />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/task/:meetingId/:taskId"
-            element={
-              <ProtectedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/quizAttempt/:meetingId/:quizId"
+          element={
+            <ProtectedRoute>
+              <QuizAttempt />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/task/:meetingId/:taskId"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
                 <Task />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/score"
-            element={
-              <ProtectedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/score"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
                 <Score />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/score/:trainingId"
-            element={
-              <ProtectedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/score/:trainingId"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
                 <DetailScore />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </MainLayout>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </Router>
   );
 };
