@@ -2,25 +2,10 @@ import React from "react";
 import { Users, BookOpen } from "lucide-react";
 import { useGetInstructorDashboard } from "../../hooks/useDashboard";
 
-// Definisi tipe data
-interface Course {
-  id: number;
-  title: string;
-  students: number;
-  progress: number;
-}
-
-interface DashboardData {
-  courses: number;
-  activeStudents: number;
-  pendingAssignments: number;
-  completionRate: number;
-  recentCourses: Course[];
-}
 
 interface StatsCardProps {
   title: string;
-  value: string | number;
+  value: number | undefined;
   icon: React.ReactNode;
   bgColor: string;
 }
@@ -46,25 +31,7 @@ const InstructorDashboard: React.FC = () => {
     );
   }
 
-  console.log(data);
-
-  // Data contoh untuk dashboard
-  const dashboardData: DashboardData = {
-    courses: 5,
-    activeStudents: 243,
-    pendingAssignments: 12,
-    completionRate: 78,
-    recentCourses: [
-      { id: 1, title: "Dasar Pemrograman Web", students: 56, progress: 75 },
-      {
-        id: 2,
-        title: "React dan TypeScript Fundamental",
-        students: 48,
-        progress: 60,
-      },
-      { id: 3, title: "UI/UX Design Principles", students: 35, progress: 90 },
-    ],
-  };
+  console.log(data); 
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -85,13 +52,13 @@ const InstructorDashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
             <StatsCard
               title="Total Courses"
-              value={dashboardData.courses}
+              value={data?.summary.totalCourses}
               icon={<BookOpen className="text-blue-600" />}
               bgColor="bg-blue-100"
             />
             <StatsCard
               title="Active Students"
-              value={dashboardData.activeStudents}
+              value={data?.summary.totalUniqueStudents}
               icon={<Users className="text-green-600" />}
               bgColor="bg-green-100"
             />
@@ -121,7 +88,7 @@ const InstructorDashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {dashboardData.recentCourses.map((course) => (
+                  {data?.courses.map((course) => (
                     <tr key={course.id}>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
@@ -130,7 +97,7 @@ const InstructorDashboard: React.FC = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
-                          {course.students} students
+                          {course.totalStudents} students
                         </div>
                       </td>
 
