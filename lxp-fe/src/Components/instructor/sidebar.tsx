@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Users, BookOpen, Home, Settings, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { UserData } from "../../types/auth";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -9,6 +10,25 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
   const location = useLocation();
+  const [profileData, setProfileData] = useState<UserData | null>(null);
+
+  useEffect(() => {
+    const getUserProfile = () => {
+      try {
+        const storedUser = localStorage.getItem("user_data");
+        if (storedUser) {
+          const userData: UserData = JSON.parse(storedUser);
+          setProfileData(userData);
+        } else {
+          console.log("Data profil tidak ditemukan di localStorage");
+        }
+      } catch (error) {
+        console.error("Error parsing user profile:", error);
+      }
+    };
+
+    getUserProfile();
+  }, []);
 
   return (
     <div
@@ -17,7 +37,9 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
       } bg-gray-900 text-white transition-all duration-300 ease-in-out flex flex-col`}
     >
       <div className="p-4 flex items-center justify-between">
-        {sidebarOpen && <h1 className="text-xl font-bold">LXP M-Knows</h1>}
+        {sidebarOpen && (
+          <h1 className="text-xl font-bold line-clamp-1">LXP M-Knows</h1>
+        )}
         <button
           onClick={toggleSidebar}
           className="p-2 rounded-lg hover:bg-gray-800"
@@ -26,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
         </button>
       </div>
 
-      <div className="flex-1 py-4">
+      <div className="flex-1 py-4 ">
         <NavItem
           icon={<Home size={20} />}
           text="Dashboard"
@@ -56,6 +78,39 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
           collapsed={!sidebarOpen}
         />
       </div>
+      {/* User Profile */}
+      <div
+        className={`p-4 border-t border-gray-800 ${
+          sidebarOpen ? "flex items-center" : "flex flex-col items-center"
+        }`}
+      >
+        <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold">
+          {profileData?.avatar ? (
+            <img
+              src={profileData.avatar}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center  rounded-full ">
+              {profileData?.name
+                ? profileData.name
+                    .split(" ")
+                    .slice(0, 2) // Ambil maksimal 2 kata pertama
+                    .map((word) => word[0]) // Ambil huruf pertama setiap kata
+                    .join("")
+                    .toUpperCase() // Ubah ke huruf besar
+                : "?"}
+            </div>
+          )}
+        </div>
+        {sidebarOpen && (
+          <div className="ml-3">
+            <div className="font-medium">{profileData?.name}</div>
+            <div className="text-xs text-gray-400">{profileData?.email}</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -80,15 +135,13 @@ const NavItem: React.FC<NavItemProps> = ({
   return (
     <div
       onClick={() => navigate(path)}
-      className={`px-4 py-3 flex items-center ${
+      className={`px-4 pl-6 py-3 flex items-center ${
         active
           ? "bg-gray-800 text-white"
           : "text-gray-400 hover:bg-gray-800 hover:text-white"
-      } transition-colors duration-200 cursor-pointer ${
-        collapsed ? "justify-center" : ""
-      }`}
+      } transition-colors duration-200 cursor-pointer`}
     >
-      <div>{icon}</div>
+      <div className="w-6 flex items-center justify-center">{icon}</div>
       {!collapsed && <div className="ml-3">{text}</div>}
     </div>
   );
