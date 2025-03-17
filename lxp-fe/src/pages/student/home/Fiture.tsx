@@ -1,4 +1,4 @@
-import { fiturCards } from "../../../public/landing/landingData";
+import { fiturCards } from "../../../../public/landing/landingData";
 
 export const Fiture = () => {
   return (

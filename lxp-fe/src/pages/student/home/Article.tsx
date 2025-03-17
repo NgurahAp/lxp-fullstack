@@ -1,4 +1,4 @@
-import { sekilasIlmuCards } from "../../../public/landing/landingData";
+import { sekilasIlmuCards } from "../../../../public/landing/landingData";
 
 export const Article = () => {
   return (

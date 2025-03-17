@@ -1,10 +1,10 @@
 import { Link, useParams } from "react-router-dom";
 import { FaCheckCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useState } from "react";
-import { useGetDetailTrainings } from "../../hooks/useTrainings";
-import { Meeting } from "../../types/training";
-import { Breadcrumb } from "../../Components/BreadCrumbs";
-import LoadingSpinner from "../../Components/LoadingSpinner";
+import { Breadcrumb } from "../../../Components/BreadCrumbs";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
+import { useGetDetailTrainings } from "../../../hooks/useTrainings";
+import { Meeting } from "../../../types/training";
 
 export const PelatihankuDetail: React.FC = () => {
   const { trainingId } = useParams<{ trainingId: string }>();

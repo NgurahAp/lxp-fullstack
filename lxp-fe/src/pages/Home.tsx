@@ -1,12 +1,12 @@
 import Clients from "../Components/Client";
 import FooterHome from "../Components/FooterHome";
 import NavbarHome from "../Components/NavbarHome";
-import { AboutUs } from "./home/AboutUs";
-import { Article } from "./home/Article";
-import { Bootcamp } from "./home/Bootcamp";
-import { Fiture } from "./home/Fiture";
-import { Hero } from "./home/Hero";
-import { TrainingProgram } from "./home/TrainingProgram";
+import { AboutUs } from "./student/home/AboutUs";
+import { Article } from "./student/home/Article";
+import { Bootcamp } from "./student/home/Bootcamp";
+import { Fiture } from "./student/home/Fiture";
+import { Hero } from "./student/home/Hero";
+import { TrainingProgram } from "./student/home/TrainingProgram";
 
 export default function Home() {
   return (

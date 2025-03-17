@@ -3,20 +3,20 @@ import MainLayout from "../layouts/MainLayout";
 import InstructorLayout from "../layouts/InstructorLayout";
 import Home from "../pages/Home";
 import { Login } from "../pages/auth/Login";
-import Dashboard from "../pages/dashboard";
-import { ProtectedRoute } from "./ProtectedRoute";
-import { Pelatihanku } from "../pages/pelatihanku";
-import { PelatihankuDetail } from "../pages/pelatihanku/DetailPelatihanku";
-import { Module } from "../pages/pelatihanku/Module";
-import { Quiz } from "../pages/pelatihanku/Quiz";
-import { QuizAttempt } from "../pages/pelatihanku/QuizAtttempt";
-import { Task } from "../pages/pelatihanku/Task";
-import { Score } from "../pages/score";
-import { DetailScore } from "../pages/score/DetailScore";
 import { Register } from "../pages/auth/register";
 import { ForgotPassword } from "../pages/auth/ForgotPassword";
 import { ResetPassword } from "../pages/auth/ResetPassword";
 import InstructorDashboard from "../pages/instructor/dashboard";
+import { Pelatihanku } from "../pages/student/pelatihanku";
+import { PelatihankuDetail } from "../pages/student/pelatihanku/DetailPelatihanku";
+import { Module } from "../pages/student/pelatihanku/Module";
+import { Quiz } from "../pages/student/pelatihanku/Quiz";
+import { QuizAttempt } from "../pages/student/pelatihanku/QuizAtttempt";
+import { Task } from "../pages/student/pelatihanku/Task";
+import { Score } from "../pages/student/score";
+import { DetailScore } from "../pages/student/score/DetailScore";
+import { ProtectedRoute } from "./ProtectedRoute";
+import Dashboard from "../pages/student/dashboard";
 
 const AppRoutes: React.FC = () => {
   return (

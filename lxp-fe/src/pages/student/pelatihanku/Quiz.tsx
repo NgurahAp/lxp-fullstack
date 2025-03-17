@@ -1,13 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetQuiz } from "../../hooks/useQuiz";
-import LoadingSpinner from "../../Components/LoadingSpinner";
-import { Breadcrumb } from "../../Components/BreadCrumbs";
-import PageInfo from "../../Components/PageInfo";
 import { QuizInfo } from "./components/QuizInfo";
 import { MdOutlineTaskAlt } from "react-icons/md";
 import QuizDialog from "./components/QuizDialog";
 import { useState } from "react";
 import { QuizHistory } from "./components/QuizHistory";
+import { Breadcrumb } from "../../../Components/BreadCrumbs";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
+import PageInfo from "../../../Components/PageInfo";
+import { useGetQuiz } from "../../../hooks/useQuiz";
 
 export const Quiz = () => {
   const [isDialogOpen, setDialogOpen] = useState(false);

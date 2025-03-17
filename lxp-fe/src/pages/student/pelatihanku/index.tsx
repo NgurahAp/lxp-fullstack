@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useGetTrainings } from "../../hooks/useTrainings";
-import { TrainingData } from "../../types/training";
-import { Breadcrumb } from "../../Components/BreadCrumbs";
 import { Link } from "react-router-dom";
-import { SearchBar } from "../../Components/SearchBar";
-import LoadingSpinner from "../../Components/LoadingSpinner";
+import { Breadcrumb } from "../../../Components/BreadCrumbs";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
+import { SearchBar } from "../../../Components/SearchBar";
+import { useGetTrainings } from "../../../hooks/useTrainings";
+import { TrainingData } from "../../../types/training";
 
 export const Pelatihanku = () => {
   const { data, isLoading, error } = useGetTrainings();

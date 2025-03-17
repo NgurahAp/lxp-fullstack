@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { UserData } from "../../../types/auth";
-import ProfileBox from "../../../Components/ProfileBox";
 import NavigationDialog from "./NavConfirmDialog";
+import ProfileBox from "../../../../Components/ProfileBox";
+import { UserData } from "../../../../types/auth";
 
 export const NavbarQuiz = () => {
   const location = useLocation();

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { RiFileEditLine, RiLoader4Line } from "react-icons/ri";
-import { useSubmitModuleAnswer } from "../../../hooks/useModule";
 import { UseMutationResult } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useSubmitModuleAnswer } from "../../../../hooks/useModule";
 
 interface ModuleSubmitDialogProps {
   onComplete?: () => void;

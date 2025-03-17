@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useGetUser } from "../../hooks/useAuth";
 import Sidebar from "./components/Sidebar";
+import { useGetUser } from "../../../hooks/useAuth";
 
 const Dashboard: React.FC = () => {
   const { data: user, isLoading, error } = useGetUser();

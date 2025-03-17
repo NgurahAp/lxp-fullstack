@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
-import { useGetScore } from "../../hooks/useScore";
-import LoadingSpinner from "../../Components/LoadingSpinner";
-import { Breadcrumb } from "../../Components/BreadCrumbs";
-import { BackLink } from "../../Components/BackLink";
+import { BackLink } from "../../../Components/BackLink";
+import { Breadcrumb } from "../../../Components/BreadCrumbs";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
+import { useGetScore } from "../../../hooks/useScore";
 
 export const DetailScore = () => {
   const { trainingId } = useParams<{ trainingId: string }>();

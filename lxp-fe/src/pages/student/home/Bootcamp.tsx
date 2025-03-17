@@ -1,4 +1,4 @@
-import { trainingCategories } from "../../../public/landing/landingData";
+import { trainingCategories } from "../../../../public/landing/landingData";
 
 export const Bootcamp = () => {
   return (

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useGetTrainings } from "../../hooks/useTrainings";
-import LoadingSpinner from "../../Components/LoadingSpinner";
-import { Breadcrumb } from "../../Components/BreadCrumbs";
-import { EmptyState } from "../../Components/EmptyState";
 import { Link } from "react-router-dom";
-import { TrainingData } from "../../types/training";
+import { Breadcrumb } from "../../../Components/BreadCrumbs";
+import { EmptyState } from "../../../Components/EmptyState";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
+import { useGetTrainings } from "../../../hooks/useTrainings";
+import { TrainingData } from "../../../types/training";
 
 export const Score: React.FC = () => {
   const { data, isLoading, error } = useGetTrainings();

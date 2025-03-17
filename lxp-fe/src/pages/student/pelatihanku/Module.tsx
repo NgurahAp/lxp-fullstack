@@ -1,11 +1,11 @@
 import { Link, useParams } from "react-router-dom";
-import { useGetModule } from "../../hooks/useModule";
-import { Breadcrumb } from "../../Components/BreadCrumbs";
-import { BackLink } from "../../Components/BackLink";
 import { IoDocumentText } from "react-icons/io5";
 import { ModuleSubmitDialog } from "./components/ModuleSubmitDialog";
 import { FaCheck } from "react-icons/fa6";
-import LoadingSpinner from "../../Components/LoadingSpinner";
+import { BackLink } from "../../../Components/BackLink";
+import { Breadcrumb } from "../../../Components/BreadCrumbs";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
+import { useGetModule } from "../../../hooks/useModule";
 
 export const Module = () => {
   const { meetingId, moduleId } = useParams<{

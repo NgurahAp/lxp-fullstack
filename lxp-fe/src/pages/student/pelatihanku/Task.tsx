@@ -1,11 +1,11 @@
 import { useParams } from "react-router-dom";
-import { useGetTask } from "../../hooks/useTask";
-import LoadingSpinner from "../../Components/LoadingSpinner";
-import { Breadcrumb } from "../../Components/BreadCrumbs";
-import PageInfo from "../../Components/PageInfo";
-import { FinishedAssignment } from "./components/FinishedAssignment";
-import { BackLink } from "../../Components/BackLink";
 import { FileUploadForm } from "./components/FileUploadForm";
+import { BackLink } from "../../../Components/BackLink";
+import { Breadcrumb } from "../../../Components/BreadCrumbs";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
+import PageInfo from "../../../Components/PageInfo";
+import { useGetTask } from "../../../hooks/useTask";
+import { FinishedAssignment } from "./components/FinishedAssignment";
 
 export const Task = () => {
   const { meetingId, taskId } = useParams<{

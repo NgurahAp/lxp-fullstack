@@ -1,5 +1,5 @@
 import React from "react";
-import { UserData } from "../../../types/auth";
+import { UserData } from "../../../../types/auth";
 
 interface SidebarProps {
   user: UserData;

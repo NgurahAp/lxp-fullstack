@@ -1,8 +1,5 @@
-import {
-  inHouseCards,
-  pelatihanPubliCards,
-  programPelatihanCards,
-} from "../../../public/landing/landingData";
+import { programPelatihanCards, inHouseCards, pelatihanPubliCards } from "../../../../public/landing/landingData";
+
 
 export const TrainingProgram = () => {
   return (

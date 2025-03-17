@@ -1,10 +1,10 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetQuizQuestion, useSubmitQuiz } from "../../hooks/useQuiz";
-import LoadingSpinner from "../../Components/LoadingSpinner";
 import { NavbarQuiz } from "./components/NavbarQuiz";
 import { useState } from "react";
 import CountdownTimer from "./components/CountdownTimer";
 import { ConfirmAttemptQuizDialog } from "./components/ConfirmAttemptDialog";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
+import { useGetQuizQuestion, useSubmitQuiz } from "../../../hooks/useQuiz";
 
 export const QuizAttempt = () => {
   const { meetingId, quizId } = useParams<{
