@@ -1,5 +1,6 @@
 import React from "react";
 import { Users, BookOpen } from "lucide-react";
+import { useGetInstructorDashboard } from "../../hooks/useDashboard";
 
 // Definisi tipe data
 interface Course {
@@ -25,6 +26,28 @@ interface StatsCardProps {
 }
 
 const InstructorDashboard: React.FC = () => {
+  const { data, isLoading, error } = useGetInstructorDashboard();
+
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div>Error: {error.message}</div>
+      </div>
+    );
+  }
+
+  console.log(data);
+
   // Data contoh untuk dashboard
   const dashboardData: DashboardData = {
     courses: 5,
