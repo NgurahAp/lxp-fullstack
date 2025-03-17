@@ -22,8 +22,76 @@ const getTestUser = async () => {
   });
 };
 
+const getTestInstructor = async () => {
+  return prismaClient.user.findUnique({
+    where: {
+      email: "instructor@test.com",
+    },
+  });
+};
+
 const removeTestUser = async () => {
   await prismaClient.user.deleteMany({});
+};
+
+const getInstructorTrainings = async (instructorId) => {
+  return prismaClient.training.findMany({
+    where: {
+      instructorId: instructorId,
+    },
+  });
+};
+
+// Fungsi untuk mendapatkan jumlah student dalam training
+const getTrainingStudentsCount = async (trainingId) => {
+  return prismaClient.training_Users.count({
+    where: {
+      trainingId: trainingId,
+    },
+  });
+};
+
+// Fungsi untuk membuat multiple training users sekaligus
+const createMultipleTrainingUsers = async (trainingId, userIds) => {
+  const promises = userIds.map((userId) =>
+    prismaClient.training_Users.create({
+      data: {
+        trainingId: trainingId,
+        userId: userId,
+        status: "enrolled",
+      },
+    })
+  );
+  return Promise.all(promises);
+};
+
+// Fungsi untuk membuat beberapa test students
+const createMultipleTestStudents = async (count = 5) => {
+  const promises = [];
+  for (let i = 0; i < count; i++) {
+    promises.push(
+      prismaClient.user.create({
+        data: {
+          name: `Student ${i + 1}`,
+          email: `student${i + 1}@test.com`,
+          password: "hashedpassword",
+          role: "student",
+        },
+      })
+    );
+  }
+  return Promise.all(promises);
+};
+
+const removeTestStudents = async () => {
+  return prismaClient.user.deleteMany({
+    where: {
+      email: {
+        contains: "student",
+        endsWith: "@test.com",
+      },
+    },
+  });
 };
 
 const createTestInstructor = async () => {
@@ -211,6 +279,12 @@ export {
   createTestInstructor,
   removeTestInstructor,
   getTestUser,
+  getTestInstructor,
+  getInstructorTrainings,
+  getTrainingStudentsCount,
+  createMultipleTestStudents,
+  createMultipleTrainingUsers,
+  removeTestStudents,
   createTraining,
   removeTraining,
   createMeeting,

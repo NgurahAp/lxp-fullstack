@@ -100,4 +100,107 @@ const getStudentDashboard = async (user, request) => {
   };
 };
 
-export default { getStudentDashboard };
+const getInstructorDashboard = async (user) => {
+  // Memastikan user adalah instructor
+  if (user.role !== "instructor") {
+    throw new ResponseError(403, "Access forbidden. Instructor role required");
+  }
+
+  const instructorData = await prismaClient.user.findUnique({
+    where: {
+      id: user.id,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      profile: true,
+      trainings: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          image: true,
+          createdAt: true,
+          _count: {
+            select: {
+              users: true, // Jumlah murid per course
+            },
+          },
+          users: {
+            select: {
+              id: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+              status: true,
+            },
+            take: 5, // Batasi tampilan murid yang ditampilkan di dashboard
+          },
+        },
+      },
+      _count: {
+        select: {
+          trainings: true, // Total course
+        },
+      },
+    },
+  });
+
+  if (!instructorData) {
+    throw new ResponseError(404, "Instructor not found");
+  }
+
+  // Hitung total murid yang unik dari semua kursus
+  const allStudentIds = new Set();
+
+  instructorData.trainings.forEach((training) => {
+    training.users.forEach((user) => {
+      allStudentIds.add(user.user.id);
+    });
+  });
+
+  // Transformasi data course untuk response
+  const formattedCourses = instructorData.trainings.map((training) => {
+    return {
+      id: training.id,
+      title: training.title,
+      description: training.description,
+      image: training.image,
+      createdAt: training.createdAt,
+      totalStudents: training._count.users,
+      recentStudents: training.users.map((user) => ({
+        id: user.id,
+        userId: user.user.id,
+        name: user.user.name,
+        email: user.user.email,
+        status: user.status,
+      })),
+    };
+  });
+
+  return {
+    data: {
+      profile: {
+        id: instructorData.id,
+        email: instructorData.email,
+        name: instructorData.name,
+        role: instructorData.role,
+        avatar: instructorData.profile,
+      },
+      summary: {
+        totalCourses: instructorData._count.trainings,
+        totalUniqueStudents: allStudentIds.size,
+      },
+      courses: formattedCourses,
+    },
+  };
+};
+
+
+export default { getStudentDashboard, getInstructorDashboard };

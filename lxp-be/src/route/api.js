@@ -22,6 +22,13 @@ userRouter.get(
   dashboardController.getStudentDashboard
 );
 
+userRouter.get(
+  "/api/instructor/dashboard",
+  authMiddleware,
+  instruktorMiddleware,
+  dashboardController.getInstructorDashboard
+);
+
 // Router for training
 userRouter.post(
   "/api/trainings",

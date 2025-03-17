@@ -9,4 +9,15 @@ const getStudentDashboard = async (req, res, next) => {
   }
 };
 
-export default { getStudentDashboard };
+const getInstructorDashboard = async (req, res, next) => {
+  try {
+    const result = await dashboardService.getInstructorDashboard(
+      req.user
+    );
+    res.status(200).json(result);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { getStudentDashboard, getInstructorDashboard };
