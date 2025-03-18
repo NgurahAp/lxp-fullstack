@@ -161,6 +161,37 @@ describe("GET /api/students/trainings", () => {
   });
 });
 
+describe("GET /api/instructor/trainings", () => {
+  beforeEach(async () => {
+    const user = await createTestUser();
+
+    const instructor = await createTestInstructor();
+
+    const training = await createTraining(instructor.id);
+
+    await createTrainingUser(training.id, user.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("should return 200 and instructor dashboard data", async () => {
+    const result = await supertest(web)
+      .get("/api/instructor/trainings")
+      .set("Authorization", `Bearer test-instructor`);
+
+    console.log(result.body.data.training);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(Array.isArray(result.body.data.training)).toBe(true);
+    expect(result.body.paging).toBeDefined();
+    expect(result.body.paging.page).toBe(1);
+    expect(result.body.data.training[0].title).toBe("test training");
+  });
+});
+
 describe("GET /api/student/trainings/:trainingId", () => {
   beforeEach(async () => {
     const user = await createTestUser();

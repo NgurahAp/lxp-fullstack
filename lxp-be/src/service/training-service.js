@@ -2,6 +2,7 @@ import { prismaClient } from "../application/database.js";
 import {
   createTrainingUserValidation,
   createTrainingValidation,
+  getInstructorTrainingsValidation,
   getStudentTrainingsValidation,
   getTrainingDetailValidation,
 } from "../validation/training-validation.js";
@@ -243,6 +244,52 @@ const getStudentTrainings = async (user, request) => {
   };
 };
 
+const getInstructorTrainings = async (user, request) => {
+  const option = validate(getInstructorTrainingsValidation, request);
+
+  const skip = (option.page - 1) * option.size;
+
+  const where = {
+    instructorId: user.id,
+  };
+
+  if (option.status) {
+    where.status = option.status;
+  }
+
+  const total = await prismaClient.training.count({ where });
+
+  const trainings = await prismaClient.training.findMany({
+    where,
+    skip,
+    take: option.size,
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      image: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: {
+        select: {
+          meetings: true,
+          users: true,
+        },
+      },
+    },
+  });
+  return {
+    data: {
+      training: trainings,
+    },
+    paging: {
+      page: option.page,
+      total_items: total,
+      total_pages: Math.ceil(total / option.size),
+    },
+  };
+};
+
 const getTrainingDetail = async (user, trainingId) => {
   trainingId = validate(getTrainingDetailValidation, { trainingId }).trainingId;
 
@@ -327,5 +374,6 @@ export default {
   createTraining,
   createTrainingUser,
   getStudentTrainings,
+  getInstructorTrainings,
   getTrainingDetail,
 };

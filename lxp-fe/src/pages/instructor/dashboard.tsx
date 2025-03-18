@@ -2,7 +2,6 @@ import React from "react";
 import { Users, BookOpen } from "lucide-react";
 import { useGetInstructorDashboard } from "../../hooks/useDashboard";
 
-
 interface StatsCardProps {
   title: string;
   value: number | undefined;
@@ -31,7 +30,7 @@ const InstructorDashboard: React.FC = () => {
     );
   }
 
-  console.log(data); 
+  console.log(data);
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -41,7 +40,7 @@ const InstructorDashboard: React.FC = () => {
         <main className="flex-1 overflow-y-auto p-4">
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
-              Welcome back, Arya!
+              Welcome back, {data?.profile?.name?.split(" ")[0]}!
             </h1>
             <p className="text-gray-600">
               Here's an overview of your teaching activity
