@@ -190,6 +190,26 @@ describe("GET /api/instructor/trainings", () => {
     expect(result.body.paging.page).toBe(1);
     expect(result.body.data.training[0].title).toBe("test training");
   });
+
+  it("should return 403 if student try to access", async () => {
+    const result = await supertest(web)
+      .get("/api/instructor/trainings")
+      .set("Authorization", `Bearer test`);
+
+    expect(result.status).toBe(403);
+  });
+
+  it("Should reject invalid pagination parameters", async () => {
+    const result = await supertest(web)
+      .get("/api/student/trainings")
+      .set("Authorization", "Bearer test")
+      .query({
+        page: 0,
+        size: 100,
+      });
+
+    expect(result.status).toBe(400);
+  });
 });
 
 describe("GET /api/student/trainings/:trainingId", () => {
