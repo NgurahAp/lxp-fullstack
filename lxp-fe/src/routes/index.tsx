@@ -19,6 +19,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import Dashboard from "../pages/student/dashboard";
 import CoursePage from "../pages/instructor/course";
 import DetailCoursePage from "../pages/instructor/course/DetailCourse";
+import CreateTrainingForm from "../pages/instructor/course/pelatihanku/CreateTraining";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -46,7 +47,17 @@ const AppRoutes: React.FC = () => {
           }
         />
         <Route
-          path="/detailCourse/:trainingId"
+          path="/CreateTraining"
+          element={
+            <ProtectedRoute>
+              <InstructorLayout>
+                <CreateTrainingForm />
+              </InstructorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/instructorCourse/:trainingId"
           element={
             <ProtectedRoute>
               <InstructorLayout>

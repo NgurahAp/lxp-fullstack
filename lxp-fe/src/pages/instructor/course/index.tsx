@@ -28,9 +28,12 @@ const CoursePage = () => {
     <div className="bg-gray-100 min-h-screen p-6">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Your Courses</h1>
-        <button className="mt-4 md:mt-0 px-5 py-2.5 bg-gray-900 text-white rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors">
+        <Link
+          to="/CreateTraining"
+          className="mt-4 md:mt-0 px-5 py-2.5 bg-gray-900 text-white rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
+        >
           <PlusCircle size={18} /> Create New Course
-        </button>
+        </Link>
       </div>
 
       <div className="mb-8 bg-white p-5 rounded-xl shadow-sm">
@@ -90,13 +93,13 @@ const CoursePage = () => {
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <Link
-                  to={`/detailCourse/${course.id}`}
+                  to={`/instructorCourse/${course.id}`}
                   className="px-4 py-2 border border-gray-900 text-gray-900 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors text-center"
                 >
                   View
                 </Link>
                 <Link
-                  to={`/detailCourse/${course.id}`}
+                  to={`/instructorCourse/${course.id}`}
                   className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors text-center"
                 >
                   Edit
