@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { PlusCircle, Search, Book, Users, Calendar } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useGetTrainingsInstructor } from "../../../hooks/useTrainings";
 
 const CoursePage = () => {
@@ -7,7 +8,6 @@ const CoursePage = () => {
 
   const { data, isLoading, error } = useGetTrainingsInstructor();
 
-  // Show loading state while data is being fetched
   if (isLoading) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center">
@@ -16,7 +16,6 @@ const CoursePage = () => {
     );
   }
 
-  // Show error state if there's an error
   if (error) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center">
@@ -25,11 +24,8 @@ const CoursePage = () => {
     );
   }
 
-  console.log(data);
-
   return (
     <div className="bg-gray-100 min-h-screen p-6">
-      {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Your Courses</h1>
         <button className="mt-4 md:mt-0 px-5 py-2.5 bg-gray-900 text-white rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors">
@@ -37,7 +33,6 @@ const CoursePage = () => {
         </button>
       </div>
 
-      {/* Filters */}
       <div className="mb-8 bg-white p-5 rounded-xl shadow-sm">
         <div className="flex flex-col md:flex-row gap-4 items-center">
           <div className="flex-1 relative">
@@ -56,14 +51,12 @@ const CoursePage = () => {
         </div>
       </div>
 
-      {/* Course Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {data?.data.training.map((course) => (
           <div
             key={course.id}
             className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
           >
-            {/* Course Image */}
             <div className="h-48 bg-gray-200 relative">
               <img
                 src={
@@ -75,8 +68,6 @@ const CoursePage = () => {
                 className="w-full h-full object-fill"
               />
             </div>
-
-            {/* Course Info */}
             <div className="p-5">
               <h2 className="font-semibold text-lg text-gray-900 line-clamp-2 h-14">
                 {course.title}
@@ -84,7 +75,6 @@ const CoursePage = () => {
               <p className="text-sm text-gray-600 mt-3 line-clamp-2 h-10">
                 {course.description}
               </p>
-
               <div className="flex items-center justify-between mt-5 text-sm text-gray-500">
                 <div className="flex items-center gap-1.5">
                   <Users size={16} className="text-gray-400" />
@@ -95,26 +85,28 @@ const CoursePage = () => {
                   <span>{course._count.meetings} meetings</span>
                 </div>
               </div>
-
               <div className="mt-4 text-xs text-gray-500">
                 Last updated: {new Date(course.updatedAt).toLocaleDateString()}
               </div>
-
-              {/* Action Buttons */}
               <div className="mt-5 grid grid-cols-2 gap-3">
-                <button className="px-4 py-2 border border-gray-900 text-gray-900 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+                <Link
+                  to={`/detailCourse/${course.id}`}
+                  className="px-4 py-2 border border-gray-900 text-gray-900 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors text-center"
+                >
                   View
-                </button>
-                <button className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
+                </Link>
+                <Link
+                  to={`/detailCourse/${course.id}`}
+                  className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors text-center"
+                >
                   Edit
-                </button>
+                </Link>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Empty State */}
       {data?.data.training.length === 0 && (
         <div className="text-center py-16 px-6 bg-white rounded-xl shadow-sm">
           <Book size={56} className="mx-auto text-gray-300 mb-4" />

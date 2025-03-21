@@ -356,6 +356,7 @@ const getTrainingDetail = async (user, trainingId) => {
       _count: {
         select: {
           meetings: true,
+          users: true
         },
       },
     },

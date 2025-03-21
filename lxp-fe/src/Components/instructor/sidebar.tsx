@@ -60,7 +60,10 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
           icon={<BookOpen size={20} />}
           text="Courses"
           path="/instructorCourse"
-          active={location.pathname.includes("/instructorCourse")}
+          active={
+            location.pathname.includes("/instructorCourse") ||
+            location.pathname.includes("/detailCourse")
+          }
           collapsed={!sidebarOpen}
         />
         <NavItem
