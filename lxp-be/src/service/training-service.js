@@ -382,6 +382,7 @@ const getInstructorTrainingDetail = async (user, trainingId) => {
       title: true,
       description: true,
       image: true,
+      updatedAt: true,
       instructor: {
         select: {
           id: true,

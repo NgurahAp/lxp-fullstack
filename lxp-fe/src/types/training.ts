@@ -10,6 +10,7 @@ export interface Training {
   title: string;
   description: string;
   image: string;
+  updateAt: Date;
   instructor: Instructor;
 }
 
@@ -67,6 +68,7 @@ export interface DetailTrainingData {
   description: string;
   image: string;
   instructor: Instructor;
+  updatedAt: Date;
   meetings: Meeting[];
   _count: Count;
 }
