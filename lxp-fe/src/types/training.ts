@@ -73,3 +73,33 @@ export interface DetailTrainingData {
 export interface DetailTrainingResponse {
   data: DetailTrainingData;
 }
+
+//  Instructor
+
+interface InstructorTraining {
+  id: string;
+  title: string;
+  description: string;
+  image: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count: {
+    meetings: number;
+    users: number;
+  };
+}
+
+interface Data {
+  training: InstructorTraining[];
+}
+
+interface Paging {
+  page: number;
+  total_items: number;
+  total_pages: number;
+}
+
+export interface GetTrainingInstructorResponse {
+  data: Data;
+  paging: Paging;
+}

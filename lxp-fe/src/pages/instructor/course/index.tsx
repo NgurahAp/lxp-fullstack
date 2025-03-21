@@ -7,6 +7,7 @@ import {
   Calendar,
   Filter,
 } from "lucide-react";
+import { useGetTrainingsInstructor } from "../../../hooks/useTrainings";
 
 // Mock data for courses
 const coursesData = [
@@ -69,6 +70,28 @@ const CoursePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const { data, isLoading, error } = useGetTrainingsInstructor();
+
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div>Error: {error.message}</div>
+      </div>
+    );
+  }
+
+  console.log(data);
 
   // Filter courses based on search term and status
   const filteredCourses = coursesData.filter((course) => {

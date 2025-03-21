@@ -1,6 +1,14 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { DetailTrainingData, TrainingResponse } from "../types/training";
-import { getDetailTraining, getTrainings } from "../service/trainingService.ts";
+import {
+  DetailTrainingData,
+  GetTrainingInstructorResponse,
+  TrainingResponse,
+} from "../types/training";
+import {
+  getDetailTraining,
+  getTrainings,
+  getTrainingsInstructor,
+} from "../service/trainingService.ts";
 
 export const useGetTrainings = (): UseQueryResult<TrainingResponse, Error> => {
   return useQuery({
@@ -9,6 +17,20 @@ export const useGetTrainings = (): UseQueryResult<TrainingResponse, Error> => {
       const response = await getTrainings();
       const trainingData = response.data;
 
+      return trainingData;
+    },
+  });
+};
+
+export const useGetTrainingsInstructor = (): UseQueryResult<
+  GetTrainingInstructorResponse,
+  Error
+> => {
+  return useQuery({
+    queryKey: ["trainingInstructor"],
+    queryFn: async () => {
+      const response = await getTrainingsInstructor();
+      const trainingData = response;
       return trainingData;
     },
   });
