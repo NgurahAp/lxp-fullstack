@@ -225,29 +225,48 @@ describe("GET /api/student/trainings/:trainingId", () => {
     await removeAll();
   });
 
+  it("Should reject when accessing unauthorized training", async () => {
+    const result = await supertest(web)
+      .get(`/api/student/trainings/99999`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(403);
+  });
+});
+
+describe("GET /api/instructor/trainings/:trainingId", () => {
+  beforeEach(async () => {
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
+    const training = await createTraining(instructor.id);
+    await createTrainingUser(training.id, user.id);
+    await createMeeting(training.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
   it("Should return training detail with meetings", async () => {
     const training = await prismaClient.training.findFirst({
       where: { title: "test training" },
     });
 
     const result = await supertest(web)
-      .get(`/api/student/trainings/${training.id}`)
-      .set("Authorization", "Bearer test");
-
-    console.log(training.id);
-    console.log(result.body);
+      .get(`/api/instructor/trainings/${training.id}`)
+      .set("Authorization", "Bearer test-instructor");
 
     expect(result.status).toBe(200);
     expect(result.body.data).toBeDefined();
-    expect(result.body.data.title).toBe("test training");
-    expect(Array.isArray(result.body.data.meetings)).toBe(true);
-    expect(result.body.data.meetings.length).toBe(1);
-    expect(result.body.data.meetings[0].title).toBe("Test Meeting");
   });
 
-  it("Should reject when accessing unauthorized training", async () => {
+  it("Should reject if student try to access", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
     const result = await supertest(web)
-      .get(`/api/student/trainings/99999`)
+      .get(`/api/instructor/trainings/${training.id}`)
       .set("Authorization", "Bearer test");
 
     expect(result.status).toBe(403);

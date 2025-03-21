@@ -7,6 +7,7 @@ import {
   FileText,
   CheckSquare,
 } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 // Mock data
 const courseData = {
@@ -97,6 +98,22 @@ const DetailCoursePage = () => {
     courseData.meetings[0]
   );
   const [activeTab, setActiveTab] = useState("modules");
+
+  const { trainingId } = useParams<{ trainingId: string }>();
+  // const { data, isLoading, error } = useGetDetailTrainings(trainingId);
+
+  // if (isLoading) {
+  //   return <LoadingSpinner text="Loading..." />;
+  // }
+
+  // if (error) {
+  //   return (
+  //     <div className="min-h-[85vh] w-screen flex items-center justify-center">
+  //       Error loading data
+  //     </div>
+  //   );
+  // }
+
 
   return (
     <div className="bg-gray-100 min-h-screen p-6">

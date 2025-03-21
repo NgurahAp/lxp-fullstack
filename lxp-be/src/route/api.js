@@ -60,6 +60,13 @@ userRouter.get(
   trainingController.getTrainingDetail
 );
 
+userRouter.get(
+  "/api/instructor/trainings/:trainingId",
+  authMiddleware,
+  instruktorMiddleware,
+  trainingController.getInstructorTrainingDetail
+);
+
 // Router for meeting
 userRouter.post(
   "/api/meetings",

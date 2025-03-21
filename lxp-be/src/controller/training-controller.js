@@ -76,10 +76,24 @@ const getTrainingDetail = async (req, res, next) => {
   }
 };
 
+const getInstructorTrainingDetail = async (req, res, next) => {
+  try {
+    const trainingId = req.params.trainingId;
+    const result = await trainingService.getInstructorTrainingDetail(
+      req.user,
+      trainingId
+    );
+    res.status(200).json(result);
+  } catch (e) {
+    next(e);
+  }
+};
+
 export default {
   createTraining,
   createTrainingUser,
   getStudentsTraining,
   getInstructorTraining,
   getTrainingDetail,
+  getInstructorTrainingDetail,
 };

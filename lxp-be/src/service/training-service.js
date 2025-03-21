@@ -356,7 +356,76 @@ const getTrainingDetail = async (user, trainingId) => {
       _count: {
         select: {
           meetings: true,
-          users: true
+          users: true,
+        },
+      },
+    },
+  });
+
+  if (!training) {
+    throw new ResponseError(404, "Training not found");
+  }
+
+  return {
+    data: training,
+  };
+};
+
+const getInstructorTrainingDetail = async (user, trainingId) => {
+  trainingId = validate(getTrainingDetailValidation, { trainingId }).trainingId;
+
+  // Get training details with meetings
+  const training = await prismaClient.training.findUnique({
+    where: { id: trainingId, instructorId: user.id },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      image: true,
+      instructor: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      meetings: {
+        select: {
+          id: true,
+          title: true,
+          meetingDate: true,
+          createdAt: true,
+          updatedAt: true,
+          modules: {
+            select: {
+              id: true,
+              title: true,
+              moduleAnswer: true,
+            },
+          },
+          quizzes: {
+            select: {
+              id: true,
+              title: true,
+              quizScore: true,
+            },
+          },
+          tasks: {
+            select: {
+              id: true,
+              title: true,
+              taskAnswer: true,
+            },
+          },
+        },
+        orderBy: {
+          meetingDate: "asc",
+        },
+      },
+      _count: {
+        select: {
+          meetings: true,
+          users: true,
         },
       },
     },
@@ -377,4 +446,5 @@ export default {
   getStudentTrainings,
   getInstructorTrainings,
   getTrainingDetail,
+  getInstructorTrainingDetail,
 };

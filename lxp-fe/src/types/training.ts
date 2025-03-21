@@ -58,6 +58,7 @@ export interface Meeting {
 
 interface Count {
   meetings: number;
+  users: number;
 }
 
 export interface DetailTrainingData {
