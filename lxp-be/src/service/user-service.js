@@ -37,7 +37,7 @@ const register = async (request) => {
   });
 
   // Send welcome email after successful registration
-  await sendWelcomeEmail(createdUser.email, createdUser.name);
+  // await sendWelcomeEmail(createdUser.email, createdUser.name);
 
   return createdUser;
 };

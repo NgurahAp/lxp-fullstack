@@ -432,7 +432,10 @@ const getInstructorTrainingDetail = async (user, trainingId) => {
   });
 
   if (!training) {
-    throw new ResponseError(404, "Training not found");
+    throw new ResponseError(
+      404,
+      "Training not found or you dont have access to this training"
+    );
   }
 
   return {
