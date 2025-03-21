@@ -6,6 +6,7 @@ import {
 } from "../types/training";
 import {
   getDetailTraining,
+  getInstructorDetailTraining,
   getTrainings,
   getTrainingsInstructor,
 } from "../service/trainingService.ts";
@@ -43,6 +44,20 @@ export const useGetDetailTrainings = (
     queryKey: ["detailTraining"],
     queryFn: async () => {
       const response = await getDetailTraining(trainingId);
+      const detailTrainingData = response.data;
+
+      return detailTrainingData;
+    },
+  });
+};
+
+export const useGetInstructorDetailTrainings = (
+  trainingId: string | undefined
+): UseQueryResult<DetailTrainingData, Error> => {
+  return useQuery({
+    queryKey: ["detailTraining"],
+    queryFn: async () => {
+      const response = await getInstructorDetailTraining(trainingId);
       const detailTrainingData = response.data;
 
       return detailTrainingData;

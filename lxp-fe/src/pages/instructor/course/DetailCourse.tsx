@@ -8,6 +8,8 @@ import {
   CheckSquare,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { useGetInstructorDetailTrainings } from "../../../hooks/useTrainings";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
 
 // Mock data
 const courseData = {
@@ -100,20 +102,22 @@ const DetailCoursePage = () => {
   const [activeTab, setActiveTab] = useState("modules");
 
   const { trainingId } = useParams<{ trainingId: string }>();
-  // const { data, isLoading, error } = useGetDetailTrainings(trainingId);
+  const { data, isLoading, error } =
+    useGetInstructorDetailTrainings(trainingId);
 
-  // if (isLoading) {
-  //   return <LoadingSpinner text="Loading..." />;
-  // }
+  if (isLoading) {
+    return <LoadingSpinner text="Loading..." />;
+  }
 
-  // if (error) {
-  //   return (
-  //     <div className="min-h-[85vh] w-screen flex items-center justify-center">
-  //       Error loading data
-  //     </div>
-  //   );
-  // }
+  if (error) {
+    return (
+      <div className="min-h-[85vh] w-screen flex items-center justify-center">
+        Error loading data
+      </div>
+    );
+  }
 
+  console.log(data);
 
   return (
     <div className="bg-gray-100 min-h-screen p-6">
