@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { PlusCircle, Upload, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const CreateTrainingForm = () => {
   const [title, setTitle] = useState("");
@@ -135,12 +136,12 @@ const CreateTrainingForm = () => {
 
             {/* Submit Button */}
             <div className="flex justify-end pt-4">
-              <button
-                type="button"
+              <Link
+                to={"/instructorCourse"}
                 className="px-4 py-2 border border-gray-300 rounded-lg mr-2 hover:bg-gray-50 text-gray-700 transition-colors"
               >
                 Cancel
-              </button>
+              </Link>
               <button
                 type="submit"
                 className="px-4 py-2 bg-gray-900 text-white rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
