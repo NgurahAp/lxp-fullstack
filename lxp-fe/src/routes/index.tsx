@@ -18,6 +18,7 @@ import { DetailScore } from "../pages/student/score/DetailScore";
 import { ProtectedRoute } from "./ProtectedRoute";
 import Dashboard from "../pages/student/dashboard";
 import CoursePage from "../pages/instructor/course";
+import DetailCoursePage from "../pages/instructor/course/DetailCourse";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -40,6 +41,16 @@ const AppRoutes: React.FC = () => {
             <ProtectedRoute>
               <InstructorLayout>
                 <CoursePage />
+              </InstructorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/detailCourse/:trainingId"
+          element={
+            <ProtectedRoute>
+              <InstructorLayout>
+                <DetailCoursePage />
               </InstructorLayout>
             </ProtectedRoute>
           }
