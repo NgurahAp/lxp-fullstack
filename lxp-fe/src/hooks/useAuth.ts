@@ -40,7 +40,7 @@ export const useAuth = (): UseAuthReturn => {
 
       Cookies.set("token", token, { expires: 7 });
       const userDataForStorage = {
-        role: response.data.id,
+        id: response.data.id,
         name: response.data.name,
         email: response.data.email,
         avatar: response.data.profile,

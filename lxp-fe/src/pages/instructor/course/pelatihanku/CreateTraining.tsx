@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { PlusCircle, Upload, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCreateTraining } from "../../../../hooks/useTrainings";
 
 const CreateTrainingForm = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const createTrainingMutation = useCreateTraining();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -23,19 +26,27 @@ const CreateTrainingForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would handle the form submission
-    console.log({ title, description, image });
+    setIsSubmitting(true);
+
+    const instructorData = JSON.parse(
+      localStorage.getItem("user_data") || "{}"
+    );
+    const instructorId = instructorData.id;
 
     // Create form data for submission with file
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
+    const training = new FormData();
+    training.append("title", title);
+    training.append("instructorId", instructorId);
+    training.append("description", description);
     if (image) {
-      formData.append("image", image);
+      training.append("image", image);
     }
 
-    // Submit the form data
-    // Example: await createTraining(formData);
+    try {
+      createTrainingMutation.mutate(training);
+    } catch (error) {
+      console.error("Error creating training:", error);
+    }
   };
 
   return (
@@ -146,7 +157,8 @@ const CreateTrainingForm = () => {
                 type="submit"
                 className="px-4 py-2 bg-gray-900 text-white rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
               >
-                <PlusCircle size={16} /> Create Training
+                <PlusCircle size={16} />{" "}
+                {isSubmitting ? "Creating training..." : "Create Training"}
               </button>
             </div>
           </div>

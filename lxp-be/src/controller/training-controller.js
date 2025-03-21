@@ -1,5 +1,6 @@
 import { uploadTrainingImage } from "../middleware/upload-middleware.js";
 import trainingService from "../service/training-service.js";
+import { ResponseError } from "../error/response-error.js";
 import multer from "multer";
 
 const createTraining = async (req, res, next) => {

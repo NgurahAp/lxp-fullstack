@@ -106,3 +106,7 @@ export interface GetTrainingInstructorResponse {
   data: Data;
   paging: Paging;
 }
+
+export interface CreateTrainingResponse {
+  data: Training;
+}

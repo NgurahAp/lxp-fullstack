@@ -16,7 +16,7 @@ const createTraining = async (user, request, file) => {
   // Ensure the instructorId matches the logged-in user's ID
   if (training.instructorId !== user.id) {
     throw new ResponseError(
-      403,
+      404,
       "You can only create training with your own instructor ID"
     );
   }

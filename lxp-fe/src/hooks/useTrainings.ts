@@ -1,15 +1,23 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import {
   DetailTrainingData,
   GetTrainingInstructorResponse,
   TrainingResponse,
 } from "../types/training";
 import {
+  createTraining,
   getDetailTraining,
   getInstructorDetailTraining,
   getTrainings,
   getTrainingsInstructor,
 } from "../service/trainingService.ts";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export const useGetTrainings = (): UseQueryResult<TrainingResponse, Error> => {
   return useQuery({
@@ -61,6 +69,31 @@ export const useGetInstructorDetailTrainings = (
       const detailTrainingData = response.data;
 
       return detailTrainingData;
+    },
+  });
+};
+
+export const useCreateTraining = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (training: FormData) => createTraining(training),
+
+    onSuccess: () => {
+      // Invalidate related queries to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["trainingInstructor"],
+      });
+
+      // Show success notification
+      toast.success("Pelatihan berhasil dibuat");
+      navigate(`/instructorCourse`);
+    },
+
+    onError: (error: Error) => {
+      console.log(error.message);
+      toast.error("Gagal membuat pelatihan");
     },
   });
 };
