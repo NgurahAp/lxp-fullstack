@@ -29,10 +29,17 @@ const getTrainingDetailValidation = Joi.object({
   trainingId: Joi.string().required(),
 });
 
+const updateTrainingValidation = Joi.object({
+  title: Joi.string().max(255).required(),
+  description: Joi.string().optional(),
+  instructorId: Joi.string().required(),
+});
+
 export {
   createTrainingUserValidation,
   createTrainingValidation,
   getStudentTrainingsValidation,
   getTrainingDetailValidation,
-  getInstructorTrainingsValidation
+  getInstructorTrainingsValidation,
+  updateTrainingValidation,
 };

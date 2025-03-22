@@ -29,6 +29,8 @@ userRouter.get(
   dashboardController.getInstructorDashboard
 );
 
+// Router for training
+
 userRouter.get(
   "/api/instructor/trainings",
   authMiddleware,
@@ -36,7 +38,6 @@ userRouter.get(
   trainingController.getInstructorTraining
 );
 
-// Router for training
 userRouter.post(
   "/api/trainings",
   authMiddleware,
@@ -65,6 +66,13 @@ userRouter.get(
   authMiddleware,
   instruktorMiddleware,
   trainingController.getInstructorTrainingDetail
+);
+
+userRouter.put(
+  "/api/instructor/updateTraining/:trainingId",
+  authMiddleware,
+  instruktorMiddleware,
+  trainingController.updateTraining
 );
 
 // Router for meeting

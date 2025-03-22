@@ -5,6 +5,7 @@ import {
   getInstructorTrainingsValidation,
   getStudentTrainingsValidation,
   getTrainingDetailValidation,
+  updateTrainingValidation,
 } from "../validation/training-validation.js";
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response-error.js";
@@ -444,6 +445,60 @@ const getInstructorTrainingDetail = async (user, trainingId) => {
   };
 };
 
+const updateTraining = async (user, trainingId, request, file) => {
+  const training = validate(updateTrainingValidation, request);
+
+  if (training.instructorId !== user.id) {
+    throw new ResponseError(
+      404,
+      "You can only update training with your own instructor ID"
+    );
+  }
+
+  // Cek keberadaan training dengan ID dari parameter
+  const totalTrainingInDatabase = await prismaClient.training.count({
+    where: {
+      id: trainingId,
+      instructorId: user.id,
+    },
+  });
+
+  if (totalTrainingInDatabase !== 1) {
+    throw new ResponseError(405, "Training is not found");
+  }
+
+  const trainingData = {
+    ...training,
+  };
+
+  if (file) {
+    trainingData.image = "/trainings/" + path.basename(file.path);
+  }
+
+  return prismaClient.training.update({
+    where: {
+      id: trainingId,
+    },
+    data: trainingData,
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      image: true,
+      instructorId: true,
+      createdAt: true,
+      updatedAt: true,
+      instructor: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+};
+
 export default {
   createTraining,
   createTrainingUser,
@@ -451,4 +506,5 @@ export default {
   getInstructorTrainings,
   getTrainingDetail,
   getInstructorTrainingDetail,
+  updateTraining,
 };

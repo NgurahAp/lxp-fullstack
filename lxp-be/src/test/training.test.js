@@ -7,6 +7,7 @@ import {
   createTestUser,
   createTraining,
   createTrainingUser,
+  getTestInstructor,
   removeAll,
 } from "./test.util";
 import path from "path";
@@ -270,5 +271,61 @@ describe("GET /api/instructor/trainings/:trainingId", () => {
       .set("Authorization", "Bearer test");
 
     expect(result.status).toBe(403);
+  });
+});
+
+describe("PUT /api/instructor/updateTraining/:trainingId", () => {
+  beforeEach(async () => {
+    // Create test directories
+    const trainingDir = path.join(process.cwd(), "public", "trainings");
+    if (!fs.existsSync(trainingDir)) {
+      fs.mkdirSync(trainingDir, { recursive: true });
+    }
+
+    await createTestUser();
+    const instructor = await createTestInstructor();
+    await createTraining(instructor.id);
+  });
+
+  afterEach(async () => {
+    // Clean up uploaded files
+    const trainingDir = path.join(process.cwd(), "public", "trainings");
+    if (fs.existsSync(trainingDir)) {
+      const files = fs.readdirSync(trainingDir);
+      files.forEach((file) => {
+        fs.unlinkSync(path.join(trainingDir, file));
+      });
+    }
+
+    await removeAll();
+  });
+
+  it("It Should can update training", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
+    const instructor = await getTestInstructor();
+
+    // Create a test image
+    const testImagePath = path.join(__dirname, "files", "test.jpg");
+    if (!fs.existsSync(testImagePath)) {
+      fs.writeFileSync(testImagePath, "Test image content");
+    }
+
+    const result = await supertest(web)
+      .put("/api/instructor/updateTraining/" + training.id)
+      .set("Authorization", "Bearer test-instructor")
+      .field("title", "test update training")
+      .field("description", "test update description")
+      .field("instructorId", instructor.id)
+      .attach("image", testImagePath);
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.title).toBe("test update training");
+    expect(result.body.data.description).toBe("test update description");
+    expect(result.body.data.image).toBeDefined();
   });
 });

@@ -90,6 +90,34 @@ const getInstructorTrainingDetail = async (req, res, next) => {
   }
 };
 
+const updateTraining = async (req, res, next) => {
+  uploadTrainingImage(req, res, async function (err) {
+    try {
+      if (err instanceof multer.MulterError) {
+        throw new ResponseError(400, err.message);
+      } else if (err) {
+        throw new ResponseError(400, err.message);
+      }
+
+      // Ambil trainingId dari parameter URL
+      const trainingId = req.params.trainingId;
+
+      const result = await trainingService.updateTraining(
+        req.user,
+        trainingId, // Kirim parameter trainingId terlebih dahulu
+        req.body, // Hanya kirim body tanpa file
+        req.file // Kirim file sebagai parameter terpisah
+      );
+
+      res.status(200).json({
+        data: result,
+      });
+    } catch (e) {
+      next(e);
+    }
+  });
+};
+
 export default {
   createTraining,
   createTrainingUser,
@@ -97,4 +125,5 @@ export default {
   getInstructorTraining,
   getTrainingDetail,
   getInstructorTrainingDetail,
+  updateTraining,
 };
