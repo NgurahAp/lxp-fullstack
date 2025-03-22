@@ -10,6 +10,7 @@ import {
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response-error.js";
 import path from "path";
+import fs from "fs";
 
 const createTraining = async (user, request, file) => {
   const training = validate(createTrainingValidation, request);
@@ -456,20 +457,40 @@ const updateTraining = async (user, trainingId, request, file) => {
   }
 
   // Cek keberadaan training dengan ID dari parameter
-  const totalTrainingInDatabase = await prismaClient.training.count({
+  const existingTraining = await prismaClient.training.findUnique({
     where: {
       id: trainingId,
-      instructorId: user.id,
     },
   });
 
-  if (totalTrainingInDatabase !== 1) {
+  if (!existingTraining || existingTraining.instructorId !== user.id) {
     throw new ResponseError(405, "Training is not found");
   }
 
   const trainingData = {
     ...training,
   };
+
+  // Jika ada file baru dan training lama memiliki gambar, hapus gambar lama
+  if (file && existingTraining.image) {
+    try {
+      // Gunakan process.cwd() sebagai pengganti __dirname
+      const oldImagePath = path.join(
+        process.cwd(),
+        "public",
+        existingTraining.image
+      );
+
+      // Cek apakah file ada sebelum dihapus
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath);
+        console.log(`Successfully deleted old image: ${oldImagePath}`);
+      }
+    } catch (err) {
+      console.error("Error deleting old image:", err);
+      // Lanjutkan proses meskipun gagal menghapus (non-critical error)
+    }
+  }
 
   if (file) {
     trainingData.image = "/trainings/" + path.basename(file.path);
