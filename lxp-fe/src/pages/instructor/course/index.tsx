@@ -99,7 +99,8 @@ const CoursePage = () => {
                   View
                 </Link>
                 <Link
-                  to={`/instructorCourse/${course.id}`}
+                  to={`/editTraining/${course.id}`}
+                  state={{ trainingData: course }}
                   className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors text-center"
                 >
                   Edit

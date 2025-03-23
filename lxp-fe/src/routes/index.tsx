@@ -20,6 +20,7 @@ import Dashboard from "../pages/student/dashboard";
 import CoursePage from "../pages/instructor/course";
 import DetailCoursePage from "../pages/instructor/course/DetailCourse";
 import CreateTrainingForm from "../pages/instructor/course/pelatihanku/CreateTraining";
+import EditTrainingForm from "../pages/instructor/course/pelatihanku/EditTraining";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -52,6 +53,16 @@ const AppRoutes: React.FC = () => {
             <ProtectedRoute>
               <InstructorLayout>
                 <CreateTrainingForm />
+              </InstructorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/editTraining/:trainingId"
+          element={
+            <ProtectedRoute>
+              <InstructorLayout>
+                <EditTrainingForm />
               </InstructorLayout>
             </ProtectedRoute>
           }

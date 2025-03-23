@@ -79,7 +79,7 @@ export interface DetailTrainingResponse {
 
 //  Instructor
 
-interface InstructorTraining {
+export interface InstructorTraining {
   id: string;
   title: string;
   description: string;
