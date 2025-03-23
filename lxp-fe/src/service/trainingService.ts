@@ -5,6 +5,7 @@ import {
   DetailTrainingResponse,
   GetTrainingInstructorResponse,
   TrainingResponse,
+  UpdateTrainingParams,
 } from "../types/training";
 import { API_URL } from "../config/api";
 
@@ -130,6 +131,40 @@ export const createTraining = async (
     });
     return response.data;
   } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        throw new Error("Kamu tidak memiliki hak akses");
+      }
+      if (error.response?.status === 404) {
+        throw new Error("Kamu hanya bisa membuat pelatihan dengan id kamu");
+      }
+      throw new Error(
+        error.response?.data?.message || "Terjadi kesalahan pada server"
+      );
+    }
+    throw new Error("Terjadi kesalahan yang tidak diketahui");
+  }
+};
+
+export const updateTraining = async ({
+  trainingId,
+  training,
+}: UpdateTrainingParams): Promise<CreateTrainingResponse> => {
+  const token = Cookies.get("token");
+
+  try {
+    const response = await axios.put(
+      `${API_URL}/instructor/updateTraining/${trainingId}`,
+      training,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // Error handling tetap sama
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 403) {
         throw new Error("Kamu tidak memiliki hak akses");

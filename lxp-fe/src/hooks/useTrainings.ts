@@ -5,9 +5,11 @@ import {
   UseQueryResult,
 } from "@tanstack/react-query";
 import {
+  CreateTrainingResponse,
   DetailTrainingData,
   GetTrainingInstructorResponse,
   TrainingResponse,
+  UpdateTrainingParams,
 } from "../types/training";
 import {
   createTraining,
@@ -15,6 +17,7 @@ import {
   getInstructorDetailTraining,
   getTrainings,
   getTrainingsInstructor,
+  updateTraining,
 } from "../service/trainingService.ts";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -94,6 +97,31 @@ export const useCreateTraining = () => {
     onError: (error: Error) => {
       console.log(error.message);
       toast.error("Gagal membuat pelatihan");
+    },
+  });
+};
+
+export const useUpdateTraining = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation<CreateTrainingResponse, Error, UpdateTrainingParams>({
+    mutationFn: (params) => updateTraining(params),
+
+    onSuccess: () => {
+      // Invalidate related queries to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["updateTraining"],
+      });
+
+      // Show success notification
+      toast.success("Pelatihan berhasil diedit");
+      navigate(`/instructorCourse`);
+    },
+
+    onError: (error: Error) => {
+      console.log(error.message);
+      toast.error("Gagal mengedit pelatihan");
     },
   });
 };

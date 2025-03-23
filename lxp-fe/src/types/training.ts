@@ -110,3 +110,8 @@ export interface GetTrainingInstructorResponse {
 export interface CreateTrainingResponse {
   data: Training;
 }
+
+export interface UpdateTrainingParams {
+  trainingId: string | undefined;
+  training: FormData;
+}

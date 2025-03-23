@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Save, Upload, X, Trash2, AlertTriangle } from "lucide-react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { InstructorTraining } from "../../../../types/training";
+import { useUpdateTraining } from "../../../../hooks/useTrainings";
 
 const EditTrainingForm = () => {
   const { trainingId } = useParams();
@@ -19,7 +20,7 @@ const EditTrainingForm = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // const updateTrainingMutation = useUpdateTraining();
+  const updateTrainingMutation = useUpdateTraining();
   // const deleteTrainingMutation = useDeleteTraining();
 
   // Populate form with existing data
@@ -68,22 +69,20 @@ const EditTrainingForm = () => {
     if (image) {
       training.append("image", image);
     }
-    // Flag to indicate if the image was changed or not
-    training.append("imageChanged", image ? "true" : "false");
 
     try {
-      // updateTrainingMutation.mutate(
-      //   { id: trainingId, formData: training },
-      //   {
-      //     onSuccess: () => {
-      //       navigate("/instructorCourse");
-      //     },
-      //     onError: (error) => {
-      //       console.error("Error updating training:", error);
-      //       setIsSubmitting(false);
-      //     },
-      //   }
-      // );
+      updateTrainingMutation.mutate(
+        { trainingId: trainingId, training: training },
+        {
+          onSuccess: () => {
+            navigate("/instructorCourse");
+          },
+          onError: (error) => {
+            console.error("Error updating training:", error);
+            setIsSubmitting(false);
+          },
+        }
+      );
 
       // Simulate success for now
       setTimeout(() => {
