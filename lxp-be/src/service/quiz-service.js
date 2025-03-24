@@ -40,7 +40,6 @@ const createQuiz = async (user, meetingId, request) => {
       id: true,
       title: true,
       questions: true,
-      quizScore: true,
       meetingId: true,
       createdAt: true,
       updatedAt: true,
@@ -61,7 +60,7 @@ const createQuiz = async (user, meetingId, request) => {
 };
 
 const submitQuiz = async (user, quizId, request) => {
-  const submittedAnswers = validate(submitQuizValidation, request);
+  const { answers, trainingUserId } = validate(submitQuizValidation, request);
 
   // Check if the quiz exists
   const quiz = await prismaClient.quiz.findUnique({
@@ -98,7 +97,7 @@ const submitQuiz = async (user, quizId, request) => {
   let quizScore = 0;
 
   // Calculate score based on correct answers
-  submittedAnswers.answers.forEach((answer) => {
+  answers.forEach((answer) => {
     const question = questions[answer.questionIndex];
     if (question && question.correctAnswer === answer.selectedAnswer) {
       quizScore += scorePerQuestion;
@@ -108,61 +107,69 @@ const submitQuiz = async (user, quizId, request) => {
   // Round the score to nearest integer
   quizScore = Math.round(quizScore);
 
-  // Start transaction to update both quiz and score
   return prismaClient.$transaction(async (tx) => {
-    const updateQuiz = await tx.quiz.update({
-      where: { id: quizId },
-      data: { quizScore: quizScore },
-      select: {
-        id: true,
-        title: true,
-        quizScore: true,
-        createdAt: true,
-        updatedAt: true,
-        meeting: true,
+    const submission = await tx.quizSubmission.create({
+      data: {
+        quizId: quiz.id, // Changed from 'quiz' to 'quizId'
+        trainingUserId: trainingUserId,
+        answers: answers, // Changed from 'answer' to 'answers'
+        score: quizScore,
       },
     });
 
-    // Get enrolled users' training_users records
-    const enrolledUsers = quiz.meeting.training.users;
+    const existingScore = await tx.score.findFirst({
+      where: {
+        trainingUserId: trainingUserId,
+        meetingId: quiz.meetingId, // Use meetingId from quiz
+      },
+    });
 
-    // Update scores for all enrolled users
-    for (const trainingUser of enrolledUsers) {
-      const existingScore = await tx.score.findFirst({
+    if (existingScore) {
+      await tx.score.update({
         where: {
-          trainingUserId: trainingUser.id,
-          meetingId: quiz.meetingId, // Changed from quizId to meetingId
+          id: existingScore.id,
+        },
+        data: {
+          quizScore: quizScore,
+          totalScore: Math.round(
+            (existingScore.moduleScore +
+              quizScore +
+              (existingScore.taskScore || 0)) /
+              3
+          ),
         },
       });
-
-      if (existingScore) {
-        await tx.score.update({
-          where: {
-            id: existingScore.id,
-          },
-          data: {
-            quizScore: quizScore,
-            totalScore:
-              (quizScore +
-                existingScore.moduleScore +
-                existingScore.taskScore) /
-              3,
-          },
-        });
-      } else {
-        // Create new score if it doesn't exist
-        await tx.score.create({
-          data: {
-            trainingUserId: trainingUser.id,
-            meetingId: quiz.meetingId,
-            quizScore: quizScore,
-            totalScore: quizScore / 3, // Only quiz score available at this point
-          },
-        });
-      }
+    } else {
+      await tx.score.create({
+        data: {
+          trainingUserId: trainingUserId,
+          meetingId: quiz.meetingId,
+          quizScore: quizScore,
+          totalScore: Math.round(quizScore / 3), // default calculation
+        },
+      });
     }
 
-    return updateQuiz;
+    return {
+      id: quiz.id,
+      title: quiz.title,
+      meetingId: quiz.meetingId,
+      submission: {
+        id: submission.id,
+        trainingUserId: submission.trainingUserId,
+        score: quizScore,
+      },
+      meeting: {
+        id: quiz.meeting.id,
+        title: quiz.meeting.title,
+        training: {
+          id: quiz.meeting.training.id,
+          title: quiz.meeting.training.title,
+        },
+      },
+      createdAt: quiz.createdAt,
+      updatedAt: new Date(),
+    };
   });
 };
 

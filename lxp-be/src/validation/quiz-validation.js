@@ -25,12 +25,12 @@ const submitQuizValidation = Joi.object({
     )
     .min(1)
     .required(),
+  trainingUserId: Joi.string().required(),
 });
 
 const getDetailQuizValidation = Joi.object({
   meetingId: Joi.string().required(),
   quizId: Joi.string().required(),
 });
-
 
 export { createQuizValidation, submitQuizValidation, getDetailQuizValidation };

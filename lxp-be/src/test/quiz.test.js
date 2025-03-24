@@ -82,6 +82,8 @@ describe("POST /api/quizzes/:quizId/submit", () => {
       where: { title: "Test Quiz" },
     });
 
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
     const result = await supertest(web)
       .post(`/api/quizzes/${quiz.id}/submit`)
       .set("Authorization", "Bearer test")
@@ -93,11 +95,12 @@ describe("POST /api/quizzes/:quizId/submit", () => {
           { questionIndex: 3, selectedAnswer: 1 }, // correct
           { questionIndex: 4, selectedAnswer: 3 }, // correct
         ],
+        trainingUserId: trainingUser.id,
       });
 
-    console.log("Perfect Score Test:", result.body);
+    console.log(result.body);
     expect(result.status).toBe(200);
-    expect(result.body.data.quizScore).toBe(100);
+    expect(result.body.data.submission.score).toBe(100);
 
     // Verify score table was updated
     const score = await prismaClient.score.findFirst({
@@ -105,8 +108,6 @@ describe("POST /api/quizzes/:quizId/submit", () => {
         meetingId: quiz.meetingId,
       },
     });
-
-    console.log(score.body);
 
     expect(score.quizScore).toBe(100);
   });
@@ -116,6 +117,8 @@ describe("POST /api/quizzes/:quizId/submit", () => {
       where: { title: "Test Quiz" },
     });
 
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
     const result = await supertest(web)
       .post(`/api/quizzes/${quiz.id}/submit`)
       .set("Authorization", "Bearer test")
@@ -124,22 +127,30 @@ describe("POST /api/quizzes/:quizId/submit", () => {
           { questionIndex: 0, selectedAnswer: 0 }, // correct
           { questionIndex: 1, selectedAnswer: 1 }, // correct
           { questionIndex: 2, selectedAnswer: 2 }, // correct
-          // { questionIndex: 3, selectedAnswer: 1 }, // correct
           { questionIndex: 4, selectedAnswer: 3 }, // correct
         ],
+        trainingUserId: trainingUser.id,
       });
 
-    console.log("Perfect Score Test:", result.body);
     expect(result.status).toBe(200);
-    expect(result.body.data.quizScore).toBe(80);
+    expect(result.body.data.submission.score).toBe(80);
   });
 
   it("should throw error if quiz not found", async () => {
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
     const result = await supertest(web)
-      .post(`/api/quizzes/99999/submit`)
+      .post(`/api/quizzes/9999/submit`)
       .set("Authorization", "Bearer test")
       .send({
-        answers: [{ questionIndex: 0, selectedAnswer: 0 }],
+        answers: [
+          { questionIndex: 0, selectedAnswer: 0 }, // correct
+          { questionIndex: 1, selectedAnswer: 1 }, // correct
+          { questionIndex: 2, selectedAnswer: 2 }, // correct
+          { questionIndex: 3, selectedAnswer: 1 }, // correct
+          { questionIndex: 4, selectedAnswer: 3 }, // correct
+        ],
+        trainingUserId: trainingUser.id,
       });
 
     expect(result.status).toBe(404);
