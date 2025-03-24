@@ -105,11 +105,7 @@ userRouter.post(
   authMiddleware,
   moduleController.submitModuleAnswer
 );
-userRouter.get(
-  "/api/meetings/:meetingId/modules",
-  authMiddleware,
-  moduleController.getModules
-);
+
 userRouter.get(
   "/api/meetings/:meetingId/modules/:moduleId",
   authMiddleware,

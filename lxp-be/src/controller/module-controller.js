@@ -46,27 +46,6 @@ const submitModuleAnswer = async (req, res, next) => {
   }
 };
 
-const getModules = async (req, res, next) => {
-  try {
-    const meetingId = req.params.meetingId; // Ambil meetingId dari URL
-    const page = req.query.page || 1; // Ambil page dari query, default 1
-    const size = req.query.size || 10; // Ambil size dari query, default 10
-
-    const result = await moduleService.getModules(req.user, {
-      meetingId,
-      page,
-      size,
-    });
-
-    res.status(200).json({
-      data: result.data,
-      paging: result.paging,
-    });
-  } catch (e) {
-    next(e);
-  }
-};
-
 const getModuleDetail = async (req, res, next) => {
   try {
     const meetingId = req.params.meetingId;
@@ -105,7 +84,6 @@ const submitModuleScore = async (req, res, next) => {
 export default {
   createModule,
   submitModuleAnswer,
-  getModules,
   getModuleDetail,
   submitModuleScore,
 };

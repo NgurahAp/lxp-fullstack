@@ -223,71 +223,24 @@ describe("POST /api/modules/:moduleId/answer", () => {
   });
 });
 
-describe("GET /api/meetings/:meetingId/modules", () => {
-  beforeEach(async () => {
-    const user = await createTestUser();
-    const instructor = await createTestInstructor();
-    const training = await createTraining(instructor.id);
-    await createTrainingUser(training.id, user.id);
-    const meeting = await createMeeting(training.id);
-    await createModule(meeting.id);
-    await createModule(meeting.id); // Create multiple modules for pagination testing
-  });
-
-  afterEach(async () => {
-    await removeAll();
-  });
-
-  it("Should get list of modules successfully with pagination", async () => {
-    const meeting = await prismaClient.meeting.findFirst({
-      where: { title: "Test Meeting" },
-    });
-
-    const result = await supertest(web)
-      .get(`/api/meetings/${meeting.id}/modules?page=1&size=10`)
-      .set("Authorization", "Bearer test");
-
-    expect(result.status).toBe(200);
-    expect(result.body.data).toBeDefined();
-    expect(result.body.data.length).toBeGreaterThan(0);
-    expect(result.body.paging).toBeDefined();
-    expect(result.body.paging.page).toBe(1);
-    expect(result.body.paging.total_page).toBeGreaterThan(0);
-  });
-
-  it("Should reject if user is not enrolled", async () => {
-    // Create a new training with module but without enrollment
-    const instructor = await prismaClient.user.findFirst({
-      where: { email: "instructor@test.com" },
-    });
-    const training = await createTraining(instructor.id);
-    const meeting = await createMeeting(training.id);
-    await createModule(meeting.id);
-
-    const result = await supertest(web)
-      .get(`/api/meetings/${meeting.id}/modules`)
-      .set("Authorization", "Bearer test");
-
-    expect(result.status).toBe(404);
-  });
-
-  it("Should reject invalid meeting ID", async () => {
-    const result = await supertest(web)
-      .get(`/api/meetings/999999/modules`)
-      .set("Authorization", "Bearer test");
-
-    expect(result.status).toBe(404);
-  });
-});
-
 describe("GET /api/meetings/:meetingId/modules/:moduleId", () => {
   beforeEach(async () => {
     const user = await createTestUser();
     const instructor = await createTestInstructor();
     const training = await createTraining(instructor.id);
-    await createTrainingUser(training.id, user.id);
+    const trainingUser = await createTrainingUser(training.id, user.id);
     const meeting = await createMeeting(training.id);
-    await createModule(meeting.id);
+    const module = await createModule(meeting.id);
+
+    // Optionally create a module submission for testing
+    await prismaClient.moduleSubmission.create({
+      data: {
+        moduleId: module.id,
+        trainingUserId: trainingUser.id,
+        answer: "Test answer",
+        score: 80,
+      },
+    });
   });
 
   afterEach(async () => {
@@ -311,6 +264,26 @@ describe("GET /api/meetings/:meetingId/modules/:moduleId", () => {
     expect(result.body.data).toBeDefined();
     expect(result.body.data.id).toBe(module.id);
     expect(result.body.data.title).toBe(module.title);
+    expect(result.body.data.submission).toBeDefined();
+    expect(result.body.data.submission.score).toBeDefined();
+  });
+
+  it("Should return module with empty submission if no submission exists", async () => {
+    // Create a new module without a submission
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+    const training = await createTraining(instructor.id);
+    const trainingUser = await createTrainingUser(training.id, "test@test.com");
+    const meeting = await createMeeting(training.id);
+    const module = await createModule(meeting.id);
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/modules/${module.id}`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.submission).toEqual({ answer: null, score: 0 });
   });
 
   it("Should reject if user is not enrolled", async () => {

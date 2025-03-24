@@ -3,7 +3,6 @@ import { ResponseError } from "../error/response-error.js";
 import {
   createModuleValidation,
   getDetailModuleValidation,
-  getModulesValidation,
   submitModuleAnswerValidation,
   submitScoreModuleValidation,
 } from "../validation/module-validation.js";
@@ -191,90 +190,11 @@ const submitModuleAnswer = async (user, moduleId, request) => {
   };
 };
 
-const getModules = async (user, request) => {
-  const { meetingId, page, size } = validate(getModulesValidation, request);
-
-  // Check if meeting exists and user is enrolled in the training
-  const meeting = await prismaClient.meeting.findFirst({
-    where: {
-      id: meetingId,
-      training: {
-        users: {
-          some: {
-            userId: user.id,
-            status: "enrolled",
-          },
-        },
-      },
-    },
-    include: {
-      training: true,
-    },
-  });
-
-  if (!meeting) {
-    throw new ResponseError(
-      404,
-      "Meeting not found or you're not enrolled in this training"
-    );
-  }
-
-  // Calculate pagination
-  const skip = (page - 1) * size;
-
-  // Get all modules for the meeting with pagination
-  const modules = await prismaClient.module.findMany({
-    where: {
-      meetingId: meetingId,
-    },
-    skip: skip,
-    take: size,
-    select: {
-      id: true,
-      title: true,
-      content: true,
-      moduleScore: true,
-      meetingId: true,
-      moduleAnswer: true,
-      createdAt: true,
-      updatedAt: true,
-      meeting: {
-        select: {
-          id: true,
-          title: true,
-          training: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  // Get total count of modules for pagination metadata
-  const totalItems = await prismaClient.module.count({
-    where: {
-      meetingId: meetingId,
-    },
-  });
-
-  return {
-    data: modules,
-    paging: {
-      page: page,
-      total_item: totalItems,
-      total_page: Math.ceil(totalItems / size),
-    },
-  };
-};
-
 const getModuleDetail = async (user, request) => {
   const validationResult = validate(getDetailModuleValidation, request);
   const { meetingId, moduleId } = validationResult;
 
-  // Cek apakah module ada dan user terdaftar di training yang sesuai
+  // Check if the module exists and the user is enrolled in the corresponding training
   const module = await prismaClient.module.findFirst({
     where: {
       id: moduleId,
@@ -294,8 +214,6 @@ const getModuleDetail = async (user, request) => {
       id: true,
       title: true,
       content: true,
-      moduleScore: true,
-      moduleAnswer: true,
       createdAt: true,
       updatedAt: true,
       meeting: {
@@ -322,7 +240,37 @@ const getModuleDetail = async (user, request) => {
     );
   }
 
-  return module;
+  // Get the training user record
+  const trainingUser = await prismaClient.training_Users.findFirst({
+    where: {
+      userId: user.id,
+      training: {
+        meetings: {
+          some: {
+            id: meetingId,
+          },
+        },
+      },
+    },
+  });
+
+  // Get the module submission for this user if exists
+  const moduleSubmission = await prismaClient.moduleSubmission.findFirst({
+    where: {
+      moduleId: moduleId,
+      trainingUserId: trainingUser.id,
+    },
+    select: {
+      answer: true,
+      score: true,
+    },
+  });
+
+  // Add submission data to the module response
+  return {
+    ...module,
+    submission: moduleSubmission || { answer: null, score: 0 },
+  };
 };
 
 const submitModuleScore = async (user, moduleId, request) => {
@@ -430,7 +378,7 @@ const submitModuleScore = async (user, moduleId, request) => {
 export default {
   createModule,
   submitModuleAnswer,
-  getModules,
+  // getModules,
   submitModuleScore,
   getModuleDetail,
 };
