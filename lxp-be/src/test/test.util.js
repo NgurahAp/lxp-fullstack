@@ -2,6 +2,13 @@ import bcrypt from "bcrypt";
 import { prismaClient } from "../application/database";
 
 const createTestUser = async () => {
+  // First try to remove any existing test user to avoid conflicts
+  await prismaClient.user.deleteMany({
+    where: {
+      email: "test@gmail.com",
+    },
+  });
+
   return prismaClient.user.create({
     data: {
       email: "test@gmail.com",
@@ -31,7 +38,11 @@ const getTestInstructor = async () => {
 };
 
 const removeTestUser = async () => {
-  await prismaClient.user.deleteMany({});
+  await prismaClient.user.deleteMany({
+    where: {
+      email: "test@gmail.com",
+    },
+  });
 };
 
 const getInstructorTrainings = async (instructorId) => {
@@ -67,6 +78,9 @@ const createMultipleTrainingUsers = async (trainingId, userIds) => {
 
 // Fungsi untuk membuat beberapa test students
 const createMultipleTestStudents = async (count = 5) => {
+  // First clean up any existing test students
+  await removeTestStudents();
+
   const promises = [];
   for (let i = 0; i < count; i++) {
     promises.push(
@@ -95,6 +109,13 @@ const removeTestStudents = async () => {
 };
 
 const createTestInstructor = async () => {
+  // First try to remove any existing test instructor
+  await prismaClient.user.deleteMany({
+    where: {
+      email: "instructor@test.com",
+    },
+  });
+
   return prismaClient.user.create({
     data: {
       name: "test instructor",
@@ -166,21 +187,27 @@ const createModule = async (meetingId) => {
       meetingId: meetingId,
       title: "Test Module",
       content: "modules/test.pdf",
-      moduleScore: 100,
     },
   });
 };
 
-const removeModule = async () => {
-  return prismaClient.module.deleteMany({});
+// Module Submission utilities
+const removeModuleSubmissions = async () => {
+  return prismaClient.moduleSubmission.deleteMany();
 };
 
+const removeModule = async () => {
+  // First remove all module submissions to avoid foreign key constraints
+  await removeModuleSubmissions();
+  return prismaClient.module.deleteMany();
+};
+
+// Quiz utilities
 const createQuiz = async (meetingId) => {
   return prismaClient.quiz.create({
     data: {
       meetingId: meetingId,
       title: "Test Quiz",
-      quizScore: 100,
       questions: [
         {
           question: "Question 1?",
@@ -212,10 +239,18 @@ const createQuiz = async (meetingId) => {
   });
 };
 
-const removeQuiz = async () => {
-  return prismaClient.quiz.deleteMany({});
+// Quiz Submission utilities
+const removeQuizSubmissions = async () => {
+  return prismaClient.quizSubmission.deleteMany();
 };
 
+const removeQuiz = async () => {
+  // First remove all quiz submissions to avoid foreign key constraints
+  await removeQuizSubmissions();
+  return prismaClient.quiz.deleteMany();
+};
+
+// Task utilities
 const createTask = async (meetingId) => {
   return prismaClient.task.create({
     data: {
@@ -226,10 +261,18 @@ const createTask = async (meetingId) => {
   });
 };
 
-const removeTask = async () => {
-  return prismaClient.task.deleteMany({});
+// Task Submission utilities
+const removeTaskSubmissions = async () => {
+  return prismaClient.taskSubmission.deleteMany();
 };
 
+const removeTask = async () => {
+  // First remove all task submissions to avoid foreign key constraints
+  await removeTaskSubmissions();
+  return prismaClient.task.deleteMany();
+};
+
+// Score utilities
 const createInitScore = async (trainingUserId, meetingId) => {
   return prismaClient.score.create({
     data: {
@@ -257,12 +300,16 @@ const createScore = async (trainingUserId, meetingId) => {
 };
 
 const removeScore = async () => {
-  return prismaClient.score.deleteMany({});
+  return prismaClient.score.deleteMany();
 };
 
 // Main cleanup utility
 const removeAll = async () => {
+  // Order matters here - need to remove related records first
   await removeScore();
+  await removeModuleSubmissions();
+  await removeQuizSubmissions();
+  await removeTaskSubmissions();
   await removeModule();
   await removeQuiz();
   await removeTask();
@@ -299,4 +346,7 @@ export {
   createTask,
   createScore,
   createInitScore,
+  removeModuleSubmissions,
+  removeQuizSubmissions,
+  removeTaskSubmissions,
 };

@@ -44,11 +44,9 @@ const createModule = async (user, meetingId, request, file) => {
     },
     select: {
       id: true,
+      meetingId: true,
       title: true,
       content: true,
-      moduleScore: true,
-      meetingId: true,
-      moduleAnswer: true,
       createdAt: true,
       updatedAt: true,
       meeting: {
@@ -68,10 +66,10 @@ const createModule = async (user, meetingId, request, file) => {
 };
 
 const submitModuleAnswer = async (user, moduleId, request) => {
-  // Kita perlu destructure moduleAnswer dari object hasil validasi tersebut
-  const { moduleAnswer } = validate(submitModuleAnswerValidation, request);
+  // Validate the request
+  const { answer } = validate(submitModuleAnswerValidation, request);
 
-  // Check if module exists and user is enrolled in the training
+  // Check if module exists
   const module = await prismaClient.module.findFirst({
     where: {
       id: moduleId,
@@ -102,36 +100,95 @@ const submitModuleAnswer = async (user, moduleId, request) => {
     );
   }
 
-  // Update the module with the answer
-  return prismaClient.module.update({
+  // Get the training user record (we need this ID for the submission)
+  const trainingUser = await prismaClient.training_Users.findFirst({
     where: {
-      id: moduleId,
+      userId: user.id,
+      trainingId: module.meeting.training.id,
     },
-    data: {
-      moduleAnswer: moduleAnswer,
+  });
+
+  if (!trainingUser) {
+    throw new ResponseError(404, "You're not enrolled in this training");
+  }
+
+  // Check if there's an existing submission
+  const existingSubmission = await prismaClient.moduleSubmission.findFirst({
+    where: {
+      moduleId: moduleId,
+      trainingUserId: trainingUser.id,
     },
-    select: {
-      id: true,
-      title: true,
-      moduleAnswer: true,
-      moduleScore: true,
-      meetingId: true,
-      createdAt: true,
-      updatedAt: true,
-      meeting: {
-        select: {
-          id: true,
-          title: true,
-          training: {
-            select: {
-              id: true,
-              title: true,
+  });
+
+  let submission;
+
+  // Update or create submission
+  if (existingSubmission) {
+    // Update existing submission
+    submission = await prismaClient.moduleSubmission.update({
+      where: {
+        id: existingSubmission.id,
+      },
+      data: {
+        answer: answer,
+        updatedAt: new Date(),
+      },
+      include: {
+        module: {
+          include: {
+            meeting: {
+              include: {
+                training: true,
+              },
             },
           },
         },
       },
+    });
+  } else {
+    // Create new submission
+    submission = await prismaClient.moduleSubmission.create({
+      data: {
+        moduleId: moduleId,
+        trainingUserId: trainingUser.id,
+        answer: answer,
+      },
+      include: {
+        module: {
+          include: {
+            meeting: {
+              include: {
+                training: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  // Return relevant data
+  return {
+    id: submission.id,
+    moduleId: submission.moduleId,
+    answer: submission.answer,
+    score: submission.score,
+    createdAt: submission.createdAt,
+    updatedAt: submission.updatedAt,
+    module: {
+      id: submission.module.id,
+      title: submission.module.title,
+      meetingId: submission.module.meetingId,
+      meeting: {
+        id: submission.module.meeting.id,
+        title: submission.module.meeting.title,
+        training: {
+          id: submission.module.meeting.training.id,
+          title: submission.module.meeting.training.title,
+        },
+      },
     },
-  });
+  };
 };
 
 const getModules = async (user, request) => {

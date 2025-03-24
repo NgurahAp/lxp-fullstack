@@ -71,8 +71,9 @@ describe("POST /api/meetings/:meetingId/modules", () => {
       .post(`/api/meetings/${meeting.id}/modules`)
       .set("Authorization", "Bearer test-instructor")
       .field("title", "Test Module")
-      .field("moduleScore", "100")
       .attach("content", testPdfPath);
+
+    console.log(result.body);
 
     expect(result.status).toBe(200);
     expect(result.body.data).toBeDefined();
@@ -137,13 +138,58 @@ describe("POST /api/modules/:moduleId/answer", () => {
       .post(`/api/modules/${module.id}/answer`)
       .set("Authorization", "Bearer test")
       .send({
-        moduleAnswer: "This is my answer to the module",
+        answer: "This is my answer to the module",
+      });
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.answer).toBe("This is my answer to the module");
+
+    // Verify that a submission was created in the database
+    const submission = await prismaClient.moduleSubmission.findFirst({
+      where: {
+        moduleId: module.id,
+      },
+    });
+
+    expect(submission).not.toBeNull();
+    expect(submission.answer).toBe("This is my answer to the module");
+  });
+
+  it("Should update existing submission when submitting again", async () => {
+    const module = await prismaClient.module.findFirst({
+      where: { title: "Test Module" },
+    });
+
+    // First submission
+    await supertest(web)
+      .post(`/api/modules/${module.id}/answer`)
+      .set("Authorization", "Bearer test")
+      .send({
+        answer: "First answer",
+      });
+
+    // Second submission
+    const result = await supertest(web)
+      .post(`/api/modules/${module.id}/answer`)
+      .set("Authorization", "Bearer test")
+      .send({
+        answer: "Updated answer",
       });
 
     expect(result.status).toBe(200);
-    expect(result.body.data.moduleAnswer).toBe(
-      "This is my answer to the module"
-    );
+    expect(result.body.data.answer).toBe("Updated answer");
+
+    // Verify we only have one submission in the database
+    const submissions = await prismaClient.moduleSubmission.findMany({
+      where: {
+        moduleId: module.id,
+      },
+    });
+
+    expect(submissions.length).toBe(1);
+    expect(submissions[0].answer).toBe("Updated answer");
   });
 
   it("Should reject if user is not enrolled", async () => {
@@ -159,7 +205,7 @@ describe("POST /api/modules/:moduleId/answer", () => {
       .post(`/api/modules/${module.id}/answer`)
       .set("Authorization", "Bearer test")
       .send({
-        moduleAnswer: "This is my answer to the module",
+        answer: "This is my answer to the module",
       });
 
     expect(result.status).toBe(404);
@@ -170,7 +216,7 @@ describe("POST /api/modules/:moduleId/answer", () => {
       .post(`/api/modules/999999/answer`)
       .set("Authorization", "Bearer test")
       .send({
-        moduleAnswer: "This is my answer to the module",
+        answer: "This is my answer to the module",
       });
 
     expect(result.status).toBe(404);
