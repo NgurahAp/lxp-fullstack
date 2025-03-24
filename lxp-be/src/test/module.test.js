@@ -11,6 +11,7 @@ import {
   createTestUser,
   createTraining,
   createTrainingUser,
+  getTestInstructor,
   removeAll,
 } from "./test.util.js";
 
@@ -305,6 +306,8 @@ describe("POST /api/modules/:moduleId/score", () => {
     const module = await prismaClient.module.findFirst({
       where: { title: "Test Module" },
     });
+
+    const instructor = await getTestInstructor();
 
     const result = await supertest(web)
       .post(`/api/modules/${module.id}/score`)

@@ -274,8 +274,13 @@ const getModuleDetail = async (user, request) => {
 };
 
 const submitModuleScore = async (user, moduleId, request) => {
-  const { moduleScore } = validate(submitScoreModuleValidation, request);
+  // Validate incoming request data
+  const { moduleScore, trainingUserId } = validate(
+    submitScoreModuleValidation,
+    request
+  );
 
+  // Check if module exists and user is the instructor
   const module = await prismaClient.module.findFirst({
     where: {
       id: moduleId,
@@ -305,92 +310,88 @@ const submitModuleScore = async (user, moduleId, request) => {
   if (!module) {
     throw new ResponseError(
       404,
-      "module not found or you're not the instructor"
+      "Module not found or you're not the instructor"
     );
   }
 
-  // Start a transaction to update both module submissions and scores
+  // Add a check to make sure moduleScore is a valid number
+  if (typeof moduleScore !== "number" || isNaN(moduleScore)) {
+    throw new ResponseError(400, "Invalid module score provided");
+  }
+
+  // Add a check to validate trainingUserId
+  if (!trainingUserId) {
+    throw new ResponseError(400, "Training user ID is required");
+  }
+
+  // Start a transaction to update module submissions
   return prismaClient.$transaction(async (tx) => {
-    // Get enrolled users' training_users records
-    const enrolledUsers = module.meeting.training.users;
+    // Find the specific module submission for this user
+    const submission = await tx.moduleSubmission.findFirst({
+      where: {
+        moduleId: moduleId,
+        trainingUserId: trainingUserId,
+      },
+      include: {
+        trainingUser: true,
+      },
+    });
 
-    const updatedSubmissions = [];
-
-    // Update module submissions and scores for all enrolled users
-    for (const trainingUser of enrolledUsers) {
-      // Find or create module submission
-      const existingSubmission = await tx.moduleSubmission.findFirst({
-        where: {
-          moduleId: moduleId,
-          trainingUserId: trainingUser.id,
-        },
-      });
-
-      // Update or create module submission
-      if (existingSubmission) {
-        await tx.moduleSubmission.update({
-          where: {
-            id: existingSubmission.id,
-          },
-          data: {
-            score: moduleScore,
-          },
-        });
-      } else {
-        await tx.moduleSubmission.create({
-          data: {
-            moduleId: moduleId,
-            trainingUserId: trainingUser.id,
-            score: moduleScore,
-          },
-        });
-      }
-
-      updatedSubmissions.push({
-        trainingUserId: trainingUser.id,
-        score: moduleScore,
-      });
-
-      // Update the score record for this user
-      const existingScore = await tx.score.findFirst({
-        where: {
-          trainingUserId: trainingUser.id,
-          meetingId: module.meetingId,
-        },
-      });
-
-      if (existingScore) {
-        await tx.score.update({
-          where: {
-            id: existingScore.id,
-          },
-          data: {
-            moduleScore: moduleScore,
-            totalScore:
-              (moduleScore +
-                existingScore.quizScore +
-                existingScore.taskScore) /
-              3,
-          },
-        });
-      } else {
-        await tx.score.create({
-          data: {
-            trainingUserId: trainingUser.id,
-            meetingId: module.meetingId,
-            moduleScore: moduleScore,
-            totalScore: moduleScore / 3, // since quiz and task are 0
-          },
-        });
-      }
+    if (!submission) {
+      throw new ResponseError(404, "Module submission not found for this user");
     }
 
-    // Return module details with updated submissions
+    // Update this specific submission
+    const updatedSubmission = await tx.moduleSubmission.update({
+      where: {
+        id: submission.id,
+      },
+      data: {
+        score: moduleScore,
+      },
+    });
+
+    // Update the score record for this specific user
+    const existingScore = await tx.score.findFirst({
+      where: {
+        trainingUserId: trainingUserId,
+        meetingId: module.meetingId,
+      },
+    });
+
+    if (existingScore) {
+      await tx.score.update({
+        where: {
+          id: existingScore.id,
+        },
+        data: {
+          moduleScore: moduleScore,
+          totalScore:
+            (moduleScore + existingScore.quizScore + existingScore.taskScore) /
+            3,
+        },
+      });
+    } else {
+      await tx.score.create({
+        data: {
+          trainingUserId: trainingUserId,
+          meetingId: module.meetingId,
+          moduleScore: moduleScore,
+          totalScore: moduleScore / 3, // since quiz and task are 0
+        },
+      });
+    }
+
+    // Return module details with updated submission
     return {
       id: module.id,
       title: module.title,
       meetingId: module.meetingId,
-      updatedSubmissions: updatedSubmissions,
+      updatedSubmission: {
+        id: updatedSubmission.id,
+        trainingUserId: submission.trainingUserId,
+        score: moduleScore,
+      },
       meeting: {
         id: module.meeting.id,
         title: module.meeting.title,

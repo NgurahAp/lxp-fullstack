@@ -545,6 +545,8 @@ const createTrainingUser = async (trainingId, userId) => {
   });
 };
 
+const getTrainingUser = async ()
+
 const removeTrainingUser = async () => {
   // First remove child records
   await prismaClient.moduleSubmission.deleteMany({
