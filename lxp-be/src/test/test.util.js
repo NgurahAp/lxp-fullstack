@@ -545,7 +545,19 @@ const createTrainingUser = async (trainingId, userId) => {
   });
 };
 
-const getTrainingUser = async ()
+const createModuleSubmission = async (meetingId, trainingUserId) => {
+  const module = await prismaClient.module.findFirst({
+    where: { meetingId: meetingId },
+  });
+
+  return prismaClient.moduleSubmission.create({
+    data: {
+      moduleId: module.id,
+      trainingUserId: trainingUserId,
+      score: 0,
+    },
+  });
+};
 
 const removeTrainingUser = async () => {
   // First remove child records
@@ -777,4 +789,5 @@ export {
   removeModuleSubmissions,
   removeQuizSubmissions,
   removeTaskSubmissions,
+  createModuleSubmission,
 };

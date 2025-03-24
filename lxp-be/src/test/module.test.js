@@ -12,6 +12,7 @@ import {
   createTraining,
   createTrainingUser,
   getTestInstructor,
+  createModuleSubmission,
   removeAll,
 } from "./test.util.js";
 
@@ -293,6 +294,7 @@ describe("POST /api/modules/:moduleId/score", () => {
     const trainingUser = await createTrainingUser(training.id, user.id);
     const meeting = await createMeeting(training.id);
     await createModule(meeting.id);
+    await createModuleSubmission(meeting.id, trainingUser.id);
 
     // Initialize score for the user
     await createInitScore(trainingUser.id, meeting.id);
@@ -302,28 +304,33 @@ describe("POST /api/modules/:moduleId/score", () => {
     await removeAll();
   });
 
-  it("Should submit module score and update score table successfully", async () => {
+  it("Should submit module score for specific user and update score table successfully", async () => {
     const module = await prismaClient.module.findFirst({
       where: { title: "Test Module" },
     });
 
-    const instructor = await getTestInstructor();
+    const trainingUser = await prismaClient.training_Users.findFirst();
 
     const result = await supertest(web)
       .post(`/api/modules/${module.id}/score`)
       .set("Authorization", "Bearer test-instructor")
       .send({
         moduleScore: 90,
+        trainingUserId: trainingUser.id,
       });
 
     expect(result.status).toBe(200);
-    expect(result.body.data.updatedSubmissions).toBeDefined();
-    expect(result.body.data.updatedSubmissions[0].score).toBe(90);
+    expect(result.body.data.updatedSubmission).toBeDefined();
+    expect(result.body.data.updatedSubmission.score).toBe(90);
+    expect(result.body.data.updatedSubmission.trainingUserId).toBe(
+      trainingUser.id
+    );
 
-    // Verify module submission was created
+    // Verify module submission was updated
     const moduleSubmission = await prismaClient.moduleSubmission.findFirst({
       where: {
         moduleId: module.id,
+        trainingUserId: trainingUser.id,
       },
     });
 
@@ -334,6 +341,7 @@ describe("POST /api/modules/:moduleId/score", () => {
     const score = await prismaClient.score.findFirst({
       where: {
         meetingId: module.meetingId,
+        trainingUserId: trainingUser.id,
       },
     });
 
@@ -341,7 +349,7 @@ describe("POST /api/modules/:moduleId/score", () => {
     expect(score.totalScore).toBe(30); // Since quiz and task scores are 0
   });
 
-  it("Should reject if module score is string", async () => {
+  it("Should reject if trainingUserId is missing", async () => {
     const module = await prismaClient.module.findFirst({
       where: { title: "Test Module" },
     });
@@ -350,21 +358,82 @@ describe("POST /api/modules/:moduleId/score", () => {
       .post(`/api/modules/${module.id}/score`)
       .set("Authorization", "Bearer test-instructor")
       .send({
+        moduleScore: 85,
+      });
+
+    expect(result.status).toBe(400);
+  });
+
+  it("Should reject if module score is not a number", async () => {
+    const module = await prismaClient.module.findFirst({
+      where: { title: "Test Module" },
+    });
+
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
+    const result = await supertest(web)
+      .post(`/api/modules/${module.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
         moduleScore: "test",
+        trainingUserId: trainingUser.id,
+      });
+
+    expect(result.status).toBe(400);
+  });
+
+  it("Should reject if module score is out of range (0-100)", async () => {
+    const module = await prismaClient.module.findFirst({
+      where: { title: "Test Module" },
+    });
+
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
+    const result = await supertest(web)
+      .post(`/api/modules/${module.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        moduleScore: 101,
+        trainingUserId: trainingUser.id,
       });
 
     expect(result.status).toBe(400);
   });
 
   it("Should reject invalid module ID", async () => {
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
     const result = await supertest(web)
-      .post(`/api/modules/999999/score`)
+      .post(`/api/modules/invalid-module-id/score`)
       .set("Authorization", "Bearer test-instructor")
       .send({
         moduleScore: 80,
+        trainingUserId: trainingUser.id,
       });
 
     expect(result.status).toBe(404);
+    expect(result.body.errors).toBe(
+      "Module not found or you're not the instructor"
+    );
+  });
+
+  it("Should reject if user submission doesn't exist", async () => {
+    const module = await prismaClient.module.findFirst({
+      where: { title: "Test Module" },
+    });
+
+    const result = await supertest(web)
+      .post(`/api/modules/${module.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        moduleScore: 85,
+        trainingUserId: "non-existent-training-user-id",
+      });
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBe(
+      "Module submission not found for this user"
+    );
   });
 
   it("Should update total score correctly when other scores exist", async () => {
@@ -372,10 +441,13 @@ describe("POST /api/modules/:moduleId/score", () => {
       where: { title: "Test Module" },
     });
 
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
     // First set some quiz and task scores
     await prismaClient.score.updateMany({
       where: {
         meetingId: module.meetingId,
+        trainingUserId: trainingUser.id,
       },
       data: {
         quizScore: 90,
@@ -389,6 +461,7 @@ describe("POST /api/modules/:moduleId/score", () => {
       .set("Authorization", "Bearer test-instructor")
       .send({
         moduleScore: 90,
+        trainingUserId: trainingUser.id,
       });
 
     expect(result.status).toBe(200);
@@ -397,51 +470,13 @@ describe("POST /api/modules/:moduleId/score", () => {
     const score = await prismaClient.score.findFirst({
       where: {
         meetingId: module.meetingId,
+        trainingUserId: trainingUser.id,
       },
     });
 
     expect(score.moduleScore).toBe(90);
+    expect(score.quizScore).toBe(90);
+    expect(score.taskScore).toBe(90);
     expect(score.totalScore).toBe(90); // (90 + 90 + 90) / 3
-  });
-
-  it("Should create new module submission if one doesn't exist", async () => {
-    // Create a new user and add them to the training
-    const newUser = await createTestUser("new@test.com");
-    const training = await prismaClient.training.findFirst();
-    const trainingUser = await createTrainingUser(training.id, newUser.id);
-    const module = await prismaClient.module.findFirst();
-
-    // Initialize score for the new user
-    await createInitScore(trainingUser.id, module.meetingId);
-
-    const result = await supertest(web)
-      .post(`/api/modules/${module.id}/score`)
-      .set("Authorization", "Bearer test-instructor")
-      .send({
-        moduleScore: 95,
-      });
-
-    expect(result.status).toBe(200);
-
-    // Check both users have module submissions
-    const moduleSubmissions = await prismaClient.moduleSubmission.findMany({
-      where: {
-        moduleId: module.id,
-      },
-    });
-
-    expect(moduleSubmissions.length).toBe(2);
-
-    // Check both users' scores were updated
-    const scores = await prismaClient.score.findMany({
-      where: {
-        meetingId: module.meetingId,
-      },
-    });
-
-    expect(scores.length).toBe(2);
-    scores.forEach((score) => {
-      expect(score.moduleScore).toBe(95);
-    });
   });
 });
