@@ -309,44 +309,49 @@ const submitModuleScore = async (user, moduleId, request) => {
     );
   }
 
-  // Start a transaction to update both module and score
+  // Start a transaction to update both module submissions and scores
   return prismaClient.$transaction(async (tx) => {
-    // Update module score
-    const updatedModule = await tx.module.update({
-      where: {
-        id: moduleId,
-      },
-      data: {
-        moduleScore: moduleScore,
-      },
-      select: {
-        id: true,
-        title: true,
-        moduleAnswer: true,
-        moduleScore: true,
-        meetingId: true,
-        createdAt: true,
-        updatedAt: true,
-        meeting: {
-          select: {
-            id: true,
-            title: true,
-            training: {
-              select: {
-                id: true,
-                title: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
     // Get enrolled users' training_users records
     const enrolledUsers = module.meeting.training.users;
 
-    // Update scores for all enrolled users
+    const updatedSubmissions = [];
+
+    // Update module submissions and scores for all enrolled users
     for (const trainingUser of enrolledUsers) {
+      // Find or create module submission
+      const existingSubmission = await tx.moduleSubmission.findFirst({
+        where: {
+          moduleId: moduleId,
+          trainingUserId: trainingUser.id,
+        },
+      });
+
+      // Update or create module submission
+      if (existingSubmission) {
+        await tx.moduleSubmission.update({
+          where: {
+            id: existingSubmission.id,
+          },
+          data: {
+            score: moduleScore,
+          },
+        });
+      } else {
+        await tx.moduleSubmission.create({
+          data: {
+            moduleId: moduleId,
+            trainingUserId: trainingUser.id,
+            score: moduleScore,
+          },
+        });
+      }
+
+      updatedSubmissions.push({
+        trainingUserId: trainingUser.id,
+        score: moduleScore,
+      });
+
+      // Update the score record for this user
       const existingScore = await tx.score.findFirst({
         where: {
           trainingUserId: trainingUser.id,
@@ -368,10 +373,35 @@ const submitModuleScore = async (user, moduleId, request) => {
               3,
           },
         });
+      } else {
+        await tx.score.create({
+          data: {
+            trainingUserId: trainingUser.id,
+            meetingId: module.meetingId,
+            moduleScore: moduleScore,
+            totalScore: moduleScore / 3, // since quiz and task are 0
+          },
+        });
       }
     }
 
-    return updatedModule;
+    // Return module details with updated submissions
+    return {
+      id: module.id,
+      title: module.title,
+      meetingId: module.meetingId,
+      updatedSubmissions: updatedSubmissions,
+      meeting: {
+        id: module.meeting.id,
+        title: module.meeting.title,
+        training: {
+          id: module.meeting.training.id,
+          title: module.meeting.training.title,
+        },
+      },
+      createdAt: module.createdAt,
+      updatedAt: new Date(),
+    };
   });
 };
 

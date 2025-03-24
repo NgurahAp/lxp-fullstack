@@ -1,17 +1,30 @@
 import bcrypt from "bcrypt";
 import { prismaClient } from "../application/database";
 
-const createTestUser = async () => {
+const createTestUser = async (email = "test@gmail.com") => {
   // First try to remove any existing test user to avoid conflicts
-  await prismaClient.user.deleteMany({
-    where: {
-      email: "test@gmail.com",
-    },
-  });
+  try {
+    // We need to delete related records first to avoid foreign key constraints
+    await prismaClient.training_Users.deleteMany({
+      where: {
+        user: {
+          email: email,
+        },
+      },
+    });
+
+    await prismaClient.user.deleteMany({
+      where: {
+        email: email,
+      },
+    });
+  } catch (error) {
+    console.log(`Error cleaning up existing user: ${error.message}`);
+  }
 
   return prismaClient.user.create({
     data: {
-      email: "test@gmail.com",
+      email: email,
       password: await bcrypt.hash("password", 10),
       name: "test",
       token: "test",
@@ -38,6 +51,55 @@ const getTestInstructor = async () => {
 };
 
 const removeTestUser = async () => {
+  // First delete related records
+  await prismaClient.moduleSubmission.deleteMany({
+    where: {
+      trainingUser: {
+        user: {
+          email: "test@gmail.com",
+        },
+      },
+    },
+  });
+
+  await prismaClient.quizSubmission.deleteMany({
+    where: {
+      trainingUser: {
+        user: {
+          email: "test@gmail.com",
+        },
+      },
+    },
+  });
+
+  await prismaClient.taskSubmission.deleteMany({
+    where: {
+      trainingUser: {
+        user: {
+          email: "test@gmail.com",
+        },
+      },
+    },
+  });
+
+  await prismaClient.score.deleteMany({
+    where: {
+      trainingUser: {
+        user: {
+          email: "test@gmail.com",
+        },
+      },
+    },
+  });
+
+  await prismaClient.training_Users.deleteMany({
+    where: {
+      user: {
+        email: "test@gmail.com",
+      },
+    },
+  });
+
   await prismaClient.user.deleteMany({
     where: {
       email: "test@gmail.com",
@@ -98,6 +160,70 @@ const createMultipleTestStudents = async (count = 5) => {
 };
 
 const removeTestStudents = async () => {
+  // First delete related records
+  await prismaClient.moduleSubmission.deleteMany({
+    where: {
+      trainingUser: {
+        user: {
+          email: {
+            contains: "student",
+            endsWith: "@test.com",
+          },
+        },
+      },
+    },
+  });
+
+  await prismaClient.quizSubmission.deleteMany({
+    where: {
+      trainingUser: {
+        user: {
+          email: {
+            contains: "student",
+            endsWith: "@test.com",
+          },
+        },
+      },
+    },
+  });
+
+  await prismaClient.taskSubmission.deleteMany({
+    where: {
+      trainingUser: {
+        user: {
+          email: {
+            contains: "student",
+            endsWith: "@test.com",
+          },
+        },
+      },
+    },
+  });
+
+  await prismaClient.score.deleteMany({
+    where: {
+      trainingUser: {
+        user: {
+          email: {
+            contains: "student",
+            endsWith: "@test.com",
+          },
+        },
+      },
+    },
+  });
+
+  await prismaClient.training_Users.deleteMany({
+    where: {
+      user: {
+        email: {
+          contains: "student",
+          endsWith: "@test.com",
+        },
+      },
+    },
+  });
+
   return prismaClient.user.deleteMany({
     where: {
       email: {
@@ -109,12 +235,149 @@ const removeTestStudents = async () => {
 };
 
 const createTestInstructor = async () => {
-  // First try to remove any existing test instructor
-  await prismaClient.user.deleteMany({
-    where: {
-      email: "instructor@test.com",
-    },
-  });
+  // First try to remove any existing test instructor and associated data
+  try {
+    // Delete trainings and associated records created by this instructor
+    const instructor = await prismaClient.user.findFirst({
+      where: {
+        email: "instructor@test.com",
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (instructor) {
+      // Get training ids created by this instructor
+      const trainings = await prismaClient.training.findMany({
+        where: {
+          instructorId: instructor.id,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const trainingIds = trainings.map((t) => t.id);
+
+      // Delete all related records for these trainings
+      if (trainingIds.length > 0) {
+        // Get meeting ids for these trainings
+        const meetings = await prismaClient.meeting.findMany({
+          where: {
+            trainingId: {
+              in: trainingIds,
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        const meetingIds = meetings.map((m) => m.id);
+
+        // Delete records that depend on meetings
+        if (meetingIds.length > 0) {
+          await prismaClient.moduleSubmission.deleteMany({
+            where: {
+              module: {
+                meetingId: {
+                  in: meetingIds,
+                },
+              },
+            },
+          });
+
+          await prismaClient.quizSubmission.deleteMany({
+            where: {
+              quiz: {
+                meetingId: {
+                  in: meetingIds,
+                },
+              },
+            },
+          });
+
+          await prismaClient.taskSubmission.deleteMany({
+            where: {
+              task: {
+                meetingId: {
+                  in: meetingIds,
+                },
+              },
+            },
+          });
+
+          await prismaClient.score.deleteMany({
+            where: {
+              meetingId: {
+                in: meetingIds,
+              },
+            },
+          });
+
+          await prismaClient.module.deleteMany({
+            where: {
+              meetingId: {
+                in: meetingIds,
+              },
+            },
+          });
+
+          await prismaClient.quiz.deleteMany({
+            where: {
+              meetingId: {
+                in: meetingIds,
+              },
+            },
+          });
+
+          await prismaClient.task.deleteMany({
+            where: {
+              meetingId: {
+                in: meetingIds,
+              },
+            },
+          });
+
+          await prismaClient.meeting.deleteMany({
+            where: {
+              id: {
+                in: meetingIds,
+              },
+            },
+          });
+        }
+
+        // Delete training_users for these trainings
+        await prismaClient.training_Users.deleteMany({
+          where: {
+            trainingId: {
+              in: trainingIds,
+            },
+          },
+        });
+
+        // Delete the trainings themselves
+        await prismaClient.training.deleteMany({
+          where: {
+            id: {
+              in: trainingIds,
+            },
+          },
+        });
+      }
+    }
+
+    // Finally delete the instructor
+    await prismaClient.user.deleteMany({
+      where: {
+        email: "instructor@test.com",
+      },
+    });
+  } catch (error) {
+    console.log(`Error cleaning up existing instructor: ${error.message}`);
+  }
 
   return prismaClient.user.create({
     data: {
@@ -128,11 +391,147 @@ const createTestInstructor = async () => {
 };
 
 const removeTestInstructor = async () => {
-  return prismaClient.user.deleteMany({
-    where: {
-      email: "instructor@test.com",
-    },
-  });
+  // Same implementation as in the beginning of createTestInstructor
+  try {
+    const instructor = await prismaClient.user.findFirst({
+      where: {
+        email: "instructor@test.com",
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (instructor) {
+      // Get training ids created by this instructor
+      const trainings = await prismaClient.training.findMany({
+        where: {
+          instructorId: instructor.id,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const trainingIds = trainings.map((t) => t.id);
+
+      // Delete all related records for these trainings
+      if (trainingIds.length > 0) {
+        // Get meeting ids for these trainings
+        const meetings = await prismaClient.meeting.findMany({
+          where: {
+            trainingId: {
+              in: trainingIds,
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        const meetingIds = meetings.map((m) => m.id);
+
+        // Delete records that depend on meetings
+        if (meetingIds.length > 0) {
+          await prismaClient.moduleSubmission.deleteMany({
+            where: {
+              module: {
+                meetingId: {
+                  in: meetingIds,
+                },
+              },
+            },
+          });
+
+          await prismaClient.quizSubmission.deleteMany({
+            where: {
+              quiz: {
+                meetingId: {
+                  in: meetingIds,
+                },
+              },
+            },
+          });
+
+          await prismaClient.taskSubmission.deleteMany({
+            where: {
+              task: {
+                meetingId: {
+                  in: meetingIds,
+                },
+              },
+            },
+          });
+
+          await prismaClient.score.deleteMany({
+            where: {
+              meetingId: {
+                in: meetingIds,
+              },
+            },
+          });
+
+          await prismaClient.module.deleteMany({
+            where: {
+              meetingId: {
+                in: meetingIds,
+              },
+            },
+          });
+
+          await prismaClient.quiz.deleteMany({
+            where: {
+              meetingId: {
+                in: meetingIds,
+              },
+            },
+          });
+
+          await prismaClient.task.deleteMany({
+            where: {
+              meetingId: {
+                in: meetingIds,
+              },
+            },
+          });
+
+          await prismaClient.meeting.deleteMany({
+            where: {
+              id: {
+                in: meetingIds,
+              },
+            },
+          });
+        }
+
+        // Delete training_users for these trainings
+        await prismaClient.training_Users.deleteMany({
+          where: {
+            trainingId: {
+              in: trainingIds,
+            },
+          },
+        });
+
+        // Delete the trainings themselves
+        await prismaClient.training.deleteMany({
+          where: {
+            id: {
+              in: trainingIds,
+            },
+          },
+        });
+      }
+    }
+
+    return prismaClient.user.deleteMany({
+      where: {
+        email: "instructor@test.com",
+      },
+    });
+  } catch (error) {
+    console.log(`Error removing instructor: ${error.message}`);
+  }
 };
 
 // New Training User utilities
@@ -147,6 +546,23 @@ const createTrainingUser = async (trainingId, userId) => {
 };
 
 const removeTrainingUser = async () => {
+  // First remove child records
+  await prismaClient.moduleSubmission.deleteMany({
+    where: {},
+  });
+
+  await prismaClient.quizSubmission.deleteMany({
+    where: {},
+  });
+
+  await prismaClient.taskSubmission.deleteMany({
+    where: {},
+  });
+
+  await prismaClient.score.deleteMany({
+    where: {},
+  });
+
   return prismaClient.training_Users.deleteMany();
 };
 
@@ -162,6 +578,9 @@ const createTraining = async (instructorId) => {
 };
 
 const removeTraining = async () => {
+  // We need to remove dependent records first
+  await removeTrainingUser();
+  await removeMeeting();
   return prismaClient.training.deleteMany();
 };
 
@@ -177,6 +596,11 @@ const createMeeting = async (trainingId) => {
 };
 
 const removeMeeting = async () => {
+  // Remove dependent records first
+  await removeModule();
+  await removeQuiz();
+  await removeTask();
+  await removeScore();
   return prismaClient.meeting.deleteMany();
 };
 
@@ -294,7 +718,7 @@ const createScore = async (trainingUserId, meetingId) => {
       moduleScore: 85,
       quizScore: 90,
       taskScore: 95,
-      totalScore: 270,
+      totalScore: 90, // (85 + 90 + 95) / 3
     },
   });
 };
@@ -306,16 +730,18 @@ const removeScore = async () => {
 // Main cleanup utility
 const removeAll = async () => {
   // Order matters here - need to remove related records first
-  await removeScore();
+  // Bottom-up deletion approach
   await removeModuleSubmissions();
   await removeQuizSubmissions();
   await removeTaskSubmissions();
+  await removeScore();
   await removeModule();
   await removeQuiz();
   await removeTask();
   await removeMeeting();
   await removeTrainingUser();
   await removeTraining();
+  await removeTestStudents();
   await removeTestUser();
   await removeTestInstructor();
 };
