@@ -140,7 +140,6 @@ const getStudentTrainings = async (user, request) => {
           title: true,
           description: true,
           image: true,
-
           instructor: {
             select: {
               id: true,
@@ -153,15 +152,49 @@ const getStudentTrainings = async (user, request) => {
             select: {
               id: true,
               title: true,
-              modules: true,
-              quizzes: true,
-              tasks: true,
+              modules: {
+                select: {
+                  id: true,
+                },
+              },
+              quizzes: {
+                select: {
+                  id: true,
+                },
+              },
+              tasks: {
+                select: {
+                  id: true,
+                },
+              },
             },
           },
         },
       },
-      // Include scores to calculate progress
+      // Include scores for progress calculation
       scores: true,
+      // Include submissions for progress calculation
+      moduleSubmissions: {
+        select: {
+          id: true,
+          moduleId: true,
+          answer: true,
+        },
+      },
+      quizSubmissions: {
+        select: {
+          id: true,
+          quizId: true,
+          score: true,
+        },
+      },
+      taskSubmissions: {
+        select: {
+          id: true,
+          taskId: true,
+          answer: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -178,24 +211,35 @@ const getStudentTrainings = async (user, request) => {
           (score) => score.meetingId === meeting.id
         );
 
-        // Calculate module progress
+        // Calculate module progress - check if module submissions exist
         const totalModules = meeting.modules.length;
-        const completedModules = meeting.modules.filter(
-          (module) => module.moduleAnswer !== null && module.moduleAnswer !== ""
+        const completedModules = meeting.modules.filter((moduleItem) =>
+          training.moduleSubmissions.some(
+            (submission) =>
+              submission.moduleId === moduleItem.id &&
+              submission.answer !== null &&
+              submission.answer !== ""
+          )
         ).length;
 
-        // Calculate quiz progress (based on scores)
+        // Calculate quiz progress - check if quiz submissions with scores exist
         const totalQuizzes = meeting.quizzes.length;
-        const completedQuizzes = userScore
-          ? userScore.quizScore > 0
-            ? totalQuizzes
-            : 0
-          : 0;
+        const completedQuizzes = meeting.quizzes.filter((quizItem) =>
+          training.quizSubmissions.some(
+            (submission) =>
+              submission.quizId === quizItem.id && submission.score > 0
+          )
+        ).length;
 
-        // Calculate task progress
+        // Calculate task progress - check if task submissions exist
         const totalTasks = meeting.tasks.length;
-        const completedTasks = meeting.tasks.filter(
-          (task) => task.taskAnswer !== null && task.taskAnswer !== ""
+        const completedTasks = meeting.tasks.filter((taskItem) =>
+          training.taskSubmissions.some(
+            (submission) =>
+              submission.taskId === taskItem.id &&
+              submission.answer !== null &&
+              submission.answer !== ""
+          )
         ).length;
 
         // Calculate total progress
@@ -226,6 +270,9 @@ const getStudentTrainings = async (user, request) => {
 
       // Remove unnecessary fields before returning
       delete training.scores;
+      delete training.moduleSubmissions;
+      delete training.quizSubmissions;
+      delete training.taskSubmissions;
       delete training.training.meetings;
 
       return {
@@ -333,21 +380,51 @@ const getTrainingDetail = async (user, trainingId) => {
             select: {
               id: true,
               title: true,
-              moduleAnswer: true,
+              // Get user submissions for this module
+              submissions: {
+                where: {
+                  trainingUserId: trainingUser.id,
+                },
+                select: {
+                  id: true,
+                  answer: true,
+                  score: true,
+                },
+              },
             },
           },
           quizzes: {
             select: {
               id: true,
               title: true,
-              quizScore: true,
+              // Get user submissions for this quiz
+              submissions: {
+                where: {
+                  trainingUserId: trainingUser.id,
+                },
+                select: {
+                  id: true,
+                  answers: true,
+                  score: true,
+                },
+              },
             },
           },
           tasks: {
             select: {
               id: true,
               title: true,
-              taskAnswer: true,
+              // Get user submissions for this task
+              submissions: {
+                where: {
+                  trainingUserId: trainingUser.id,
+                },
+                select: {
+                  id: true,
+                  answer: true,
+                  score: true,
+                },
+              },
             },
           },
         },
@@ -368,8 +445,39 @@ const getTrainingDetail = async (user, trainingId) => {
     throw new ResponseError(404, "Training not found");
   }
 
+  // Transform the data to format that matches the old structure but with submissions data
+  const transformedTraining = {
+    ...training,
+    meetings: training.meetings.map((meeting) => ({
+      ...meeting,
+      modules: meeting.modules.map((module) => ({
+        id: module.id,
+        title: module.title,
+        moduleAnswer: module.submissions[0]?.answer || null,
+        moduleScore: module.submissions[0]?.score || 0,
+        hasSubmission: module.submissions.length > 0,
+        submissionId: module.submissions[0]?.id || null,
+      })),
+      quizzes: meeting.quizzes.map((quiz) => ({
+        id: quiz.id,
+        title: quiz.title,
+        quizScore: quiz.submissions[0]?.score || 0,
+        hasSubmission: quiz.submissions.length > 0,
+        submissionId: quiz.submissions[0]?.id || null,
+      })),
+      tasks: meeting.tasks.map((task) => ({
+        id: task.id,
+        title: task.title,
+        taskAnswer: task.submissions[0]?.answer || null,
+        taskScore: task.submissions[0]?.score || 0,
+        hasSubmission: task.submissions.length > 0,
+        submissionId: task.submissions[0]?.id || null,
+      })),
+    })),
+  };
+
   return {
-    data: training,
+    data: transformedTraining,
   };
 };
 
@@ -403,21 +511,21 @@ const getInstructorTrainingDetail = async (user, trainingId) => {
             select: {
               id: true,
               title: true,
-              moduleAnswer: true,
+              content: true,
             },
           },
           quizzes: {
             select: {
               id: true,
               title: true,
-              quizScore: true,
+              questions: true,
             },
           },
           tasks: {
             select: {
               id: true,
               title: true,
-              taskAnswer: true,
+              taskQuestion: true,
             },
           },
         },

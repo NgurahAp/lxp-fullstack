@@ -59,8 +59,19 @@ CREATE TABLE `modules` (
     `meetingId` VARCHAR(191) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `content` VARCHAR(255) NOT NULL,
-    `moduleAnswer` VARCHAR(191) NULL,
-    `moduleScore` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `module_submissions` (
+    `id` VARCHAR(36) NOT NULL,
+    `moduleId` VARCHAR(191) NOT NULL,
+    `trainingUserId` VARCHAR(191) NOT NULL,
+    `answer` VARCHAR(191) NULL,
+    `score` INTEGER NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -73,7 +84,19 @@ CREATE TABLE `quizzes` (
     `meetingId` VARCHAR(191) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `questions` JSON NOT NULL,
-    `quizScore` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `quiz_submissions` (
+    `id` VARCHAR(36) NOT NULL,
+    `quizId` VARCHAR(191) NOT NULL,
+    `trainingUserId` VARCHAR(191) NOT NULL,
+    `answers` JSON NULL,
+    `score` INTEGER NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -86,8 +109,19 @@ CREATE TABLE `tasks` (
     `meetingId` VARCHAR(191) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `taskQuestion` VARCHAR(255) NOT NULL,
-    `taskAnswer` VARCHAR(255) NULL,
-    `taskScore` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `task_submissions` (
+    `id` VARCHAR(36) NOT NULL,
+    `taskId` VARCHAR(191) NOT NULL,
+    `trainingUserId` VARCHAR(191) NOT NULL,
+    `answer` VARCHAR(255) NULL,
+    `score` INTEGER NOT NULL DEFAULT 0,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -125,10 +159,28 @@ ALTER TABLE `meetings` ADD CONSTRAINT `meetings_trainingId_fkey` FOREIGN KEY (`t
 ALTER TABLE `modules` ADD CONSTRAINT `modules_meetingId_fkey` FOREIGN KEY (`meetingId`) REFERENCES `meetings`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `module_submissions` ADD CONSTRAINT `module_submissions_moduleId_fkey` FOREIGN KEY (`moduleId`) REFERENCES `modules`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `module_submissions` ADD CONSTRAINT `module_submissions_trainingUserId_fkey` FOREIGN KEY (`trainingUserId`) REFERENCES `training_users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `quizzes` ADD CONSTRAINT `quizzes_meetingId_fkey` FOREIGN KEY (`meetingId`) REFERENCES `meetings`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `quiz_submissions` ADD CONSTRAINT `quiz_submissions_quizId_fkey` FOREIGN KEY (`quizId`) REFERENCES `quizzes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `quiz_submissions` ADD CONSTRAINT `quiz_submissions_trainingUserId_fkey` FOREIGN KEY (`trainingUserId`) REFERENCES `training_users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `tasks` ADD CONSTRAINT `tasks_meetingId_fkey` FOREIGN KEY (`meetingId`) REFERENCES `meetings`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `task_submissions` ADD CONSTRAINT `task_submissions_taskId_fkey` FOREIGN KEY (`taskId`) REFERENCES `tasks`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `task_submissions` ADD CONSTRAINT `task_submissions_trainingUserId_fkey` FOREIGN KEY (`trainingUserId`) REFERENCES `training_users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `scores` ADD CONSTRAINT `scores_trainingUserId_fkey` FOREIGN KEY (`trainingUserId`) REFERENCES `training_users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

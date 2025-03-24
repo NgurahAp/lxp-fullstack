@@ -1,4 +1,3 @@
-// Schema
 generator client {
   provider = "prisma-client-js"
 }
@@ -54,6 +53,9 @@ model Training_Users {
   training Training @relation(fields: [trainingId], references: [id])
   user     User     @relation(fields: [userId], references: [id])
   scores   Score[]
+  moduleSubmissions ModuleSubmission[]
+  quizSubmissions QuizSubmission[]
+  taskSubmissions TaskSubmission[]
 
   @@map("training_users")
 }
@@ -80,14 +82,28 @@ model Module {
   meetingId   String
   title       String   @db.VarChar(255)
   content     String   @db.VarChar(255)  // PDF file path
-  moduleAnswer     String?     
-  moduleScore Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   meeting Meeting @relation(fields: [meetingId], references: [id])
+  submissions ModuleSubmission[]
 
   @@map("modules")
+}
+
+model ModuleSubmission {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  moduleId     String
+  trainingUserId String
+  answer       String?
+  score        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  module       Module @relation(fields: [moduleId], references: [id])
+  trainingUser Training_Users @relation(fields: [trainingUserId], references: [id])
+
+  @@map("module_submissions")
 }
 
 model Quiz {
@@ -95,28 +111,57 @@ model Quiz {
   meetingId  String
   title      String   @db.VarChar(255)
   questions  Json
-  quizScore  Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   meeting Meeting @relation(fields: [meetingId], references: [id])
+  submissions QuizSubmission[]
 
   @@map("quizzes")
 }
 
-model Task {
-  id         String   @id @default(uuid()) @db.VarChar(36)
-  meetingId  String
-  title      String   @db.VarChar(255)
-  taskQuestion String @db.VarChar(255)
-  taskAnswer     String? @db.VarChar(255) 
-  taskScore  Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model QuizSubmission {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  quizId       String
+  trainingUserId String
+  answers      Json?
+  score        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  meeting Meeting @relation(fields: [meetingId], references: [id])
+  quiz         Quiz @relation(fields: [quizId], references: [id])
+  trainingUser Training_Users @relation(fields: [trainingUserId], references: [id])
+
+  @@map("quiz_submissions")
+}
+
+model Task {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  meetingId    String
+  title        String   @db.VarChar(255)
+  taskQuestion String   @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  meeting     Meeting @relation(fields: [meetingId], references: [id])
+  submissions TaskSubmission[]
 
   @@map("tasks")
+}
+
+model TaskSubmission {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  taskId       String
+  trainingUserId String
+  answer       String?  @db.VarChar(255)
+  score        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  task         Task @relation(fields: [taskId], references: [id])
+  trainingUser Training_Users @relation(fields: [trainingUserId], references: [id])
+
+  @@map("task_submissions")
 }
 
 model Score {
