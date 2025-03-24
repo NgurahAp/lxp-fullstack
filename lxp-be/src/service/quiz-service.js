@@ -108,19 +108,33 @@ const submitQuiz = async (user, quizId, request) => {
   quizScore = Math.round(quizScore);
 
   return prismaClient.$transaction(async (tx) => {
-    const submission = await tx.quizSubmission.create({
-      data: {
-        quizId: quiz.id, // Changed from 'quiz' to 'quizId'
-        trainingUserId: trainingUserId,
-        answers: answers, // Changed from 'answer' to 'answers'
-        score: quizScore,
-      },
+    let submission = await tx.quizSubmission.findFirst({
+      where: { quizId: quizId, trainingUserId: trainingUserId },
     });
+
+    if (submission) {
+      submission = await tx.quizSubmission.update({
+        where: { id: submission.id },
+        data: {
+          answers: answers,
+          score: quizScore,
+        },
+      });
+    } else {
+      submission = await tx.quizSubmission.create({
+        data: {
+          quizId: quizId,
+          trainingUserId: trainingUserId,
+          answers: answers,
+          score: quizScore,
+        },
+      });
+    }
 
     const existingScore = await tx.score.findFirst({
       where: {
         trainingUserId: trainingUserId,
-        meetingId: quiz.meetingId, // Use meetingId from quiz
+        meetingId: quiz.meetingId,
       },
     });
 
@@ -195,7 +209,6 @@ const getDetailQuiz = async (user, request) => {
     select: {
       id: true,
       title: true,
-      quizScore: true,
       createdAt: true,
       updatedAt: true,
       meeting: {
@@ -222,7 +235,33 @@ const getDetailQuiz = async (user, request) => {
     );
   }
 
-  return quiz;
+  const trainingUser = await prismaClient.training_Users.findFirst({
+    where: {
+      userId: user.id,
+      training: {
+        meetings: {
+          some: {
+            id: meetingId,
+          },
+        },
+      },
+    },
+  });
+
+  const quizSubmission = await prismaClient.quizSubmission.findFirst({
+    where: {
+      quizId: quizId,
+      trainingUserId: trainingUser.id,
+    },
+    select: {
+      score: true,
+    },
+  });
+
+  return {
+    ...quiz,
+    submission: quizSubmission || { score: 0 },
+  };
 };
 
 const getQuizQuestions = async (user, request) => {
@@ -247,7 +286,6 @@ const getQuizQuestions = async (user, request) => {
     select: {
       id: true,
       title: true,
-      quizScore: true,
       questions: true,
       meeting: {
         select: {
@@ -282,7 +320,6 @@ const getQuizQuestions = async (user, request) => {
   return {
     id: quiz.id,
     title: quiz.title,
-    quizScore: quiz.quizScore,
     questions: questionsForStudent,
     meeting: quiz.meeting,
   };
