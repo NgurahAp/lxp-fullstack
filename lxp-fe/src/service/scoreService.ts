@@ -10,7 +10,7 @@ export const getScore = async (
 
   try {
     const response = await axios.get(
-      `${API_URL}/trainings/${trainingId}/score`,
+      `${API_URL}/trainings/${trainingId}/scores`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
