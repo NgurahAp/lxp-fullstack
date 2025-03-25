@@ -7,6 +7,7 @@ import {
   createInitScore,
   createMeeting,
   createTask,
+  createTaskSubmission,
   createTestInstructor,
   createTestUser,
   createTraining,
@@ -225,6 +226,7 @@ describe("POST /api/tasks/:taskId/score", () => {
     const trainingUser = await createTrainingUser(training.id, user.id);
     const meeting = await createMeeting(training.id);
     await createTask(meeting.id);
+    await createTaskSubmission(meeting.id, trainingUser.id);
 
     // Initialize score for the user
     await createInitScore(trainingUser.id, meeting.id);
@@ -239,15 +241,24 @@ describe("POST /api/tasks/:taskId/score", () => {
       where: { title: "Test task" },
     });
 
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
     const result = await supertest(web)
       .post(`/api/tasks/${task.id}/score`)
       .set("Authorization", "Bearer test-instructor")
       .send({
         taskScore: 90,
+        trainingUserId: trainingUser.id,
       });
 
+    console.log(result.body);
+
     expect(result.status).toBe(200);
-    expect(result.body.data.taskScore).toBe(90);
+    expect(result.body.data.updatedSubmission).toBeDefined();
+    expect(result.body.data.updatedSubmission.score).toBe(90);
+    expect(result.body.data.updatedSubmission.trainingUserId).toBe(
+      trainingUser.id
+    );
 
     // Verify score table was updated
     const score = await prismaClient.score.findFirst({
@@ -260,15 +271,102 @@ describe("POST /api/tasks/:taskId/score", () => {
     expect(score.totalScore).toBe(30); // Since quiz and task scores are 0
   });
 
+  it("Should reject if trainingUserId is missing", async () => {
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test task" },
+    });
+    const result = await supertest(web)
+      .post(`/api/tasks/${task.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        taskScore: 90,
+      });
+
+    expect(result.status).toBe(400);
+  });
+
+  it("Should reject if score is not number", async () => {
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test task" },
+    });
+
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
+    const result = await supertest(web)
+      .post(`/api/tasks/${task.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        taskScore: "test",
+        trainingUserId: trainingUser.id,
+      });
+
+    expect(result.status).toBe(400);
+  });
+
+  it("Should reject if module score is out of range (0-100)", async () => {
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test task" },
+    });
+
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
+    const result = await supertest(web)
+      .post(`/api/tasks/${task.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        taskScore: 2000,
+        trainingUserId: trainingUser.id,
+      });
+
+    expect(result.status).toBe(400);
+  });
+
+  it("Should reject invalid module ID", async () => {
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test task" },
+    });
+
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
+    const result = await supertest(web)
+      .post(`/api/tasks/invalid-task/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        taskScore: 80,
+        trainingUserId: trainingUser.id,
+      });
+
+    expect(result.status).toBe(404);
+  });
+
+  it("Should reject if user submission doesn't exist", async () => {
+    const task = await prismaClient.task.findFirst({
+      where: { title: "Test task" },
+    });
+
+    const result = await supertest(web)
+      .post(`/api/tasks/${task.id}/score`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        taskScore: 80,
+        trainingUserId: "non-existent-training-user-id",
+      });
+
+    expect(result.status).toBe(404);
+  });
+
   it("Should update total score correctly when other scores exist", async () => {
     const task = await prismaClient.task.findFirst({
       where: { title: "Test task" },
     });
 
+    const trainingUser = await prismaClient.training_Users.findFirst();
+
     // First set some quiz and task scores
     await prismaClient.score.updateMany({
       where: {
         meetingId: task.meetingId,
+        trainingUserId: trainingUser.id,
       },
       data: {
         quizScore: 90,
@@ -282,6 +380,7 @@ describe("POST /api/tasks/:taskId/score", () => {
       .set("Authorization", "Bearer test-instructor")
       .send({
         taskScore: 90,
+        trainingUserId: trainingUser.id,
       });
 
     expect(result.status).toBe(200);
@@ -290,9 +389,12 @@ describe("POST /api/tasks/:taskId/score", () => {
     const score = await prismaClient.score.findFirst({
       where: {
         meetingId: task.meetingId,
+        trainingUserId: trainingUser.id,
       },
     });
 
+    expect(score.moduleScore).toBe(90);
+    expect(score.quizScore).toBe(90);
     expect(score.taskScore).toBe(90);
     expect(score.totalScore).toBe(90); // (90 + 90 + 90) / 3
   });

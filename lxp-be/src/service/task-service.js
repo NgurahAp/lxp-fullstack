@@ -259,7 +259,10 @@ const getDetailTask = async (user, request) => {
 };
 
 const submitTaskScore = async (user, taskId, request) => {
-  const { taskScore } = validate(submitScoreTaskValidation, request);
+  const { taskScore, trainingUserId } = validate(
+    submitScoreTaskValidation,
+    request
+  );
 
   const task = await prismaClient.task.findFirst({
     where: {
@@ -291,69 +294,91 @@ const submitTaskScore = async (user, taskId, request) => {
     throw new ResponseError(404, "Task not found or you're not the instructor");
   }
 
+  // Add a check to make sure moduleScore is a valid number
+  if (typeof taskScore !== "number" || isNaN(taskScore)) {
+    throw new ResponseError(400, "Invalid task score provided");
+  }
+
+  // Add a check to validate trainingUserId
+  if (!trainingUserId) {
+    throw new ResponseError(400, "Training user ID is required");
+  }
+
   // Start a transaction to update both task and score
   return prismaClient.$transaction(async (tx) => {
-    const updateTask = await tx.task.update({
+    const submission = await tx.taskSubmission.findFirst({
       where: {
-        id: taskId,
+        taskId: taskId,
+        trainingUserId: trainingUserId,
       },
-      data: {
-        taskScore: taskScore,
-      },
-      select: {
-        id: true,
-        title: true,
-        taskQuestion: true,
-        taskAnswer: true,
-        taskScore: true,
-        meetingId: true,
-        createdAt: true,
-        updatedAt: true,
-        meeting: {
-          select: {
-            id: true,
-            title: true,
-            training: {
-              select: {
-                id: true,
-                title: true,
-              },
-            },
-          },
-        },
+      include: {
+        trainingUser: true,
       },
     });
 
-    // Get enrolled users' training_users records
-    const enrolledUsers = task.meeting.training.users;
-
-    // Update scores for all enrolled users
-    for (const trainingUser of enrolledUsers) {
-      const existingScore = await tx.score.findFirst({
-        where: {
-          trainingUserId: trainingUser.id,
-          meetingId: task.meetingId,
-        },
-      });
-
-      if (existingScore) {
-        await tx.score.update({
-          where: {
-            id: existingScore.id,
-          },
-          data: {
-            taskScore: taskScore,
-            totalScore:
-              (taskScore +
-                existingScore.quizScore +
-                existingScore.moduleScore) /
-              3,
-          },
-        });
-      }
+    if (!submission) {
+      throw new ResponseError(404, "Task submission not found for this user");
     }
 
-    return updateTask;
+    const updatedSubmission = await tx.taskSubmission.update({
+      where: {
+        id: submission.id,
+      },
+      data: {
+        score: taskScore,
+      },
+    });
+
+    const existingScore = await tx.score.findFirst({
+      where: {
+        trainingUserId: trainingUserId,
+        meetingId: task.meetingId,
+      },
+    });
+
+    if (existingScore) {
+      await tx.score.update({
+        where: {
+          id: existingScore.id,
+        },
+        data: {
+          taskScore: taskScore,
+          totalScore:
+            (existingScore.moduleScore + existingScore.quizScore + taskScore) /
+            3,
+        },
+      });
+    } else {
+      await tx.score.create({
+        data: {
+          trainingUserId: trainingUserId,
+          meetingId: task.meetingId,
+          taskScore: taskScore,
+          totalScore: taskScore / 3, // since quiz and task are 0
+        },
+      });
+    }
+
+    return {
+      id: task.id,
+      title: task.title,
+      meetingId: task.meetingId,
+      updatedSubmission: {
+        id: updatedSubmission.id,
+        trainingUserId: submission.trainingUserId,
+        score: taskScore,
+      },
+      meeting: {
+        id: task.meeting.id,
+        title: task.meeting.title,
+        training: {
+          id: task.meeting.training.id,
+          title: task.meeting.training.title,
+        },
+      },
+      createdAt: task.createdAt,
+      updatedAt: new Date(),
+    };
   });
 };
 

@@ -699,6 +699,20 @@ const createTask = async (meetingId) => {
   });
 };
 
+const createTaskSubmission = async (meetingId, trainingUserId) => {
+  const task = await prismaClient.task.findFirst({
+    where: { meetingId: meetingId },
+  });
+
+  return prismaClient.taskSubmission.create({
+    data: {
+      taskId: task.id,
+      trainingUserId: trainingUserId,
+      score: 0,
+    },
+  });
+};
+
 // Task Submission utilities
 const removeTaskSubmissions = async () => {
   return prismaClient.taskSubmission.deleteMany();
@@ -790,4 +804,5 @@ export {
   removeQuizSubmissions,
   removeTaskSubmissions,
   createModuleSubmission,
+  createTaskSubmission,
 };
