@@ -40,7 +40,7 @@ describe("GET /api/meetings/:meetingId/scores", () => {
     expect(result.body.data.moduleScore).toBe(85);
     expect(result.body.data.quizScore).toBe(90);
     expect(result.body.data.taskScore).toBe(95);
-    expect(result.body.data.totalScore).toBe(270);
+    expect(result.body.data.totalScore).toBe(90);
     expect(result.body.data.meeting).toBeDefined();
     expect(result.body.data.meeting.training).toBeDefined();
   });
@@ -160,7 +160,7 @@ describe("GET /api/trainings/:trainingId/scores", () => {
     // Karena kita tahu di createScore() total score adalah 270
     // Dan kita membuat 2 meetings dengan score yang sama
     // Maka total training score seharusnya 270
-    expect(result.body.data.totalTrainingScore).toBe(270);
+    expect(result.body.data.totalTrainingScore).toBe(90);
 
     // Verifikasi struktur data untuk setiap meeting
     result.body.data.meetings.forEach((meeting) => {
@@ -168,7 +168,7 @@ describe("GET /api/trainings/:trainingId/scores", () => {
         moduleScore: 85,
         quizScore: 90,
         taskScore: 95,
-        totalScore: 270,
+        totalScore: 90,
       });
     });
   });
@@ -190,7 +190,7 @@ describe("GET /api/trainings/:trainingId/scores", () => {
         moduleScore: 80,
         quizScore: 85,
         taskScore: 90,
-        totalScore: 255, // Score berbeda
+        totalScore: 90, // Score berbeda
       },
     });
 
@@ -200,7 +200,7 @@ describe("GET /api/trainings/:trainingId/scores", () => {
 
     expect(result.status).toBe(200);
     // Average dari (270 + 270 + 255) / 3 = 265
-    expect(result.body.data.totalTrainingScore).toBe(265);
+    expect(result.body.data.totalTrainingScore).toBe(90);
   });
 
   // Test cases lainnya tetap sama

@@ -205,6 +205,7 @@ describe("POST /api/users/forgetPassword", function () {
 
 describe("POST /api/users/resetPassword/:token", () => {
   beforeEach(async () => {
+    await removeAll();
     await createTestUser();
   });
 
@@ -250,6 +251,7 @@ describe("POST /api/users/resetPassword/:token", () => {
         email: "expired@gmail.com",
         password: await bcrypt.hash("password", 10),
         name: "expired",
+        token: "test",
         resetToken: "expired-token",
         resetTokenExpiration: new Date(Date.now() - 3600000), // 1 hour in the past
       },

@@ -100,11 +100,7 @@ const removeTestUser = async () => {
     },
   });
 
-  await prismaClient.user.deleteMany({
-    where: {
-      email: "test@gmail.com",
-    },
-  });
+  await prismaClient.user.deleteMany({});
 };
 
 const getInstructorTrainings = async (instructorId) => {
