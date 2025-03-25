@@ -197,6 +197,23 @@ describe("GET /api/meetings/:meetingId/tasks/:taskId", () => {
     expect(result.body.data).toBeDefined();
     expect(result.body.data.id).toBe(task.id);
     expect(result.body.data.title).toBe(task.title);
+    expect(result.body.data.submission).toBeDefined();
+    expect(result.body.data.submission.score).toBeDefined();
+  });
+
+  it("Should reject if user is not enrolled", async () => {
+    const instructor = await prismaClient.user.findFirst({
+      where: { email: "instructor@test.com" },
+    });
+    const training = await createTraining(instructor.id);
+    const meeting = await createMeeting(training.id);
+    const task = await createTask(meeting.id);
+
+    const result = await supertest(web)
+      .get(`/api/meetings/${meeting.id}/tasks/${task.id}`)
+      .set("Authorization", "Bearer test");
+
+    expect(result.status).toBe(404);
   });
 });
 

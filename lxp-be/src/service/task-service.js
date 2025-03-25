@@ -200,8 +200,6 @@ const getDetailTask = async (user, request) => {
       id: true,
       title: true,
       taskQuestion: true,
-      taskAnswer: true,
-      taskScore: true,
       createdAt: true,
       updatedAt: true,
       meeting: {
@@ -228,7 +226,36 @@ const getDetailTask = async (user, request) => {
     );
   }
 
-  return task;
+  // Get the training user record
+  const trainingUser = await prismaClient.training_Users.findFirst({
+    where: {
+      userId: user.id,
+      training: {
+        meetings: {
+          some: {
+            id: meetingId,
+          },
+        },
+      },
+    },
+  });
+
+  // Get the module submission for this user if exists
+  const taskSubmission = await prismaClient.taskSubmission.findFirst({
+    where: {
+      taskId: taskId,
+      trainingUserId: trainingUser.id,
+    },
+    select: {
+      answer: true,
+      score: true,
+    },
+  });
+
+  return {
+    ...task,
+    submission: taskSubmission || { answer: null, score: 0 },
+  };
 };
 
 const submitTaskScore = async (user, taskId, request) => {
