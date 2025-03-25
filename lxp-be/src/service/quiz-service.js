@@ -268,6 +268,28 @@ const getQuizQuestions = async (user, request) => {
   const validationResult = validate(getDetailQuizValidation, request);
   const { meetingId, quizId } = validationResult;
 
+  // Find the training user record
+  const trainingUser = await prismaClient.training_Users.findFirst({
+    where: {
+      userId: user.id,
+      training: {
+        meetings: {
+          some: {
+            id: meetingId,
+          },
+        },
+      },
+      status: "enrolled", // Ensure user is still enrolled
+    },
+  });
+
+  if (!trainingUser) {
+    throw new ResponseError(
+      403,
+      "You are not enrolled in this training or the training is not active"
+    );
+  }
+
   const quiz = await prismaClient.quiz.findFirst({
     where: {
       id: quizId,
@@ -314,12 +336,12 @@ const getQuizQuestions = async (user, request) => {
   const questionsForStudent = quiz.questions.map((question) => ({
     question: question.question,
     options: question.options,
-    // answer : question.correctAnswer
   }));
 
   return {
     id: quiz.id,
     title: quiz.title,
+    trainingUserId: trainingUser.id, // Include trainingUserId
     questions: questionsForStudent,
     meeting: quiz.meeting,
   };

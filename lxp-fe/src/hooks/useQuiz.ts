@@ -42,8 +42,8 @@ export const useSubmitQuiz = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ quizId, answers }: QuizSubmissionParams) =>
-      submitQuiz(quizId, { answers }),
+    mutationFn: ({ quizId, answers, trainingUserId }: QuizSubmissionParams) =>
+      submitQuiz(quizId, { answers, trainingUserId }),
 
     onSuccess: () => {
       // Invalidate related queries to refetch updated data

@@ -40,23 +40,6 @@ export const QuizAttempt = () => {
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
   const isFirstQuestion = currentQuestionIndex === 0;
 
-  // If no questions are available or current question is undefined, show error
-  if (data?.quizScore != 0) {
-    return (
-      <div className="min-h-[85vh] w-screen flex flex-col items-center justify-center">
-        <p className="text-lg font-semibold">
-          Kamu sudah menyelesaikan quiz ini!
-        </p>
-        <button
-          className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-          onClick={() => navigate(`/quiz/${meetingId}/${quizId}`)}
-        >
-          Lihat Quiz
-        </button>
-      </div>
-    );
-  }
-
   const navigateToQuestion = (index: number) => {
     setCurrentQuestionIndex(index);
   };
@@ -94,6 +77,7 @@ export const QuizAttempt = () => {
       submitQuizMutation.mutate({
         quizId: quizId!,
         answers,
+        trainingUserId: data?.trainingUserId,
       });
 
       navigate(`/quiz/${meetingId}/${quizId}`);
@@ -118,6 +102,7 @@ export const QuizAttempt = () => {
       submitQuizMutation.mutate({
         quizId: quizId!,
         answers,
+        trainingUserId: data?.trainingUserId,
       });
 
       setDialogOpen(false);

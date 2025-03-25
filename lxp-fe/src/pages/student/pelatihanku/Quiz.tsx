@@ -32,6 +32,8 @@ export const Quiz = () => {
     );
   }
 
+  console.log(data)
+
   const breadcrumbItems = [
     {
       label: "Beranda",
@@ -66,7 +68,7 @@ export const Quiz = () => {
           <img src="/pelatihanku/quiz-left.png" alt="" />
         </div>
         <div className="md:w-1/2 py-5 md:py-10">
-          {data && data.quizScore != 0 && <QuizHistory data={data} />}{" "}
+          {data && data.submission.score != 0 && <QuizHistory data={data} />}{" "}
           <QuizInfo />
           <div>
             <div>
@@ -100,13 +102,13 @@ export const Quiz = () => {
           <button
             onClick={() => setDialogOpen(true)}
             className={`flex w-full items-center text-sm py-4 rounded-xl justify-center mt-5 ${
-              data?.quizScore != 0
+              data?.submission.score != 0
                 ? "bg-gray-400 text-white cursor-not-allowed"
                 : "bg-blue-500 text-white"
             }`}
-            disabled={data?.quizScore != 0}
+            disabled={data?.submission.score != 0}
           >
-            {data?.quizScore != 0 ? "Kesempatan Habis!" : "Mulai Quiz"}
+            {data?.submission.score != 0 ? "Kesempatan Habis!" : "Mulai Quiz"}
           </button>
         </div>
       </div>

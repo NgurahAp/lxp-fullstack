@@ -16,13 +16,17 @@ interface Question {
   options: string[];
 }
 
+interface Submission {
+  score: number;
+}
+
 export interface QuizData {
   id: number;
   title: string;
-  quizScore: number;
   createdAt: string | number | Date;
   updatedAt: string | number | Date;
   meeting: Meeting;
+  submission: Submission;
 }
 
 interface QuizSubmissionAnswer {
@@ -32,17 +36,19 @@ interface QuizSubmissionAnswer {
 
 export interface QuizSubmissionPayload {
   answers: QuizSubmissionAnswer[];
+  trainingUserId: string | undefined;
 }
 
 export interface QuizSubmissionParams {
   quizId: string;
   answers: QuizSubmissionAnswer[];
+  trainingUserId: string | undefined;
 }
 
 export interface QuizQuestion {
   id: number;
   title: string;
-  quizScore: number;
+  trainingUserId: string;
   questions: Question[];
   meeting: Meeting;
 }

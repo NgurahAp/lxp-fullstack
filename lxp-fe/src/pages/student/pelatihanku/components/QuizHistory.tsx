@@ -1,9 +1,9 @@
-import { GetQuizResponse } from "../../../types/quiz";
+import { QuizResponse } from "../../../../types/quiz";
 
-export const QuizHistory = ({ data }: GetQuizResponse) => {
-  if (data.quizScore == 0) return null;
+export const QuizHistory = ({ data }: QuizResponse) => {
+  if (data.submission.score == 0) return null;
 
-  const wrongAnswer = 5 - data.quizScore / 20;
+  const wrongAnswer = 5 - data.submission.score / 20;
   const rightAnswer = 5 - wrongAnswer;
 
   return (
@@ -26,7 +26,7 @@ export const QuizHistory = ({ data }: GetQuizResponse) => {
         <div className="flex md:flex-row flex-col my-3 gap-4 md:gap-1">
           <div className="md:w-24 flex flex-col justify-center items-center gap-1">
             <h2 className="text-xs">Total Nilai</h2>
-            <h1 className="text-xl font-semibold">{data.quizScore}</h1>
+            <h1 className="text-xl font-semibold">{data.submission.score}</h1>
           </div>
           <div className="md:w-52 py-3 flex bg-[#DBF2EB] rounded-lg flex-col justify-center items-center gap-y-1">
             <h1 className="text-xl font-semibold">{rightAnswer}</h1>
