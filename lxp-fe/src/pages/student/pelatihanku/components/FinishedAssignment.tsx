@@ -1,4 +1,4 @@
-import { TaskData } from "../../../types/task";
+import { TaskData } from "../../../../types/task";
 import { formatToIndonesianDateTime } from "./Date";
 // import { calculateRemainingTime, formatToIndonesianDateTime } from "./Date";
 
@@ -28,7 +28,7 @@ export const FinishedAssignment: React.FC<OngoingStatusProps> = ({
             <td className="p-4 font-medium border-r border-gray-300">
               Status Penilaian
             </td>
-            <td className="p-4">{assignmentData.taskScore}</td>
+            <td className="p-4">{assignmentData.submission.score}</td>
           </tr>
           {/* <tr className="border-b">
             <td className="p-4 font-medium border-r border-gray-300 bg-gray-50">
@@ -67,13 +67,13 @@ export const FinishedAssignment: React.FC<OngoingStatusProps> = ({
             </td>
             <td className="p-4 bg-gray-50">
                   <a
-                    href={`http://localhost:3001/public/${assignmentData.taskAnswer}`}
+                    href={`http://localhost:3001/public/${assignmentData.submission.answer}`}
                     className="text-blue-500 hover:underline flex items-center"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <img src="/penugasan/pdf.png" className="w-8 mr-3" alt="" />{" "}
-                    {assignmentData.taskAnswer}
+                    Answer
                   </a>
             </td>
             <td className="p-4 bg-gray-50">

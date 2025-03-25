@@ -56,7 +56,7 @@ export const Task = () => {
           {data?.taskQuestion}
         </p>
         <div className="border-b-[1px] border-gray-400 md:my-8 my-3" />
-        {data?.taskAnswer != null ? (
+        {data?.submission.answer != null ? (
           <FinishedAssignment assignmentData={data} />
         ) : (
           <FileUploadForm taskId={taskId} />

@@ -11,6 +11,11 @@ interface Meeting {
   training: Training;
 }
 
+interface Submission {
+  answer: string;
+  score: number;
+}
+
 export interface SubmitTaskRequest {
   taskId: string | undefined;
   file: File | null;
@@ -20,11 +25,10 @@ export interface TaskData {
   id: number;
   title: string;
   taskQuestion: string;
-  taskAnswer: string | null;
-  taskScore: number;
   createdAt: string;
   updatedAt: string;
   meeting: Meeting;
+  submission: Submission;
 }
 
 export interface TaskResponse {
