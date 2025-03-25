@@ -43,7 +43,6 @@ describe("POST /api/meetings/:meetingId/tasks", () => {
 
     expect(result.status).toBe(200);
     expect(result.body.data.title).toBe("Test Task");
-    expect(result.body.data.taskScore).toBe(0);
   });
 
   it("Should reject if user role not Instructor", async () => {
@@ -116,10 +115,6 @@ describe("POST /api/tasks/:taskId/submit", () => {
       where: { title: "Test Task" },
     });
 
-    if (!task) {
-      throw new Error("Test task not found");
-    }
-
     const testPdfPath = path.join(__dirname, "files", "test.pdf");
 
     const result = await supertest(web)
@@ -128,9 +123,9 @@ describe("POST /api/tasks/:taskId/submit", () => {
       .attach("taskAnswer", testPdfPath);
 
     expect(result.status).toBe(200);
-    expect(result.body.data.id).toBe(task.id);
-    expect(result.body.data.taskAnswer).toBeDefined();
-    expect(result.body.data.taskAnswer).toMatch(/^tasks\/.+.pdf$/);
+    expect(result.body.data.task.id).toBe(task.id);
+    expect(result.body.data.answer).toBeDefined();
+    expect(result.body.data.answer).toMatch(/^tasks\/.+.pdf$/);
   });
 
   it("Should reject non-PDF files", async () => {

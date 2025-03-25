@@ -39,9 +39,7 @@ const createTask = async (user, meetingId, request) => {
       id: true,
       title: true,
       taskQuestion: true,
-      taskScore: true,
       meetingId: true,
-      taskAnswer: true,
       createdAt: true,
       updatedAt: true,
       meeting: {
@@ -93,24 +91,90 @@ const submitTask = async (user, taskId, file) => {
   // Extract just the relative path from /tasks/ onwards
   const relativePath = "tasks/" + path.basename(file.path);
 
-  return prismaClient.task.update({
+  // Get the training user record (we need this ID for the submission)
+  const trainingUser = await prismaClient.training_Users.findFirst({
     where: {
-      id: taskId,
-    },
-    data: {
-      taskAnswer: relativePath,
-    },
-    select: {
-      id: true,
-      title: true,
-      taskQuestion: true,
-      taskAnswer: true,
-      taskScore: true,
-      meetingId: true,
-      createdAt: true,
-      updatedAt: true,
+      userId: user.id,
+      trainingId: task.meeting.training.id,
     },
   });
+
+  if (!trainingUser) {
+    throw new ResponseError(404, "You're not enrolled in this training");
+  }
+
+  const existingSubmission = await prismaClient.taskSubmission.findFirst({
+    where: {
+      taskId: taskId,
+      trainingUserId: trainingUser.id,
+    },
+  });
+
+  let submission;
+
+  if (existingSubmission) {
+    submission = await prismaClient.taskSubmission.update({
+      where: {
+        id: existingSubmission.id,
+      },
+      data: {
+        answer: relativePath,
+        updatedAt: new Date(),
+      },
+      include: {
+        task: {
+          include: {
+            meeting: {
+              include: {
+                training: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  } else {
+    submission = await prismaClient.taskSubmission.create({
+      data: {
+        taskId: taskId,
+        trainingUserId: trainingUser.id,
+        answer: relativePath,
+      },
+      include: {
+        task: {
+          include: {
+            meeting: {
+              include: {
+                training: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  return {
+    id: submission.id,
+    taskId: submission.taskId,
+    answer: submission.answer,
+    score: submission.score,
+    createdAt: submission.createdAt,
+    updatedAt: submission.updatedAt,
+    task: {
+      id: submission.task.id,
+      title: submission.task.title,
+      meetingId: submission.task.meetingId,
+      meeting: {
+        id: submission.task.meeting.id,
+        title: submission.task.meeting.title,
+        training: {
+          id: submission.task.meeting.training.id,
+          title: submission.task.meeting.training.title,
+        },
+      },
+    },
+  };
 };
 
 const getDetailTask = async (user, request) => {
