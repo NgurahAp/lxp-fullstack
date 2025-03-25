@@ -58,7 +58,7 @@ export const ModuleSubmitDialog: React.FC<ModuleSubmitDialogProps> = ({
     submitAnswer(
       {
         moduleId,
-        moduleAnswer: summary,
+        answer: summary,
       },
       {
         onSuccess: () => {

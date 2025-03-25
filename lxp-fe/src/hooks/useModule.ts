@@ -20,15 +20,15 @@ export const useGetModule = (
 
 interface SubmitModuleAnswerParams {
   moduleId: string;
-  moduleAnswer: string;
+  answer: string;
 }
 
 export const useSubmitModuleAnswer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ moduleId, moduleAnswer }: SubmitModuleAnswerParams) =>
-      submitModuleAnswer(moduleId, moduleAnswer),
+    mutationFn: ({ moduleId, answer }: SubmitModuleAnswerParams) =>
+      submitModuleAnswer(moduleId, answer),
 
     onSuccess: (_, variables) => {
       // Invalidate related queries to refetch updated data

@@ -11,15 +11,19 @@ interface Meeting {
   training: Training;
 }
 
+interface Submission {
+  answer: string;
+  score: number;
+}
+
 export interface ModuleData {
   id: number;
   title: string;
   content: string;
-  moduleScore: number;
-  moduleAnswer: string | null;
   createdAt: string;
   updatedAt: string;
   meeting: Meeting;
+  submission: Submission;
 }
 
 export interface ModuleResponse {

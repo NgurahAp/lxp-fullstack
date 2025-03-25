@@ -34,14 +34,14 @@ export const getModule = async (
 
 export const submitModuleAnswer = async (
   moduleId: string | undefined,
-  moduleAnswer: string
+  answer: string
 ): Promise<SubmitModuleResponse> => {
   const token = Cookies.get("token");
 
   try {
     const response = await axios.post(
       `${API_URL}/modules/${moduleId}/answer`,
-      { moduleAnswer },
+      { answer },
       {
         headers: {
           Authorization: `Bearer ${token}`,
