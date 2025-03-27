@@ -628,6 +628,86 @@ const updateTraining = async (user, trainingId, request, file) => {
   });
 };
 
+const removeTraining = async (user, trainingId) => {
+  trainingId = validate(getTrainingDetailValidation, {
+    trainingId,
+  }).trainingId;
+
+  const totalTraininginDatabase = await prismaClient.training.count({
+    where: {
+      id: trainingId,
+      instructorId: user.id,
+    },
+  });
+
+  if (totalTraininginDatabase !== 1) {
+    throw new ResponseError(
+      404,
+      "Training is not found or you are not the instructor of this course"
+    );
+  }
+
+  // Start a transaction to ensure atomic deletion
+  return prismaClient.$transaction(async (tx) => {
+    // First, delete deeply nested submissions
+    await tx.moduleSubmission.deleteMany({
+      where: { trainingUser: { trainingId } },
+    });
+
+    await tx.quizSubmission.deleteMany({
+      where: { trainingUser: { trainingId } },
+    });
+
+    await tx.taskSubmission.deleteMany({
+      where: { trainingUser: { trainingId } },
+    });
+
+    // Delete scores
+    await tx.score.deleteMany({
+      where: { trainingUser: { trainingId } },
+    });
+
+    // Delete related meetings and their contents
+    const meetings = await tx.meeting.findMany({
+      where: { trainingId },
+      select: { id: true },
+    });
+
+    const meetingIds = meetings.map((meeting) => meeting.id);
+
+    // Delete meeting-related content
+    await tx.module.deleteMany({
+      where: { meetingId: { in: meetingIds } },
+    });
+
+    await tx.quiz.deleteMany({
+      where: { meetingId: { in: meetingIds } },
+    });
+
+    await tx.task.deleteMany({
+      where: { meetingId: { in: meetingIds } },
+    });
+
+    // Delete meetings
+    await tx.meeting.deleteMany({
+      where: { trainingId },
+    });
+
+    // Delete training users
+    await tx.training_Users.deleteMany({
+      where: { trainingId },
+    });
+
+    // Finally, delete the training
+    return tx.training.delete({
+      where: {
+        id: trainingId,
+        instructorId: user.id,
+      },
+    });
+  });
+};
+
 export default {
   createTraining,
   createTrainingUser,
@@ -636,4 +716,5 @@ export default {
   getTrainingDetail,
   getInstructorTrainingDetail,
   updateTraining,
+  removeTraining,
 };

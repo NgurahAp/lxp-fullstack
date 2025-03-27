@@ -256,6 +256,6 @@ describe("GET /api/meetings/:meetingId/quizzes/:quizId/questions", () => {
       .get(`/api/meetings/${meeting.id}/quizzes/${quiz.id}/questions`)
       .set("Authorization", "Bearer test");
 
-    expect(result.status).toBe(404);
+    expect(result.status).toBe(403);
   });
 });

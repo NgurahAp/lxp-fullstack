@@ -7,8 +7,8 @@ const Dashboard: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const bannerImages = [
-    "https://storage.googleapis.com/kampusgratis_id/banners/banner_216ba8b9-c5ce-43d4-8f6e-492b6f38d587.png",
-    "https://storage.googleapis.com/kampusgratis_id/banners/banner_006df764-8389-47c1-ba60-d52673b511b5.png",
+    "/public/dashboard/banner1.png",
+    "/public/dashboard/banner2.png",
   ];
 
   useEffect(() => {

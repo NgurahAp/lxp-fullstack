@@ -225,8 +225,8 @@ describe("POST /api/tasks/:taskId/score", () => {
     const training = await createTraining(instructor.id);
     const trainingUser = await createTrainingUser(training.id, user.id);
     const meeting = await createMeeting(training.id);
-    await createTask(meeting.id);
-    await createTaskSubmission(meeting.id, trainingUser.id);
+    const task = await createTask(meeting.id);
+    await createTaskSubmission(task.id, trainingUser.id);
 
     // Initialize score for the user
     await createInitScore(trainingUser.id, meeting.id);

@@ -118,6 +118,20 @@ const updateTraining = async (req, res, next) => {
   });
 };
 
+const removeTrainingUser = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const trainingId = req.params.trainingId;
+
+    await trainingService.removeTraining(user, trainingId);
+    res.status(200).json({
+      data: "Success delete training",
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 export default {
   createTraining,
   createTrainingUser,
@@ -126,4 +140,5 @@ export default {
   getTrainingDetail,
   getInstructorTrainingDetail,
   updateTraining,
+  removeTrainingUser,
 };

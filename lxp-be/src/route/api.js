@@ -75,6 +75,13 @@ userRouter.put(
   trainingController.updateTraining
 );
 
+userRouter.delete(
+  "/api/instructor/deleteTraining/:trainingId",
+  authMiddleware,
+  instruktorMiddleware,
+  trainingController.removeTrainingUser
+);
+
 // Router for meeting
 userRouter.post(
   "/api/meetings",

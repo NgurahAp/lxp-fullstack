@@ -541,14 +541,30 @@ const createTrainingUser = async (trainingId, userId) => {
   });
 };
 
-const createModuleSubmission = async (meetingId, trainingUserId) => {
-  const module = await prismaClient.module.findFirst({
-    where: { meetingId: meetingId },
-  });
-
+const createModuleSubmission = async (moduleId, trainingUserId) => {
   return prismaClient.moduleSubmission.create({
     data: {
-      moduleId: module.id,
+      moduleId: moduleId,
+      trainingUserId: trainingUserId,
+      score: 0,
+    },
+  });
+};
+
+const createQuizSubmission = async (quizId, trainingUserId) => {
+  return prismaClient.quizSubmission.create({
+    data: {
+      quizId: quizId,
+      trainingUserId: trainingUserId,
+      score: 0,
+    },
+  });
+};
+
+const createTaskSubmission = async (taskId, trainingUserId) => {
+  return prismaClient.taskSubmission.create({
+    data: {
+      taskId: taskId,
       trainingUserId: trainingUserId,
       score: 0,
     },
@@ -695,20 +711,6 @@ const createTask = async (meetingId) => {
   });
 };
 
-const createTaskSubmission = async (meetingId, trainingUserId) => {
-  const task = await prismaClient.task.findFirst({
-    where: { meetingId: meetingId },
-  });
-
-  return prismaClient.taskSubmission.create({
-    data: {
-      taskId: task.id,
-      trainingUserId: trainingUserId,
-      score: 0,
-    },
-  });
-};
-
 // Task Submission utilities
 const removeTaskSubmissions = async () => {
   return prismaClient.taskSubmission.deleteMany();
@@ -801,4 +803,5 @@ export {
   removeTaskSubmissions,
   createModuleSubmission,
   createTaskSubmission,
+  createQuizSubmission,
 };

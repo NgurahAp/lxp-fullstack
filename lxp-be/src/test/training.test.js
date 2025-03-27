@@ -3,6 +3,13 @@ import { prismaClient } from "../application/database";
 import { web } from "../application/web";
 import {
   createMeeting,
+  createModule,
+  createModuleSubmission,
+  createQuiz,
+  createQuizSubmission,
+  createScore,
+  createTask,
+  createTaskSubmission,
   createTestInstructor,
   createTestUser,
   createTraining,
@@ -327,5 +334,80 @@ describe("PUT /api/instructor/updateTraining/:trainingId", () => {
     expect(result.body.data.title).toBe("test update training");
     expect(result.body.data.description).toBe("test update description");
     expect(result.body.data.image).toBeDefined();
+  });
+});
+
+describe("DELETE /api/instructor/deleteTraining/:trainingId", () => {
+  let training;
+  let instructor;
+  let user;
+  let meeting;
+
+  beforeEach(async () => {
+    instructor = await createTestInstructor();
+    user = await createTestUser();
+    training = await createTraining(instructor.id);
+    const trainingUser = await createTrainingUser(training.id, user.id);
+    meeting = await createMeeting(training.id);
+
+    const module = await createModule(meeting.id);
+    const quiz = await createQuiz(meeting.id);
+    const task = await createTask(meeting.id);
+
+    await createModuleSubmission(module.id, trainingUser.id);
+    await createQuizSubmission(quiz.id, trainingUser.id);
+    await createTaskSubmission(task.id, trainingUser.id);
+
+    await createScore(trainingUser.id, meeting.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should can delete training", async () => {
+    const result = await supertest(web)
+      .delete(`/api/instructor/deleteTraining/${training.id}`)
+      .set("Authorization", "Bearer test-instructor");
+
+    expect(result.status).toBe(200);
+
+    // Verify training is deleted
+    const deletedTraining = await prismaClient.training.findUnique({
+      where: { id: training.id },
+    });
+    expect(deletedTraining).toBeNull();
+
+    // Verify related records are also deleted
+    const relatedTrainingUsers = await prismaClient.training_Users.findMany({
+      where: { trainingId: training.id },
+    });
+    expect(relatedTrainingUsers).toHaveLength(0);
+
+    const relatedMeetings = await prismaClient.meeting.findMany({
+      where: { trainingId: training.id },
+    });
+    expect(relatedMeetings).toHaveLength(0);
+
+    // Verify submissions are deleted
+    const moduleSubmissions = await prismaClient.moduleSubmission.findMany({
+      where: { trainingUser: { trainingId: training.id } },
+    });
+    expect(moduleSubmissions).toHaveLength(0);
+
+    const quizSubmissions = await prismaClient.quizSubmission.findMany({
+      where: { trainingUser: { trainingId: training.id } },
+    });
+    expect(quizSubmissions).toHaveLength(0);
+
+    const taskSubmissions = await prismaClient.taskSubmission.findMany({
+      where: { trainingUser: { trainingId: training.id } },
+    });
+    expect(taskSubmissions).toHaveLength(0);
+
+    const scores = await prismaClient.score.findMany({
+      where: { trainingUser: { trainingId: training.id } },
+    });
+    expect(scores).toHaveLength(0);
   });
 });
