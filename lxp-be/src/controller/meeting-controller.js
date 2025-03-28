@@ -24,14 +24,30 @@ const getMeetings = async (req, res, next) => {
 
 const getMeetingDetail = async (req, res, next) => {
   try {
-    const result = await meetingService.getMeetingDetail(req.user, {
-      trainingId: req.params.trainingId,
-      meetingId: req.params.meetingId,
-    });
+    const result = await meetingService.updateMeeting(
+      req.user,
+      req.params.meetingId,
+      req.params.trainingId,
+      req.body
+    );
     res.status(200).json({ data: result });
   } catch (e) {
     next(e);
   }
 };
 
-export default { createMeeting, getMeetings, getMeetingDetail };
+const updateMeeting = async (req, res, next) => {
+  try {
+    const result = await meetingService.updateMeeting(
+      req.user,
+      req.params.meetingId,
+      req.params.trainingId,
+      req.body
+    );
+    res.status(200).json({ data: result });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default { createMeeting, getMeetings, getMeetingDetail, updateMeeting };

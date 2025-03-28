@@ -192,3 +192,48 @@ describe("GET /api/trainings/:trainingId/meetings/:meetingId", () => {
     expect(result.body.data.title).toBe("Test Meeting");
   });
 });
+
+describe("PUT /api/trainings/:trainingId/meetings/:meetingId", () => {
+  let training;
+  let meeting;
+  let instructor;
+
+  beforeEach(async () => {
+    await createTestUser();
+    instructor = await createTestInstructor();
+    training = await createTraining(instructor.id);
+    meeting = await createMeeting(training.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should can update meeting", async () => {
+    const result = await supertest(web)
+      .put(`/api/trainings/${training.id}/meetings/${meeting.id}`)
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        title: "Updated Meeting Title",
+      });
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.title).toBe("Updated Meeting Title");
+  });
+
+  it("Should reject if not the instructor", async () => {
+    const otherInstructor = await createTestInstructor("other@example.com");
+
+    const result = await supertest(web)
+      .put(`/api/trainings/${training.id}/meetings/${meeting.id}`)
+      .set("Authorization", `Bearer test-instructor-${otherInstructor.id}`)
+      .send({
+        title: "Updated Meeting Title",
+        meetingDate: "2024-02-01T10:00:00Z",
+      });
+
+    expect(result.status).toBe(401);
+  });
+});

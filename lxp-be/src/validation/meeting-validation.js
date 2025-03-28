@@ -17,4 +17,14 @@ const getMeetingDetailValidation = Joi.object({
   meetingId: Joi.string().required(),
 });
 
-export { createMeetingValidation, getMeetingValidation, getMeetingDetailValidation };
+const updateMeetingValidation = Joi.object({
+  title: Joi.string().max(255).required(),
+  meetingDate: Joi.date().iso().allow(null).optional(),
+});
+
+export {
+  createMeetingValidation,
+  getMeetingValidation,
+  getMeetingDetailValidation,
+  updateMeetingValidation,
+};

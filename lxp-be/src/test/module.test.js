@@ -293,8 +293,8 @@ describe("POST /api/modules/:moduleId/score", () => {
     const training = await createTraining(instructor.id);
     const trainingUser = await createTrainingUser(training.id, user.id);
     const meeting = await createMeeting(training.id);
-    await createModule(meeting.id);
-    await createModuleSubmission(meeting.id, trainingUser.id);
+    const module = await createModule(meeting.id);
+    await createModuleSubmission(module.id, trainingUser.id);
 
     // Initialize score for the user
     await createInitScore(trainingUser.id, meeting.id);

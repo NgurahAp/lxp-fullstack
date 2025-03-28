@@ -50,11 +50,13 @@ userRouter.post(
   authMiddleware,
   trainingController.createTrainingUser
 );
+
 userRouter.get(
   "/api/student/trainings",
   authMiddleware,
   trainingController.getStudentsTraining
 );
+
 userRouter.get(
   "/api/student/trainings/:trainingId",
   authMiddleware,
@@ -98,6 +100,13 @@ userRouter.get(
   "/api/trainings/:trainingId/meetings/:meetingId",
   authMiddleware,
   meetingController.getMeetingDetail
+);
+
+userRouter.put(
+  "/api/trainings/:trainingId/meetings/:meetingId",
+  authMiddleware,
+  instruktorMiddleware,
+  meetingController.updateMeeting
 );
 
 // Router for module

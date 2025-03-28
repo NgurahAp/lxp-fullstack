@@ -4,6 +4,7 @@ import {
   createMeetingValidation,
   getMeetingDetailValidation,
   getMeetingValidation,
+  updateMeetingValidation,
 } from "../validation/meeting-validation.js";
 import { validate } from "../validation/validation.js";
 
@@ -70,7 +71,7 @@ const createMeeting = async (user, request) => {
 
 const getMeetings = async (user, request) => {
   const validated = validate(getMeetingValidation, {
-    trainingId: (request.trainingId), // Convert string to number
+    trainingId: request.trainingId, // Convert string to number
     page: request.page,
     size: request.size,
   });
@@ -139,8 +140,8 @@ const getMeetings = async (user, request) => {
 
 const getMeetingDetail = async (user, request) => {
   const validated = validate(getMeetingDetailValidation, {
-    trainingId: (request.trainingId),
-    meetingId: (request.meetingId),
+    trainingId: request.trainingId,
+    meetingId: request.meetingId,
   });
 
   // Verify if user has access to this training
@@ -191,4 +192,49 @@ const getMeetingDetail = async (user, request) => {
   return meeting;
 };
 
-export default { createMeeting, getMeetings, getMeetingDetail };
+const updateMeeting = async (user, meetingId, trainingId, request) => {
+  const meeting = validate(updateMeetingValidation, request);
+
+  const existingMeeting = await prismaClient.meeting.findFirst({
+    where: {
+      id: meetingId,
+      trainingId: trainingId,
+    },
+    include: {
+      training: true, // Include full training data
+    },
+  });
+
+  // Cek apakah meeting ada dan milik instructor yang sama
+  if (!existingMeeting) {
+    throw new ResponseError(404, "Meeting is not found");
+  }
+
+  // Tambahan validasi instructor
+  if (existingMeeting.training.instructorId !== user.id) {
+    throw new ResponseError(
+      403,
+      "You are not authorized to update this meeting"
+    );
+  }
+
+  return prismaClient.meeting.update({
+    where: {
+      id: meetingId,
+    },
+    data: {
+      title: meeting.title,
+      meetingDate: meeting.meetingDate,
+    },
+    select: {
+      id: true,
+      title: true,
+      meetingDate: true,
+      trainingId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+};
+
+export default { createMeeting, getMeetings, getMeetingDetail, updateMeeting };
