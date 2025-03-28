@@ -115,3 +115,7 @@ export interface UpdateTrainingParams {
   trainingId: string | undefined;
   training: FormData;
 }
+
+export interface DeleteTrainingResponse {
+  data: string;
+}

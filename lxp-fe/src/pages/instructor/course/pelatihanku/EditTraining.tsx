@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Save, Upload, X, Trash2, AlertTriangle } from "lucide-react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { InstructorTraining } from "../../../../types/training";
-import { useUpdateTraining } from "../../../../hooks/useTrainings";
+import {
+  useDeleteTraining,
+  useUpdateTraining,
+} from "../../../../hooks/useTrainings";
 
 const EditTrainingForm = () => {
   const { trainingId } = useParams();
@@ -21,7 +24,12 @@ const EditTrainingForm = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const updateTrainingMutation = useUpdateTraining();
-  // const deleteTrainingMutation = useDeleteTraining();
+  const {
+    mutate: deleteTraining,
+    isLoading,
+    isError,
+    error,
+  } = useDeleteTraining(trainingId);
 
   // Populate form with existing data
   useEffect(() => {
@@ -83,11 +91,6 @@ const EditTrainingForm = () => {
           },
         }
       );
-
-      // Simulate success for now
-      setTimeout(() => {
-        navigate("/instructorCourse");
-      }, 1000);
     } catch (error) {
       console.error("Error updating training:", error);
       setIsSubmitting(false);
@@ -99,27 +102,23 @@ const EditTrainingForm = () => {
 
     setIsDeleting(true);
 
-    try {
-      // deleteTrainingMutation.mutate(trainingId, {
-      //   onSuccess: () => {
-      //     navigate("/instructorCourse");
-      //   },
-      //   onError: (error) => {
-      //     console.error("Error deleting training:", error);
-      //     setIsDeleting(false);
-      //     setShowDeleteConfirm(false);
-      //   }
-      // });
+    deleteTraining(undefined, {
+      onSuccess: () => {
+        // Reset states
+        setIsDeleting(false);
+        setShowDeleteConfirm(false);
 
-      // Simulate success for now
-      setTimeout(() => {
-        navigate("/instructorCourse");
-      }, 1000);
-    } catch (error) {
-      console.error("Error deleting training:", error);
-      setIsDeleting(false);
-      setShowDeleteConfirm(false);
-    }
+        // Navigate after a short delay untuk memastikan state sudah terupdate
+        setTimeout(() => {
+          navigate("/instructorCourse");
+        }, 100);
+      },
+      onError: (error) => {
+        console.error("Error deleting training:", error);
+        setIsDeleting(false);
+        setShowDeleteConfirm(false);
+      },
+    });
   };
 
   // Show loading state if data isn't available yet

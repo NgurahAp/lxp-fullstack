@@ -2,6 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import {
   CreateTrainingResponse,
+  DeleteTrainingResponse,
   DetailTrainingResponse,
   GetTrainingInstructorResponse,
   TrainingResponse,
@@ -171,6 +172,37 @@ export const updateTraining = async ({
       }
       if (error.response?.status === 404) {
         throw new Error("Kamu hanya bisa membuat pelatihan dengan id kamu");
+      }
+      throw new Error(
+        error.response?.data?.message || "Terjadi kesalahan pada server"
+      );
+    }
+    throw new Error("Terjadi kesalahan yang tidak diketahui");
+  }
+};
+
+export const deleteTraining = async (
+  trainingId: string | undefined
+): Promise<DeleteTrainingResponse> => {
+  const token = Cookies.get("token");
+
+  try {
+    const response = await axios.delete(
+      `${API_URL}/instructor/deleteTraining/${trainingId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        throw new Error("Anda tidak memiliki hak akses");
+      }
+      if (error.response?.status === 404) {
+        throw new Error("Pelatihan tidak ditemukan");
       }
       throw new Error(
         error.response?.data?.message || "Terjadi kesalahan pada server"

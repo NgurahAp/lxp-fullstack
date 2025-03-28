@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import {
   CreateTrainingResponse,
+  DeleteTrainingResponse,
   DetailTrainingData,
   GetTrainingInstructorResponse,
   TrainingResponse,
@@ -13,6 +14,7 @@ import {
 } from "../types/training";
 import {
   createTraining,
+  deleteTraining,
   getDetailTraining,
   getInstructorDetailTraining,
   getTrainings,
@@ -122,6 +124,31 @@ export const useUpdateTraining = () => {
     onError: (error: Error) => {
       console.log(error.message);
       toast.error("Gagal mengedit pelatihan");
+    },
+  });
+};
+
+export const useDeleteTraining = (trainingId: string | undefined) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation<DeleteTrainingResponse, Error>({
+    mutationFn: () => deleteTraining(trainingId),
+
+    onSuccess: () => {
+      // Invalidate related queries to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["detailTraining"],
+      });
+
+      // Show success notification
+      toast.success("Pelatihan berhasi dihapus");
+      navigate(`/instructorCourse`);
+    },
+
+    onError: (error: Error) => {
+      console.log(error.message);
+      toast.error("Gagal menghapus pelatihan");
     },
   });
 };
