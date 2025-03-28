@@ -50,4 +50,24 @@ const updateMeeting = async (req, res, next) => {
   }
 };
 
-export default { createMeeting, getMeetings, getMeetingDetail, updateMeeting };
+const removeMeeting = async (req, res, next) => {
+  try {
+    await meetingService.removeMeeting(req.user, {
+      meetingId: req.params.meetingId,
+      trainingId: req.params.trainingId,
+    });
+    res.status(200).json({
+      data: "Success delete meeting",
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export default {
+  createMeeting,
+  getMeetings,
+  getMeetingDetail,
+  updateMeeting,
+  removeMeeting,
+};

@@ -109,6 +109,13 @@ userRouter.put(
   meetingController.updateMeeting
 );
 
+userRouter.delete(
+  "/api/trainings/:trainingId/meetings/:meetingId",
+  authMiddleware,
+  instruktorMiddleware,
+  meetingController.removeMeeting
+);
+
 // Router for module
 userRouter.post(
   "/api/meetings/:meetingId/modules",

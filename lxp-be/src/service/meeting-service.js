@@ -2,6 +2,7 @@ import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {
   createMeetingValidation,
+  deleteMeetingValidation,
   getMeetingDetailValidation,
   getMeetingValidation,
   updateMeetingValidation,
@@ -237,4 +238,84 @@ const updateMeeting = async (user, meetingId, trainingId, request) => {
   });
 };
 
-export default { createMeeting, getMeetings, getMeetingDetail, updateMeeting };
+const removeMeeting = async (user, request) => {
+  const meeting = validate(deleteMeetingValidation, request);
+  const { trainingId, meetingId } = meeting;
+
+  const existingMeeting = await prismaClient.meeting.findFirst({
+    where: {
+      id: meetingId,
+      trainingId: trainingId,
+    },
+    include: {
+      training: true,
+    },
+  });
+
+  // Check if meeting exists and belongs to the same instructor
+  if (!existingMeeting) {
+    throw new ResponseError(404, "Meeting is not found");
+  }
+
+  // Additional instructor validation
+  if (existingMeeting.training.instructorId !== user.id) {
+    throw new ResponseError(
+      403,
+      "You are not authorized to delete this meeting"
+    );
+  }
+
+  // Start a transaction to ensure atomic deletion
+  return prismaClient.$transaction(async (tx) => {
+    // Remove module submissions
+    await tx.moduleSubmission.deleteMany({
+      where: { module: { meetingId } },
+    });
+
+    // Remove quiz submissions
+    await tx.quizSubmission.deleteMany({
+      where: { quiz: { meetingId } },
+    });
+
+    // Remove task submissions
+    await tx.taskSubmission.deleteMany({
+      where: { task: { meetingId } },
+    });
+
+    // Remove scores related to this meeting
+    await tx.score.deleteMany({
+      where: { meetingId },
+    });
+
+    // Remove modules
+    await tx.module.deleteMany({
+      where: { meetingId },
+    });
+
+    // Remove quizzes
+    await tx.quiz.deleteMany({
+      where: { meetingId },
+    });
+
+    // Remove tasks
+    await tx.task.deleteMany({
+      where: { meetingId },
+    });
+
+    // Delete the meeting
+    return tx.meeting.delete({
+      where: {
+        id: meetingId,
+        trainingId: trainingId,
+      },
+    });
+  });
+};
+
+export default {
+  createMeeting,
+  getMeetings,
+  getMeetingDetail,
+  updateMeeting,
+  removeMeeting,
+};

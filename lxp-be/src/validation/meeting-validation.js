@@ -22,9 +22,15 @@ const updateMeetingValidation = Joi.object({
   meetingDate: Joi.date().iso().allow(null).optional(),
 });
 
+const deleteMeetingValidation = Joi.object({
+  trainingId: Joi.string().required(),
+  meetingId: Joi.string().required(),
+});
+
 export {
   createMeetingValidation,
   getMeetingValidation,
   getMeetingDetailValidation,
   updateMeetingValidation,
+  deleteMeetingValidation,
 };
