@@ -62,7 +62,9 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, toggleSidebar }) => {
           path="/instructorCourse"
           active={
             location.pathname.includes("/instructorCourse") ||
-            location.pathname.includes("/detailCourse")
+            location.pathname.includes("/detailCourse") ||
+            location.pathname.includes("/editTraining") ||
+            location.pathname.includes("/CreateTraining")
           }
           collapsed={!sidebarOpen}
         />

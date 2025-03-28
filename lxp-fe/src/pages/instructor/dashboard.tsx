@@ -1,6 +1,7 @@
 import React from "react";
 import { Users, BookOpen } from "lucide-react";
 import { useGetInstructorDashboard } from "../../hooks/useDashboard";
+import { Link } from "react-router-dom";
 
 interface StatsCardProps {
   title: string;
@@ -67,9 +68,7 @@ const InstructorDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium">Your Courses</h2>
-              <button className="text-sm text-blue-600 hover:text-blue-800">
-                Edit Courses
-              </button>
+              <h2 className="text-s">Edit Courses</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -101,12 +100,19 @@ const InstructorDashboard: React.FC = () => {
                       </td>
 
                       <td className="px-4 py-4 whitespace-nowrap text-sm">
-                        <button className="text-blue-600 hover:text-blue-800 mr-2">
+                        <Link
+                          className="text-blue-600 hover:text-blue-800 mr-2"
+                          to={`/editTraining/${course.id}`}
+                          state={{ trainingData: course }}
+                        >
                           Edit
-                        </button>
-                        <button className="text-gray-600 hover:text-gray-800">
+                        </Link>
+                        <Link
+                          className="text-gray-600 hover:text-gray-800"
+                          to={`/instructorCourse/${course.id}`}
+                        >
                           View
-                        </button>
+                        </Link>
                       </td>
                     </tr>
                   ))}

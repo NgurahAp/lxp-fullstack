@@ -121,9 +121,14 @@ const CoursePage = () => {
             Try adjusting your search or filters, or create a new course to get
             started.
           </p>
-          <button className="mt-6 px-5 py-2.5 bg-gray-900 text-white rounded-lg flex items-center gap-2 mx-auto hover:bg-gray-800 transition-colors">
-            <PlusCircle size={18} /> Create New Course
-          </button>
+          <div className="flex justify-center py-3">
+            <Link
+              to="/CreateTraining"
+              className="mt-4 md:mt-0 px-5 py-2.5 bg-gray-900 text-white w-56  rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
+            >
+              <PlusCircle size={18} /> Create New Course
+            </Link>
+          </div>
         </div>
       )}
     </div>

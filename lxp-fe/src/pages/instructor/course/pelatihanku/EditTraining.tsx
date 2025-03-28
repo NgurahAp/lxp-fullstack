@@ -24,12 +24,7 @@ const EditTrainingForm = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const updateTrainingMutation = useUpdateTraining();
-  const {
-    mutate: deleteTraining,
-    isLoading,
-    isError,
-    error,
-  } = useDeleteTraining(trainingId);
+  const { mutate: deleteTraining } = useDeleteTraining(trainingId);
 
   // Populate form with existing data
   useEffect(() => {
