@@ -480,3 +480,133 @@ describe("POST /api/modules/:moduleId/score", () => {
     expect(score.totalScore).toBe(90); // (90 + 90 + 90) / 3
   });
 });
+
+describe("PUT /api/trainings/:trainingId/meetings/:meetingId/modules/:moduleId", () => {
+  let instructor;
+  let training;
+  let meeting;
+  let module;
+
+  beforeEach(async () => {
+    const moduleDir = path.join(process.cwd(), "public", "modules");
+    if (!fs.existsSync(moduleDir)) {
+      fs.mkdirSync(moduleDir, { recursive: true });
+    }
+
+    // Create test PDF file
+    const testPdfDir = path.join(__dirname, "files");
+    if (!fs.existsSync(testPdfDir)) {
+      fs.mkdirSync(testPdfDir, { recursive: true });
+    }
+
+    const testPdfPath = path.join(testPdfDir, "update.pdf");
+    if (!fs.existsSync(testPdfPath)) {
+      // Create a simple PDF file for testing
+      fs.writeFileSync(testPdfPath, "update PDF content");
+    }
+
+    // Create a non-PDF file for testing
+    const testTxtPath = path.join(testPdfDir, "test.txt");
+    if (!fs.existsSync(testTxtPath)) {
+      fs.writeFileSync(testTxtPath, "Test TXT content");
+    }
+
+    const user = await createTestUser();
+    instructor = await createTestInstructor();
+    training = await createTraining(instructor.id);
+    await createTrainingUser(training.id, user.id);
+    meeting = await createMeeting(training.id);
+    module = await createModule(meeting.id);
+  });
+
+  afterEach(async () => {
+    const moduleDir = path.join(process.cwd(), "public", "modules");
+
+    if (fs.existsSync(moduleDir)) {
+      const files = fs.readdirSync(moduleDir);
+      files.forEach((file) => {
+        fs.unlinkSync(path.join(moduleDir, file));
+      });
+    }
+    await removeAll();
+  });
+
+  it("Should can update module with both title and file", async () => {
+    const testPdfPath = path.join(__dirname, "files", "update.pdf");
+
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${module.id}`
+      )
+      .set("Authorization", "Bearer test-instructor")
+      .field("title", "Update Module")
+      .attach("content", testPdfPath);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.title).toBe("Update Module");
+    expect(result.body.data.content).toBeDefined();
+    expect(result.body.data.content).toMatch(/^modules\/.+.pdf$/);
+    // Verify file has changed from the original
+    expect(result.body.data.content).not.toBe("modules/test.pdf");
+  });
+
+  it("Should can update module title only", async () => {
+    const originalContent = module.content; // Save original content
+
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${module.id}`
+      )
+      .set("Authorization", "Bearer test-instructor")
+      .field("title", "Title Only Update");
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.title).toBe("Title Only Update");
+    expect(result.body.data.content).toBe(originalContent); // Content should remain unchanged
+  });
+
+  it("Should can update module file only", async () => {
+    const testPdfPath = path.join(__dirname, "files", "update.pdf");
+    const originalTitle = module.title; // Save original title
+
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${module.id}`
+      )
+      .set("Authorization", "Bearer test-instructor")
+      .attach("content", testPdfPath);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.title).toBe(originalTitle); // Title should remain unchanged
+    expect(result.body.data.content).toBeDefined();
+    expect(result.body.data.content).toMatch(/^modules\/.+.pdf$/);
+    expect(result.body.data.content).not.toBe("modules/test.pdf"); // Content should be changed
+  });
+
+  it("Should reject update if user is not the instructor", async () => {
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${module.id}`
+      )
+      .set("Authorization", "Bearer test") // Using regular user token instead of instructor
+      .field("title", "Unauthorized Update");
+
+    expect(result.status).toBe(403);
+  });
+
+  it("Should reject update for non-existent module", async () => {
+    const nonExistentId = "module-not-exist";
+
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${nonExistentId}`
+      )
+      .set("Authorization", "Bearer test-instructor")
+      .field("title", "Update Non-existent");
+
+    expect(result.status).toBe(404);
+  });
+});

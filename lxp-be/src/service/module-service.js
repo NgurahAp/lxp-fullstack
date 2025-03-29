@@ -5,7 +5,10 @@ import {
   getDetailModuleValidation,
   submitModuleAnswerValidation,
   submitScoreModuleValidation,
+  updateModuleValidation,
 } from "../validation/module-validation.js";
+import fs from "fs";
+import path from "path";
 import { validate } from "../validation/validation.js";
 
 const createModule = async (user, meetingId, request, file) => {
@@ -406,10 +409,100 @@ const submitModuleScore = async (user, moduleId, request) => {
   });
 };
 
+const updateModule = async (user, request, file) => {
+  const module = validate(updateModuleValidation, request);
+  const { trainingId, meetingId, moduleId, title } = module;
+
+  // Check if module exists
+  const existingModule = await prismaClient.module.findUnique({
+    where: {
+      id: moduleId,
+      meetingId: meetingId,
+    },
+    include: {
+      meeting: {
+        include: {
+          training: true,
+        },
+      },
+    },
+  });
+
+  if (!existingModule) {
+    throw new ResponseError(404, "Module not found");
+  }
+
+  // Validate that training matches and user is the instructor
+  if (
+    existingModule.meeting.training.id !== trainingId ||
+    existingModule.meeting.training.instructorId !== user.id
+  ) {
+    throw new ResponseError(
+      403,
+      "You don't have permission to update this module"
+    );
+  }
+
+  console.log("Title from request:", title);
+
+  // Prepare update data
+  const updateData = {
+    title: title,
+  };
+
+  // Handle file update if a new file is provided
+  if (file) {
+    // Store the path to the new file
+    updateData.content = file.path.replace(/\\/g, "/").replace("public/", "");
+
+    // Delete the old file if it exists
+    if (existingModule.content) {
+      const oldFilePath = path.join("public", existingModule.content);
+
+      try {
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      } catch (error) {
+        console.error("Error deleting old file:", error);
+        // Continue with update even if file deletion fails
+      }
+    }
+  }
+
+  // Update the module
+  return prismaClient.module.update({
+    where: {
+      id: moduleId,
+    },
+    data: updateData,
+    select: {
+      id: true,
+      meetingId: true,
+      title: true,
+      content: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
 export default {
   createModule,
   submitModuleAnswer,
-  // getModules,
   submitModuleScore,
   getModuleDetail,
+  updateModule,
 };

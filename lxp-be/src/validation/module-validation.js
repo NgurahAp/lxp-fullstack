@@ -18,9 +18,17 @@ const submitScoreModuleValidation = Joi.object({
   trainingUserId: Joi.string().required(),
 });
 
+const updateModuleValidation = Joi.object({
+  trainingId: Joi.string().required(),
+  meetingId: Joi.string().required(),
+  moduleId: Joi.string().required(),
+  title: Joi.string().max(255),
+});
+
 export {
   createModuleValidation,
   submitModuleAnswerValidation,
   getDetailModuleValidation,
   submitScoreModuleValidation,
+  updateModuleValidation,
 };

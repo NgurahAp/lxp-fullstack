@@ -141,6 +141,13 @@ userRouter.post(
   moduleController.submitModuleScore
 );
 
+userRouter.put(
+  "/api/trainings/:trainingId/meetings/:meetingId/modules/:moduleId",
+  authMiddleware,
+  instruktorMiddleware,
+  moduleController.updateModule
+);
+
 // Router for Quiz
 userRouter.post(
   "/api/meetings/:meetingId/quizzes",
