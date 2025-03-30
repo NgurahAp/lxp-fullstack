@@ -50,9 +50,16 @@ const updateQuizValidation = Joi.object({
     .min(1),
 });
 
+const deleteQuizValidation = Joi.object({
+  trainingId: Joi.string().required(),
+  meetingId: Joi.string().required(),
+  quizId: Joi.string().required(),
+});
+
 export {
   createQuizValidation,
   submitQuizValidation,
   getDetailQuizValidation,
   updateQuizValidation,
+  deleteQuizValidation,
 };

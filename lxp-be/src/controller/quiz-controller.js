@@ -81,10 +81,26 @@ const updateQuiz = async (req, res, next) => {
   }
 };
 
+const deleteQuiz = async (req, res, next) => {
+  try {
+    await quizService.deleteQuiz(req.user, {
+      trainingId: req.params.trainingId,
+      meetingId: req.params.meetingId,
+      quizId: req.params.quizId,
+    });
+    res.status(200).json({
+      data: "Success delete quiz",
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 export default {
   createQuiz,
   submitQuiz,
   getQuizDetail,
   getQuizQuestions,
   updateQuiz,
+  deleteQuiz,
 };

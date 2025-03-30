@@ -2,6 +2,8 @@ import { prismaClient } from "../application/database";
 import {
   createMeeting,
   createQuiz,
+  createQuizSubmission,
+  createScore,
   createTestInstructor,
   createTestUser,
   createTraining,
@@ -320,4 +322,71 @@ describe("PUT /api/trainings/:trainingId/meetings/:meetingId/quizes/:quizId", ()
 
     expect(result.status).toBe(403);
   });
+});
+
+describe("DELETE  /api/trainings/:trainingId/meetings/:meetingId/quizes/:quizId", () => {
+  let instructor;
+  let training;
+  let meeting;
+  let quiz;
+  let trainingUser;
+
+  beforeEach(async () => {
+    const user = await createTestUser();
+    instructor = await createTestInstructor();
+    training = await createTraining(instructor.id);
+    trainingUser = await createTrainingUser(training.id, user.id);
+    meeting = await createMeeting(training.id);
+    quiz = await createQuiz(meeting.id);
+
+    await createQuizSubmission(quiz.id, trainingUser.id);
+    await createScore(trainingUser.id, meeting.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should can delete quiz", async () => {
+    const result = await supertest(web)
+      .delete(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/quizes/${quiz.id}`
+      )
+      .set("Authorization", "Bearer test-instructor");
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+  });
+
+  it("Should reject deletion if user is not the instructor", async () => {
+    const result = await supertest(web)
+      .delete(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/quizes/${quiz.id}`
+      )
+      .set("Authorization", "Bearer test"); // Using regular user token
+
+    expect(result.status).toBe(403);
+
+    // Verify module still exists
+    const quizStillExists = await prismaClient.quiz.findUnique({
+      where: {
+        id: quiz.id,
+      },
+    });
+    expect(quizStillExists).not.toBeNull();
+  });
+
+   it("Should reject deletion for non-existent module", async () => {
+      const nonExistentId = "module-not-exist";
+  
+      const result = await supertest(web)
+        .delete(
+          `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${nonExistentId}`
+        )
+        .set("Authorization", "Bearer test-instructor");
+  
+      expect(result.status).toBe(404);
+    });
 });

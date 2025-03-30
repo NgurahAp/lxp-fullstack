@@ -185,6 +185,13 @@ userRouter.put(
   quizController.updateQuiz
 );
 
+userRouter.delete(
+  "/api/trainings/:trainingId/meetings/:meetingId/quizes/:quizId",
+  authMiddleware,
+  instruktorMiddleware,
+  quizController.deleteQuiz
+);
+
 // Route for Task
 userRouter.post(
   "/api/meetings/:meetingId/tasks",
