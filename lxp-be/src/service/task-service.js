@@ -4,6 +4,7 @@ import {
   createTaskValidation,
   getDetailTaskValidation,
   submitScoreTaskValidation,
+  updateTaskValidation,
 } from "../validation/task-validation.js";
 import { validate } from "../validation/validation.js";
 import path from "path";
@@ -382,4 +383,74 @@ const submitTaskScore = async (user, taskId, request) => {
   });
 };
 
-export default { createTask, submitTask, getDetailTask, submitTaskScore };
+const updateTask = async (user, request) => {
+  const task = validate(updateTaskValidation, request);
+  const { trainingId, meetingId, taskId, title, taskQuestion } = task;
+
+  const existingTask = await prismaClient.task.findUnique({
+    where: {
+      id: taskId,
+      meetingId: meetingId,
+    },
+    include: {
+      meeting: {
+        include: {
+          training: true,
+        },
+      },
+    },
+  });
+
+  if (!existingTask) {
+    throw new ResponseError(404, "Task not found");
+  }
+
+  // Validate that training matches and user is the instructor
+  if (
+    existingTask.meeting.training.id !== trainingId ||
+    existingTask.meeting.training.instructorId !== user.id
+  ) {
+    throw new ResponseError(
+      403,
+      "You don't have permission to update this task"
+    );
+  }
+
+  return prismaClient.task.update({
+    where: {
+      id: taskId,
+    },
+    data: {
+      title: title,
+      taskQuestion: taskQuestion,
+    },
+    select: {
+      id: true,
+      title: true,
+      taskQuestion: true,
+      meetingId: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+export default {
+  createTask,
+  submitTask,
+  getDetailTask,
+  submitTaskScore,
+  updateTask,
+};

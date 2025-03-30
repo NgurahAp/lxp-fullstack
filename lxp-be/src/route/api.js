@@ -216,6 +216,13 @@ userRouter.post(
   taskController.submitTaskScore
 );
 
+userRouter.put(
+  "/api/trainings/:trainingId/meetings/:meetingId/tasks/:taskId",
+  authMiddleware,
+  instruktorMiddleware,
+  taskController.updateTask
+);
+
 // Route for score
 userRouter.get(
   "/api/meetings/:meetingId/scores",

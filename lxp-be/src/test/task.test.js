@@ -399,3 +399,73 @@ describe("POST /api/tasks/:taskId/score", () => {
     expect(score.totalScore).toBe(90); // (90 + 90 + 90) / 3
   });
 });
+
+describe("PUT /api/trainings/:trainingId/meetings/:meetingId/tasks/:taskId", () => {
+  let instructor;
+  let training;
+  let meeting;
+  let task;
+
+  beforeEach(async () => {
+    const user = await createTestUser();
+    instructor = await createTestInstructor();
+    training = await createTraining(instructor.id);
+    await createTrainingUser(training.id, user.id);
+    meeting = await createMeeting(training.id);
+    task = await createTask(meeting.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should can update task", async () => {
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/tasks/${task.id}`
+      )
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        title: "Test Task Update",
+        taskQuestion: "Sebutkan 5",
+      });
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.title).toBe("Test Task Update");
+    expect(result.body.data.taskQuestion).toBe("Sebutkan 5");
+  });
+
+  it("Should reject deletion if user is not the instructor", async () => {
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/tasks/${task.id}`
+      )
+      .set("Authorization", "Bearer test")
+      .send({
+        title: "Test Task Update",
+        taskQuestion: "Sebutkan 5",
+      });
+
+    console.log(result.body);
+
+    expect(result.status).toBe(403);
+  });
+
+  it("Should reject deletion for non-existent task", async () => {
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/tasks/task-not-exist`
+      )
+      .set("Authorization", "Bearer test-instructor")
+      .send({
+        title: "Test Task Update",
+        taskQuestion: "Sebutkan 5",
+      });
+
+    console.log(result.body);
+
+    expect(result.status).toBe(404);
+  });
+});

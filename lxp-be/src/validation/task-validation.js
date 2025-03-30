@@ -15,8 +15,17 @@ const submitScoreTaskValidation = Joi.object({
   trainingUserId: Joi.string().required(),
 });
 
+const updateTaskValidation = Joi.object({
+  trainingId: Joi.string().required(),
+  meetingId: Joi.string().required(),
+  taskId: Joi.string().required(),
+  title: Joi.string().max(255),
+  taskQuestion: Joi.string().max(255),
+});
+
 export {
   createTaskValidation,
   getDetailTaskValidation,
   submitScoreTaskValidation,
+  updateTaskValidation,
 };
