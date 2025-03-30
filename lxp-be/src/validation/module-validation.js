@@ -25,10 +25,17 @@ const updateModuleValidation = Joi.object({
   title: Joi.string().max(255),
 });
 
+const deleteModuleValidation = Joi.object({
+  trainingId: Joi.string().required(),
+  meetingId: Joi.string().required(),
+  moduleId: Joi.string().required(),
+});
+
 export {
   createModuleValidation,
   submitModuleAnswerValidation,
   getDetailModuleValidation,
   submitScoreModuleValidation,
   updateModuleValidation,
+  deleteModuleValidation,
 };

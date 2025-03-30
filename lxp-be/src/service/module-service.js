@@ -2,6 +2,7 @@ import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {
   createModuleValidation,
+  deleteModuleValidation,
   getDetailModuleValidation,
   submitModuleAnswerValidation,
   submitScoreModuleValidation,
@@ -443,8 +444,6 @@ const updateModule = async (user, request, file) => {
     );
   }
 
-  console.log("Title from request:", title);
-
   // Prepare update data
   const updateData = {
     title: title,
@@ -499,10 +498,116 @@ const updateModule = async (user, request, file) => {
   });
 };
 
+const deleteModule = async (user, request) => {
+  const module = validate(deleteModuleValidation, request);
+  const { trainingId, meetingId, moduleId } = module;
+
+  const existingModule = await prismaClient.module.findUnique({
+    where: {
+      id: moduleId,
+      meetingId: meetingId,
+    },
+    include: {
+      meeting: {
+        include: {
+          training: true,
+        },
+      },
+    },
+  });
+
+  if (!existingModule) {
+    throw new ResponseError(404, "Module not found");
+  }
+
+  // Validate that training matches and user is the instructor
+  if (
+    existingModule.meeting.training.id !== trainingId ||
+    existingModule.meeting.training.instructorId !== user.id
+  ) {
+    throw new ResponseError(
+      403,
+      "You don't have permission to delete this module"
+    );
+  }
+
+  // Delete the file if it exists
+  if (existingModule.content) {
+    const filePath = path.join("public", existingModule.content);
+
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      // Continue with deletion even if file deletion fails
+    }
+  }
+
+  return prismaClient.$transaction(async (tx) => {
+    // Get module submissions and group them by user to update scores
+    const submissions = await tx.moduleSubmission.findMany({
+      where: { moduleId: moduleId },
+    });
+
+    // Group submissions by trainingUserId and calculate total score per user
+    const userScores = {};
+    for (const submission of submissions) {
+      const userId = submission.trainingUserId;
+      if (!userScores[userId]) {
+        userScores[userId] = 0;
+      }
+      userScores[userId] += submission.score;
+    }
+
+    // Delete module submissions
+    await tx.moduleSubmission.deleteMany({
+      where: { moduleId: moduleId },
+    });
+
+    // Update only moduleScore for each affected user
+    for (const [userId, scoreToReduce] of Object.entries(userScores)) {
+      if (scoreToReduce > 0) {
+        // Find user's score for this meeting
+        const userScore = await tx.score.findFirst({
+          where: {
+            trainingUserId: userId,
+            meetingId: meetingId,
+          },
+        });
+
+        if (userScore) {
+          // Only update moduleScore, leave totalScore unchanged
+          await tx.score.update({
+            where: { id: userScore.id },
+            data: {
+              moduleScore: Math.max(0, userScore.moduleScore - scoreToReduce),
+            },
+          });
+        }
+      }
+    }
+
+    // Delete the module
+    return tx.module.delete({
+      where: {
+        id: moduleId,
+      },
+      select: {
+        id: true,
+        meetingId: true,
+        title: true,
+      },
+    });
+  });
+};
+
 export default {
   createModule,
   submitModuleAnswer,
   submitModuleScore,
   getModuleDetail,
   updateModule,
+  deleteModule,
 };

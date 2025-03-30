@@ -109,10 +109,26 @@ const updateModule = async (req, res, next) => {
   });
 };
 
+const deleteModule = async (req, res, next) => {
+  try {
+    await moduleService.deleteModule(req.user, {
+      trainingId: req.params.trainingId,
+      meetingId: req.params.meetingId,
+      moduleId: req.params.moduleId,
+    });
+    res.status(200).json({
+      data: "Success delete module",
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 export default {
   createModule,
   submitModuleAnswer,
   getModuleDetail,
   submitModuleScore,
   updateModule,
+  deleteModule,
 };

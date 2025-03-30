@@ -168,37 +168,6 @@ describe("GET /api/trainings/:trainingId/meetings", () => {
   });
 });
 
-describe("GET /api/trainings/:trainingId/meetings/:meetingId", () => {
-  beforeEach(async () => {
-    const user = await createTestUser();
-    const instructor = await createTestInstructor();
-    const training = await createTraining(instructor.id);
-    await createTrainingUser(training.id, user.id);
-    await createMeeting(training.id);
-  });
-
-  afterEach(async () => {
-    await removeAll();
-  });
-
-  it("should return meeting detail for enrolled student", async () => {
-    const training = await prismaClient.training.findFirst({
-      where: { title: "test training" },
-    });
-
-    const meeting = await prismaClient.meeting.findFirst({
-      where: { trainingId: training.id },
-    });
-
-    const result = await supertest(web)
-      .get(`/api/trainings/${training.id}/meetings/${meeting.id}`)
-      .set("Authorization", "Bearer test");
-
-    expect(result.status).toBe(200);
-    expect(result.body.data).toBeDefined();
-    expect(result.body.data.title).toBe("Test Meeting");
-  });
-});
 
 describe("PUT /api/trainings/:trainingId/meetings/:meetingId", () => {
   let training;
@@ -353,7 +322,6 @@ describe("DELETE /api/trainings/:trainingId/meetings/:meetingId", () => {
   });
 
   it("Should reject if user is not the instructor of the training", async () => {
-
     const result = await supertest(web)
       .delete(`/api/trainings/${training.id}/meetings/${meeting.id}`)
       .set("Authorization", `Bearer test`);

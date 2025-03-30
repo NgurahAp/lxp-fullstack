@@ -14,6 +14,7 @@ import {
   getTestInstructor,
   createModuleSubmission,
   removeAll,
+  createScore,
 } from "./test.util.js";
 
 describe("POST /api/meetings/:meetingId/modules", () => {
@@ -606,6 +607,110 @@ describe("PUT /api/trainings/:trainingId/meetings/:meetingId/modules/:moduleId",
       )
       .set("Authorization", "Bearer test-instructor")
       .field("title", "Update Non-existent");
+
+    expect(result.status).toBe(404);
+  });
+});
+
+describe("DELETE /api/trainings/:trainingId/meetings/:meetingId/modules/:moduleId", () => {
+  let instructor;
+  let training;
+  let meeting;
+  let module;
+  let trainingUser;
+
+  beforeEach(async () => {
+    const moduleDir = path.join(process.cwd(), "public", "modules");
+    if (!fs.existsSync(moduleDir)) {
+      fs.mkdirSync(moduleDir, { recursive: true });
+    }
+
+    // Create a test file that will be deleted
+    const testFilePath = path.join(moduleDir, "test.pdf");
+    fs.writeFileSync(testFilePath, "Test content for deletion");
+
+    const user = await createTestUser();
+    instructor = await createTestInstructor();
+    training = await createTraining(instructor.id);
+    trainingUser = await createTrainingUser(training.id, user.id);
+    meeting = await createMeeting(training.id);
+
+    // Create module with the test file path
+    module = await createModule(meeting.id);
+
+    await createModuleSubmission(module.id, trainingUser.id);
+    await createScore(trainingUser.id, meeting.id);
+  });
+
+  afterEach(async () => {
+    const moduleDir = path.join(process.cwd(), "public", "modules");
+
+    if (fs.existsSync(moduleDir)) {
+      const files = fs.readdirSync(moduleDir);
+      files.forEach((file) => {
+        try {
+          fs.unlinkSync(path.join(moduleDir, file));
+        } catch (error) {
+          // Ignore errors if files are already deleted by tests
+        }
+      });
+    }
+    await removeAll();
+  });
+
+  it("Should can delete module", async () => {
+    const filePath = path.join(process.cwd(), "public", "modules", "test.pdf");
+    expect(fs.existsSync(filePath)).toBe(true); // Confirm file exists before deletion
+
+    const result = await supertest(web)
+      .delete(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${module.id}`
+      )
+      .set("Authorization", "Bearer test-instructor");
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+
+    // Verify file is actually deleted from filesystem
+    expect(fs.existsSync(filePath)).toBe(false);
+
+    // Verify module is deleted from database
+    const deletedModule = await prismaClient.module.findUnique({
+      where: {
+        id: module.id,
+      },
+    });
+    expect(deletedModule).toBeNull();
+  });
+
+  it("Should reject deletion if user is not the instructor", async () => {
+    const result = await supertest(web)
+      .delete(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${module.id}`
+      )
+      .set("Authorization", "Bearer test"); // Using regular user token
+
+    expect(result.status).toBe(403);
+
+    // Verify module still exists
+    const moduleStillExists = await prismaClient.module.findUnique({
+      where: {
+        id: module.id,
+      },
+    });
+    expect(moduleStillExists).not.toBeNull();
+  });
+
+  it("Should reject deletion for non-existent module", async () => {
+    const nonExistentId = "module-not-exist";
+
+    const result = await supertest(web)
+      .delete(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${nonExistentId}`
+      )
+      .set("Authorization", "Bearer test-instructor");
 
     expect(result.status).toBe(404);
   });

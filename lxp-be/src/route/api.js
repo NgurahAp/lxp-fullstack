@@ -171,6 +171,13 @@ userRouter.get(
   quizController.getQuizQuestions
 );
 
+userRouter.delete(
+  "/api/trainings/:trainingId/meetings/:meetingId/modules/:moduleId",
+  authMiddleware,
+  instruktorMiddleware,
+  moduleController.deleteModule
+);
+
 // Route for Task
 userRouter.post(
   "/api/meetings/:meetingId/tasks",
