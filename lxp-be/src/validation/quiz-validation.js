@@ -33,4 +33,26 @@ const getDetailQuizValidation = Joi.object({
   quizId: Joi.string().required(),
 });
 
-export { createQuizValidation, submitQuizValidation, getDetailQuizValidation };
+const updateQuizValidation = Joi.object({
+  trainingId: Joi.string().required(),
+  meetingId: Joi.string().required(),
+  quizId: Joi.string().required(),
+  title: Joi.string().max(255),
+  questions: Joi.array()
+    .items(
+      Joi.object({
+        question: Joi.string().required(),
+        options: Joi.array().items(Joi.string()).min(2).max(4).required(),
+        correctAnswer: Joi.number().min(0).max(3).required(),
+        score: Joi.number().min(0).default(0),
+      })
+    )
+    .min(1),
+});
+
+export {
+  createQuizValidation,
+  submitQuizValidation,
+  getDetailQuizValidation,
+  updateQuizValidation,
+};

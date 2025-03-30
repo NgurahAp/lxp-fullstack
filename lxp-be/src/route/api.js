@@ -148,6 +148,13 @@ userRouter.put(
   moduleController.updateModule
 );
 
+userRouter.delete(
+  "/api/trainings/:trainingId/meetings/:meetingId/modules/:moduleId",
+  authMiddleware,
+  instruktorMiddleware,
+  moduleController.deleteModule
+);
+
 // Router for Quiz
 userRouter.post(
   "/api/meetings/:meetingId/quizzes",
@@ -171,11 +178,11 @@ userRouter.get(
   quizController.getQuizQuestions
 );
 
-userRouter.delete(
-  "/api/trainings/:trainingId/meetings/:meetingId/modules/:moduleId",
+userRouter.put(
+  "/api/trainings/:trainingId/meetings/:meetingId/quizes/:quizId",
   authMiddleware,
   instruktorMiddleware,
-  moduleController.deleteModule
+  quizController.updateQuiz
 );
 
 // Route for Task

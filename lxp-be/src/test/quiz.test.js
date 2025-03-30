@@ -259,3 +259,65 @@ describe("GET /api/meetings/:meetingId/quizzes/:quizId/questions", () => {
     expect(result.status).toBe(403);
   });
 });
+
+describe("PUT /api/trainings/:trainingId/meetings/:meetingId/quizes/:quizId", () => {
+  let training;
+  let meeting;
+  let quiz;
+  beforeEach(async () => {
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
+    training = await createTraining(instructor.id);
+    await createTrainingUser(training.id, user.id);
+    meeting = await createMeeting(training.id);
+    quiz = await createQuiz(meeting.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should can update quiz", async () => {
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/quizes/${quiz.id}`
+      )
+      .set("Authorization", "Bearer test-instructor")
+      .set("Content-Type", "application/json")
+      .send({
+        title: "Update Quiz",
+        questions: [
+          {
+            question: "Test question?",
+            options: ["Option 1", "Option 2"],
+            correctAnswer: 0,
+            score: 10,
+          },
+        ],
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.title).toBe("Update Quiz");
+  });
+
+  it("Should can update quiz", async () => {
+    const result = await supertest(web)
+      .put(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/quizes/${quiz.id}`
+      )
+      .set("Authorization", "Bearer test")
+      .send({
+        title: "Update Quiz",
+        questions: [
+          {
+            question: "Test question?",
+            options: ["Option 1", "Option 2"],
+            correctAnswer: 0,
+            score: 10,
+          },
+        ],
+      });
+
+    expect(result.status).toBe(403);
+  });
+});

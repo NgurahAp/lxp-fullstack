@@ -4,6 +4,7 @@ import {
   createQuizValidation,
   getDetailQuizValidation,
   submitQuizValidation,
+  updateQuizValidation,
 } from "../validation/quiz-validation.js";
 import { validate } from "../validation/validation.js";
 
@@ -347,4 +348,76 @@ const getQuizQuestions = async (user, request) => {
   };
 };
 
-export default { createQuiz, submitQuiz, getDetailQuiz, getQuizQuestions };
+const updateQuiz = async (user, request) => {
+  const quiz = validate(updateQuizValidation, request);
+  const { trainingId, meetingId, quizId, title, questions } = quiz;
+
+  const existingQuiz = await prismaClient.quiz.findUnique({
+    where: {
+      id: quizId,
+      meetingId: meetingId,
+    },
+    include: {
+      meeting: {
+        include: {
+          training: true,
+        },
+      },
+    },
+  });
+
+  if (!existingQuiz) {
+    throw new ResponseError(404, "Quiz not found");
+  }
+
+  if (
+    existingQuiz.meeting.training.id !== trainingId ||
+    existingQuiz.meeting.training.instructorId !== user.id
+  ) {
+    throw new ResponseError(
+      403,
+      "You don't have permission to update this quiz"
+    );
+  }
+
+  console.log(title);
+  console.log(questions);
+
+  return prismaClient.quiz.update({
+    where: {
+      id: quizId,
+    },
+    data: {
+      title: title,
+      questions: questions, // Changed from question to questions
+    },
+    select: {
+      id: true,
+      title: true,
+      questions: true,
+      meetingId: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+export default {
+  createQuiz,
+  submitQuiz,
+  getDetailQuiz,
+  getQuizQuestions,
+  updateQuiz,
+};
