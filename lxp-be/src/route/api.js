@@ -223,6 +223,13 @@ userRouter.put(
   taskController.updateTask
 );
 
+userRouter.delete(
+  "/api/trainings/:trainingId/meetings/:meetingId/tasks/:taskId",
+  authMiddleware,
+  instruktorMiddleware,
+  taskController.deleteTask
+);
+
 // Route for score
 userRouter.get(
   "/api/meetings/:meetingId/scores",

@@ -566,6 +566,7 @@ const createTaskSubmission = async (taskId, trainingUserId) => {
     data: {
       taskId: taskId,
       trainingUserId: trainingUserId,
+      answer: "tasks/test.pdf",
       score: 0,
     },
   });

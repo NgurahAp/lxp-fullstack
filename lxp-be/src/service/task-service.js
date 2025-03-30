@@ -1,13 +1,16 @@
+import { request } from "http";
 import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {
   createTaskValidation,
+  deleteTaskValidation,
   getDetailTaskValidation,
   submitScoreTaskValidation,
   updateTaskValidation,
 } from "../validation/task-validation.js";
 import { validate } from "../validation/validation.js";
 import path from "path";
+import fs from "fs";
 
 const createTask = async (user, meetingId, request) => {
   const task = validate(createTaskValidation, request);
@@ -447,10 +450,121 @@ const updateTask = async (user, request) => {
   });
 };
 
+const deleteTask = async (user, request) => {
+  const task = validate(deleteTaskValidation, request);
+  const { trainingId, meetingId, taskId } = task;
+
+  const existingTask = await prismaClient.task.findUnique({
+    where: {
+      id: taskId,
+      meetingId: meetingId,
+    },
+    include: {
+      meeting: {
+        include: {
+          training: true,
+        },
+      },
+    },
+  });
+
+  if (!existingTask) {
+    throw new ResponseError(404, "Task not found");
+  }
+
+  // Validate that training matches and user is the instructor
+  if (
+    existingTask.meeting.training.id !== trainingId ||
+    existingTask.meeting.training.instructorId !== user.id
+  ) {
+    throw new ResponseError(
+      403,
+      "You don't have permission to delete this task"
+    );
+  }
+
+  // Find all task submissions related to this task
+
+  return await prismaClient.$transaction(async (tx) => {
+    const submissions = await prismaClient.taskSubmission.findMany({
+      where: {
+        taskId: taskId,
+      },
+    });
+
+    const userScores = {};
+    for (const submission of submissions) {
+      const userId = submission.trainingUserId;
+      if (!userScores[userId]) {
+        userScores[userId] = 0;
+      }
+      userScores[userId] += submission.score;
+    }
+
+    for (const submission of submissions) {
+      if (submission.answer) {
+        try {
+          const filePath = path.join("public", submission.answer);
+          fs.unlinkSync(filePath);
+          console.log(`Deleted file: ${filePath}`);
+        } catch (error) {
+          // Log the error but continue with deletion of database records
+          console.log(
+            `Error deleting file for submission ${submission.id}:`,
+            error
+          );
+        }
+      }
+    }
+
+    // Then delete all submissions from the database
+    if (submissions.length > 0) {
+      await tx.taskSubmission.deleteMany({
+        where: {
+          taskId: taskId,
+        },
+      });
+    }
+
+    // Update only moduleScore for each affected user
+    for (const [userId, scoreToReduce] of Object.entries(userScores)) {
+      if (scoreToReduce > 0) {
+        // Find user's score for this meeting
+        const userScore = await tx.score.findFirst({
+          where: {
+            trainingUserId: userId,
+            meetingId: meetingId,
+          },
+        });
+
+        if (userScore) {
+          // Only update moduleScore, leave totalScore unchanged
+          await tx.score.update({
+            where: { id: userScore.id },
+            data: {
+              taskScore: Math.max(0, userScore.taskScore - scoreToReduce),
+            },
+          });
+        }
+      }
+    }
+
+    // Finally, delete the task itself
+    const deletedTask = await tx.task.delete({
+      where: {
+        id: taskId,
+      },
+    });
+
+    return deletedTask;
+  });
+};
+
 export default {
   createTask,
   submitTask,
   getDetailTask,
   submitTaskScore,
   updateTask,
+  deleteTask,
 };

@@ -89,10 +89,26 @@ const updateTask = async (req, res, next) => {
   }
 };
 
+const deleteTask = async (req, res, next) => {
+  try {
+    await taskService.deleteTask(req.user, {
+      trainingId: req.params.trainingId,
+      meetingId: req.params.meetingId,
+      taskId: req.params.taskId,
+    });
+    res.status(200).json({
+      data: "Success delete task",
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 export default {
   createTask,
   submitTask,
   getTaskDetail,
   submitTaskScore,
   updateTask,
+  deleteTask,
 };

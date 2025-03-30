@@ -23,9 +23,16 @@ const updateTaskValidation = Joi.object({
   taskQuestion: Joi.string().max(255),
 });
 
+const deleteTaskValidation = Joi.object({
+  trainingId: Joi.string().required(),
+  meetingId: Joi.string().required(),
+  taskId: Joi.string().required(),
+});
+
 export {
   createTaskValidation,
   getDetailTaskValidation,
   submitScoreTaskValidation,
   updateTaskValidation,
+  deleteTaskValidation,
 };
