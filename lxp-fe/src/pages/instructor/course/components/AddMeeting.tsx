@@ -9,7 +9,7 @@ interface MeetingFormData {
 // Props interface with explicit types
 interface AddMeetingFormProps {
   onClose: () => void;
-  onSubmit: (data: MeetingFormData) => void;
+  onSubmit: (data: MeetingFormData) => Promise<void>; // Change to return Promise
   isLoading?: boolean;
 }
 
@@ -26,9 +26,8 @@ const AddMeetingForm: React.FC<AddMeetingFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      onSubmit({ title });
-      // Close the modal after successful submission
-      onClose();
+      await onSubmit({ title }); // Wait for the promise to resolve
+      onClose(); // Only close after successful completion
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {

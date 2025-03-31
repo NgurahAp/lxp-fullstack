@@ -331,7 +331,7 @@ const DetailCoursePage = () => {
         <AddMeetingForm
           onClose={() => setShowAddMeetingModal(false)}
           isLoading={isSubmitting}
-          onSubmit={(data: { title: string }) => {
+          onSubmit={async (data: { title: string }) => {
             setIsSubmitting(true);
             const training = {
               trainingId: trainingId || "",
@@ -339,11 +339,24 @@ const DetailCoursePage = () => {
             };
 
             try {
-              createMeetingMutation.mutate(training);
-              setIsSubmitting(false);
+              // Return a promise that the modal can await
+              return new Promise<void>((resolve, reject) => {
+                createMeetingMutation.mutate(training, {
+                  onSuccess: () => {
+                    setIsSubmitting(false);
+                    resolve(); // Resolve the promise on success
+                  },
+                  onError: (error) => {
+                    setIsSubmitting(false);
+                    console.error("Error creating training:", error);
+                    reject(error); // Reject the promise on error
+                  },
+                });
+              });
             } catch (error) {
               setIsSubmitting(false);
               console.error("Error creating training:", error);
+              throw error; // Re-throw to be caught by the form's error handler
             }
           }}
         />
