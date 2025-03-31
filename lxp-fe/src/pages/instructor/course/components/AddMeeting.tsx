@@ -10,95 +10,95 @@ interface MeetingFormData {
 interface AddMeetingFormProps {
   onClose: () => void;
   onSubmit: (data: MeetingFormData) => void;
+  isLoading?: boolean;
 }
 
 const AddMeetingForm: React.FC<AddMeetingFormProps> = ({
   onClose,
   onSubmit,
+  isLoading = false,
 }) => {
-  const [title, setTitle] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [title, setTitle] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
+    try {
       onSubmit({ title });
-      setIsSubmitting(false);
+      // Close the modal after successful submission
       onClose();
-    }, 500);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const isProcessing = isSubmitting || isLoading;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-        <div className="flex justify-between items-center p-4 border-b border-gray-200">
-          <h2 className="font-semibold text-lg">Add New Meeting</h2>
+        <div className="flex justify-between items-center p-4 border-b">
+          <h3 className="font-semibold text-lg">Add New Meeting</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
+            disabled={isProcessing}
           >
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="mb-8">
-            <label
-              htmlFor="meeting-title"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+        <form onSubmit={handleSubmit}>
+          <div className="p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Meeting Title
             </label>
             <input
-              id="meeting-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               placeholder="Enter meeting title"
               required
+              disabled={isProcessing}
             />
           </div>
 
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-500 flex items-center">
-              <Calendar size={16} className="mr-2" />
-              Today's date will be set as default
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!title.trim() || isSubmitting}
-                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Adding..." : "Add Meeting"}
-              </button>
-            </div>
+          <div className="p-4 bg-gray-50 flex items-center gap-2 text-sm text-gray-500 rounded-b-lg">
+            <Calendar size={16} />
+            <span>Today's date will be set as default</span>
+          </div>
+
+          <div className="p-4 border-t flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
+              disabled={isProcessing}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Adding..." : "Add Meeting"}
+            </button>
           </div>
         </form>
 
-        <div className="bg-gray-50 p-6 rounded-b-lg border-t border-gray-200">
-          <div className="flex items-start">
-            <div className="bg-blue-100 rounded-full p-2 text-blue-500 mr-3">
-              <Calendar size={16} />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Quick Tip</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                You'll be able to add modules, quizzes, and tasks after creating
-                the meeting.
-              </p>
-            </div>
+        <div className="p-4 bg-blue-50 rounded-b-lg">
+          <div className="flex gap-2 text-blue-700">
+            <h4 className="text-sm font-medium">Quick Tip</h4>
+            <p className="text-sm">
+              You'll be able to add modules, quizzes, and tasks after creating
+              the meeting.
+            </p>
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ import { useGetInstructorDetailTrainings } from "../../../hooks/useTrainings";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
 import { Meeting, Module, Quiz, Task } from "../../../types/training";
 import AddMeetingForm from "./components/AddMeeting";
+import { useCreateMeeting } from "../../../hooks/useMeeting";
 
 const DetailCoursePage = () => {
   const { trainingId } = useParams<{ trainingId: string }>();
@@ -21,6 +22,8 @@ const DetailCoursePage = () => {
   const [activeTab, setActiveTab] = useState("modules");
   const [showAddMeetingModal, setShowAddMeetingModal] =
     useState<boolean>(false);
+  const createMeetingMutation = useCreateMeeting();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Update selectedMeeting when data is loaded
   useEffect(() => {
@@ -49,8 +52,6 @@ const DetailCoursePage = () => {
       </div>
     );
   }
-
-  console.log(data);
 
   return (
     <div className="bg-gray-100 min-h-screen p-6">
@@ -329,10 +330,21 @@ const DetailCoursePage = () => {
       {showAddMeetingModal && (
         <AddMeetingForm
           onClose={() => setShowAddMeetingModal(false)}
+          isLoading={isSubmitting}
           onSubmit={(data: { title: string }) => {
-            // Handle the new meeting creation logic here
-            console.log(data);
-            // Call your API or update state
+            setIsSubmitting(true);
+            const training = {
+              trainingId: trainingId || "",
+              title: data.title,
+            };
+
+            try {
+              createMeetingMutation.mutate(training);
+              setIsSubmitting(false);
+            } catch (error) {
+              setIsSubmitting(false);
+              console.error("Error creating training:", error);
+            }
           }}
         />
       )}
