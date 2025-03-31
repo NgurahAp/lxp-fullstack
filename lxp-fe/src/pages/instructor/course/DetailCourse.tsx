@@ -11,6 +11,7 @@ import { useParams } from "react-router-dom";
 import { useGetInstructorDetailTrainings } from "../../../hooks/useTrainings";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
 import { Meeting, Module, Quiz, Task } from "../../../types/training";
+import AddMeetingForm from "./components/AddMeeting";
 
 const DetailCoursePage = () => {
   const { trainingId } = useParams<{ trainingId: string }>();
@@ -18,6 +19,8 @@ const DetailCoursePage = () => {
     useGetInstructorDetailTrainings(trainingId);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [activeTab, setActiveTab] = useState("modules");
+  const [showAddMeetingModal, setShowAddMeetingModal] =
+    useState<boolean>(false);
 
   // Update selectedMeeting when data is loaded
   useEffect(() => {
@@ -71,7 +74,10 @@ const DetailCoursePage = () => {
             <button className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors">
               <Users size={16} /> Students ({data._count?.users || 0})
             </button>
-            <button className="px-4 py-2 bg-gray-900 text-white rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors">
+            <button
+              className="px-4 py-2 bg-gray-900 text-white rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
+              onClick={() => setShowAddMeetingModal(true)}
+            >
               <PlusCircle size={16} /> Add Meeting
             </button>
           </div>
@@ -84,7 +90,10 @@ const DetailCoursePage = () => {
         <div className="md:col-span-1 bg-white rounded-lg shadow-sm p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-semibold text-gray-800">Meetings</h2>
-            <button className="p-1 text-gray-700 hover:text-gray-900">
+            <button
+              className="p-1 text-gray-700 hover:text-gray-900"
+              onClick={() => setShowAddMeetingModal(true)}
+            >
               <PlusCircle size={16} />
             </button>
           </div>
@@ -317,6 +326,16 @@ const DetailCoursePage = () => {
           </div>
         )}
       </div>
+      {showAddMeetingModal && (
+        <AddMeetingForm
+          onClose={() => setShowAddMeetingModal(false)}
+          onSubmit={(data: { title: string }) => {
+            // Handle the new meeting creation logic here
+            console.log(data);
+            // Call your API or update state
+          }}
+        />
+      )}
     </div>
   );
 };
