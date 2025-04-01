@@ -4,7 +4,7 @@ import { X, FileText, Upload } from "lucide-react";
 // Props interface with explicit types
 interface EditModuleFormProps {
   onClose: () => void;
-  onSubmit: (data: FormData) => Promise<void>;
+  onSubmit: (data: FormData, moduleId: string) => Promise<void>;
   isLoading?: boolean;
   module: {
     id: string;
@@ -58,7 +58,7 @@ const EditModuleForm: React.FC<EditModuleFormProps> = ({
     }
 
     try {
-      await onSubmit(moduleData);
+      await onSubmit(moduleData, module.id);
       onClose(); // Only close after successful completion
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -117,13 +117,16 @@ const EditModuleForm: React.FC<EditModuleFormProps> = ({
               <div className="border border-gray-300 rounded-lg p-3">
                 {file || (!fileChanged && currentFileName) ? (
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm">
-                      <FileText size={16} className="mr-2 text-gray-600" />
-                      {file ? file.name : currentFileName}
+                    <div className="flex items-center justify-between text-sm ">
+                      <div className="flex w-[70%]">
+                        <FileText size={16} className="mr-2 text-gray-600" />
+                        <p className="line-clamp-1">
+                          {file ? file.name : currentFileName}
+                        </p>
+                      </div>
+
                       {!fileChanged && currentFileName && (
-                        <span className="ml-2 text-gray-500 ">
-                          (Current file)
-                        </span>
+                        <span className=" text-gray-500 ">(Current file)</span>
                       )}
                     </div>
                     <button
@@ -135,7 +138,7 @@ const EditModuleForm: React.FC<EditModuleFormProps> = ({
                           setCurrentFileName(null);
                         }
                       }}
-                      className="text-gray-500 hover:text-gray-700"
+                      className="text-gray-500 hover:text-gray-700 ml-2"
                       disabled={isProcessing}
                     >
                       <X size={16} />

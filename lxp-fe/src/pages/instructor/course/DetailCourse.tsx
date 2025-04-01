@@ -190,6 +190,7 @@ const DetailCoursePage: React.FC = () => {
         {/* Main Content */}
         {selectedMeeting ? (
           <MainContent
+            trainingId={data.id}
             meeting={selectedMeeting}
             onEditMeeting={handleEditMeeting}
             onDeleteMeeting={handleDeleteMeeting}

@@ -8,9 +8,14 @@ import {
   createModule,
   getModule,
   submitModuleAnswer,
+  updateModule,
 } from "../service/moduleService";
 import toast from "react-hot-toast";
-import { CreateModuleParams, ModuleData } from "../types/module";
+import {
+  CreateModuleParams,
+  ModuleData,
+  UpdateModuleParams,
+} from "../types/module";
 
 export const useGetModule = (
   meetingId: string | undefined,
@@ -89,6 +94,32 @@ export const useCreateModule = () => {
       // Show error notification with specific message
       console.log(error.message);
       toast.error("Terjadi kesalahan saat menambah modul");
+    },
+  });
+};
+
+export const useUpdateModule = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      trainingId,
+      meetingId,
+      moduleId,
+      payload,
+    }: UpdateModuleParams) =>
+      updateModule({ trainingId, meetingId, moduleId, payload }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["detailTrainingInstructor"],
+      });
+      toast.success("Module berhasil diedit");
+    },
+
+    onError: (error: Error) => {
+      console.log(error.message);
+      toast.error("Terjadi kesalahan saat mengedit modul");
     },
   });
 };

@@ -5,6 +5,7 @@ import {
   CreateModuleParams,
   ModuleResponse,
   SubmitModuleResponse,
+  UpdateModuleParams,
 } from "../types/module";
 
 export const getModule = async (
@@ -94,6 +95,42 @@ export const createModule = async ({
       }
       if (error.response?.status === 400) {
         throw new Error("File pdf diperlukan");
+      }
+      throw new Error(
+        error.response?.data?.message || "Terjadi kesalahan pada server"
+      );
+    }
+    throw new Error("Terjadi kesalahan yang tidak diketahui");
+  }
+};
+
+export const updateModule = async ({
+  trainingId,
+  meetingId,
+  moduleId,
+  payload,
+}: UpdateModuleParams): Promise<ModuleResponse> => {
+  const token = Cookies.get("token");
+
+  try {
+    const response = await axios.put(
+      `${API_URL}/trainings/${trainingId}/meetings/${meetingId}/modules/${moduleId}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // Error handling tetap sama
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        throw new Error("Kamu tidak memiliki hak akses");
+      }
+      if (error.response?.status === 404) {
+        throw new Error("Module tidak di temukan atau kamu bukan instructor");
       }
       throw new Error(
         error.response?.data?.message || "Terjadi kesalahan pada server"

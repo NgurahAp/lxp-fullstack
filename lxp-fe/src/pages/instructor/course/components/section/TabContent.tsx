@@ -3,12 +3,16 @@ import React, { useState } from "react";
 import { FileText, PlusCircle } from "lucide-react";
 import { Module, Quiz, Task } from "../../../../../types/training";
 import AddModuleForm from "./AddModule";
-import { useCreateModule } from "../../../../../hooks/useModule";
+import {
+  useCreateModule,
+  useUpdateModule,
+} from "../../../../../hooks/useModule";
 import EditModuleForm from "./EditModule";
 
 interface ModulesTabProps {
   modules?: Module[];
   meetingId: string;
+  trainingId: string;
   onAddModule?: (data: FormData) => Promise<void>;
 }
 
@@ -21,12 +25,17 @@ interface TasksTabProps {
 }
 
 // components/TabContent/ModulesTab.tsx
-const ModulesTab: React.FC<ModulesTabProps> = ({ modules = [], meetingId }) => {
+const ModulesTab: React.FC<ModulesTabProps> = ({
+  modules = [],
+  meetingId,
+  trainingId,
+}) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
 
   const createModuleMutation = useCreateModule();
+  const updateModuleMutation = useUpdateModule();
 
   const handleAddModule = async (formData: FormData): Promise<void> => {
     const module = {
@@ -52,19 +61,29 @@ const ModulesTab: React.FC<ModulesTabProps> = ({ modules = [], meetingId }) => {
     }
   };
 
-  const handleEditModule = async (formData: FormData): Promise<void> => {
+  const handleEditModule = async (
+    formData: FormData,
+    moduleId: string
+  ): Promise<void> => {
+    const module = {
+      trainingId: trainingId,
+      meetingId: meetingId,
+      moduleId: moduleId,
+      payload: formData,
+    };
+
     try {
-      // return new Promise<void>((resolve, reject) => {
-      //   updateModuleMutation.mutate(formData, {
-      //     onSuccess: () => {
-      //       resolve();
-      //     },
-      //     onError: () => {
-      //       console.error("Error updating module:", error);
-      //       reject(error);
-      //     },
-      //   });
-      // });
+      return new Promise<void>((resolve, reject) => {
+        updateModuleMutation.mutate(module, {
+          onSuccess: () => {
+            resolve();
+          },
+          onError: (error) => {
+            console.error("Error updating module:", error);
+            reject(error);
+          },
+        });
+      });
     } catch (error) {
       console.error("Error updating module:", error);
       throw error;
@@ -135,7 +154,6 @@ const ModulesTab: React.FC<ModulesTabProps> = ({ modules = [], meetingId }) => {
             setSelectedModule(null);
           }}
           onSubmit={handleEditModule}
-          // isLoading={updateModuleMutation.isLoading}
           module={selectedModule}
         />
       )}

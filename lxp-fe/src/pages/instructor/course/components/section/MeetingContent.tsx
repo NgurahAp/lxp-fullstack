@@ -14,12 +14,14 @@ import { Meeting } from "../../../../../types/training";
 import { ModulesTab, QuizzesTab, TasksTab } from "./TabContent";
 
 interface MainContentProps {
+  trainingId: string;
   meeting: Meeting;
   onEditMeeting: (meeting: Meeting) => void;
   onDeleteMeeting: (meeting: Meeting) => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
+  trainingId,
   meeting,
   onEditMeeting,
   onDeleteMeeting,
@@ -91,7 +93,11 @@ const MainContent: React.FC<MainContentProps> = ({
 
         {/* Tab Content */}
         {activeTab === "modules" && (
-          <ModulesTab modules={meeting.modules} meetingId={meeting.id} />
+          <ModulesTab
+            modules={meeting.modules}
+            meetingId={meeting.id}
+            trainingId={trainingId}
+          />
         )}
         {activeTab === "quizzes" && <QuizzesTab quizzes={meeting.quizzes} />}
         {activeTab === "tasks" && <TasksTab tasks={meeting.tasks} />}

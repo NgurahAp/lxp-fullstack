@@ -38,3 +38,10 @@ export interface CreateModuleParams {
   meetingId: string;
   payload: FormData;
 }
+
+export interface UpdateModuleParams {
+  trainingId: string;
+  meetingId: string;
+  moduleId: string;
+  payload: FormData;
+}
