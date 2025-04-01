@@ -14,7 +14,7 @@ import { useGetInstructorDetailTrainings } from "../../../hooks/useTrainings";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
 import { Meeting, Module, Quiz, Task } from "../../../types/training";
 import AddMeetingForm from "./components/AddMeeting";
-import { useCreateMeeting, useUpdateMeeting } from "../../../hooks/useMeeting";
+import { useCreateMeeting, useDeleteMeeting, useUpdateMeeting } from "../../../hooks/useMeeting";
 import DeleteMeetingConfirm from "./components/DeleteMeeting";
 import EditMeetingForm from "./components/EditMeeting";
 
@@ -35,6 +35,7 @@ const DetailCoursePage = () => {
 
   const createMeetingMutation = useCreateMeeting();
   const updateMeetingMutation = useUpdateMeeting();
+  const deleteMeetingMutation = useDeleteMeeting();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Update selectedMeeting when data is loaded
@@ -133,11 +134,11 @@ const DetailCoursePage = () => {
                     }`}
                     onClick={() => setSelectedMeeting(meeting)}
                   >
-                    <h3 className="font-medium text-sm pr-16">
+                    <h3 className="font-medium text-sm  line-clamp-2">
                       {meeting.title}
                     </h3>
                     <div
-                      className={`flex items-center mt-1 text-xs ${
+                      className={`flex items-center mt-3 text-xs ${
                         selectedMeeting && selectedMeeting.id === meeting.id
                           ? "text-gray-300"
                           : "text-gray-500"
@@ -147,36 +148,6 @@ const DetailCoursePage = () => {
                       {new Date(
                         meeting.meetingDate || Date.now()
                       ).toLocaleDateString()}
-                    </div>
-
-                    {/* Edit/Delete buttons */}
-                    <div className="absolute top-3 right-3 flex space-x-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditMeeting(meeting);
-                        }}
-                        className={`p-1 rounded hover:bg-gray-200 ${
-                          selectedMeeting && selectedMeeting.id === meeting.id
-                            ? "text-white hover:text-gray-800"
-                            : "text-gray-500 hover:text-gray-800"
-                        }`}
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteMeeting(meeting);
-                        }}
-                        className={`p-1 rounded hover:bg-gray-200 ${
-                          selectedMeeting && selectedMeeting.id === meeting.id
-                            ? "text-white hover:text-gray-800"
-                            : "text-gray-500 hover:text-gray-800"
-                        }`}
-                      >
-                        <Trash2 size={14} />
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -495,33 +466,29 @@ const DetailCoursePage = () => {
           meetingTitle={meetingToDelete.title}
           onConfirm={async () => {
             setIsSubmitting(true);
-
-            // try {
-            //   return new Promise<void>((resolve, reject) => {
-            //     deleteMeetingMutation.mutate(meetingToDelete.id, {
-            //       onSuccess: () => {
-            //         // If the deleted meeting was selected, clear selection
-            //         if (
-            //           selectedMeeting &&
-            //           selectedMeeting.id === meetingToDelete.id
-            //         ) {
-            //           setSelectedMeeting(null);
-            //         }
-            //         setIsSubmitting(false);
-            //         resolve();
-            //       },
-            //       onError: (error) => {
-            //         setIsSubmitting(false);
-            //         console.error("Error deleting meeting:", error);
-            //         reject(error);
-            //       },
-            //     });
-            //   });
-            // } catch (error) {
-            //   setIsSubmitting(false);
-            //   console.error("Error deleting meeting:", error);
-            //   throw error;
-            // }
+            const deleteMeeting = {
+              trainingId: trainingId,
+              meetingId: meetingToDelete.id,
+            };
+            try {
+              return new Promise<void>((resolve, reject) => {
+                deleteMeetingMutation.mutate(deleteMeeting, {
+                  onSuccess: () => {
+                    setIsSubmitting(false);
+                    resolve();
+                  },
+                  onError: (error) => {
+                    setIsSubmitting(false);
+                    console.error("Error updating meeting:", error);
+                    reject(error);
+                  },
+                });
+              });
+            } catch (error) {
+              setIsSubmitting(false);
+              console.error("Error updating meeting:", error);
+              throw error;
+            }
           }}
         />
       )}

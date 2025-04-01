@@ -16,3 +16,8 @@ export interface UpdateMeetingParams {
   meetingId: string | undefined;
   title: string;
 }
+
+export interface DeleteMeetingParams {
+  trainingId: string | undefined;
+  meetingId: string | undefined;
+}

@@ -1,7 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { createMeeting, updateMeeting } from "../service/meetingService";
-import { CreateMeetingResponse, UpdateMeetingParams } from "../types/meeting";
+import {
+  createMeeting,
+  deleteMeeting,
+  updateMeeting,
+} from "../service/meetingService";
+import {
+  CreateMeetingResponse,
+  DeleteMeetingParams,
+  UpdateMeetingParams,
+} from "../types/meeting";
 
 export const useCreateMeeting = () => {
   const queryClient = useQueryClient();
@@ -46,6 +54,29 @@ export const useUpdateMeeting = () => {
     onError: (error: Error) => {
       console.log(error.message);
       toast.error("Gagal mengedit Meeting");
+    },
+  });
+};
+
+export const useDeleteMeeting = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<CreateMeetingResponse, Error, DeleteMeetingParams>({
+    mutationFn: (params) => deleteMeeting(params),
+
+    onSuccess: () => {
+      // Invalidate related queries to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["detailTraining"],
+      });
+
+      // Show success notification
+      toast.success("Meeting berhasi dihapus");
+    },
+
+    onError: (error: Error) => {
+      console.log(error.message);
+      toast.error("Gagal menghapus meeting");
     },
   });
 };
