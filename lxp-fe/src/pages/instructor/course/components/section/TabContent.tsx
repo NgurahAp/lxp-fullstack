@@ -8,6 +8,7 @@ import {
   useUpdateModule,
 } from "../../../../../hooks/useModule";
 import EditModuleForm from "./EditModule";
+import DeleteModuleConfirm from "./DeleteModule";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -25,6 +26,12 @@ interface TasksTabProps {
 }
 
 // components/TabContent/ModulesTab.tsx
+interface ModulesTabProps {
+  modules?: Module[];
+  meetingId: string;
+  trainingId: string;
+}
+
 const ModulesTab: React.FC<ModulesTabProps> = ({
   modules = [],
   meetingId,
@@ -32,10 +39,12 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
 
   const createModuleMutation = useCreateModule();
   const updateModuleMutation = useUpdateModule();
+  // const deleteModuleMutation = useDeleteModule();
 
   const handleAddModule = async (formData: FormData): Promise<void> => {
     const module = {
@@ -90,9 +99,39 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
     }
   };
 
+  const handleDeleteModule = async (moduleId: string): Promise<void> => {
+    const deletePayload = {
+      trainingId: trainingId,
+      meetingId: meetingId,
+      moduleId: moduleId,
+    };
+
+    try {
+      // return new Promise<void>((resolve, reject) => {
+      //   deleteModuleMutation.mutate(deletePayload, {
+      //     onSuccess: () => {
+      //       resolve();
+      //     },
+      //     onError: (error) => {
+      //       console.error("Error deleting module:", error);
+      //       reject(error);
+      //     },
+      //   });
+      // });
+    } catch (error) {
+      console.error("Error deleting module:", error);
+      throw error;
+    }
+  };
+
   const openEditForm = (module: Module) => {
     setSelectedModule(module);
     setShowEditForm(true);
+  };
+
+  const openDeleteConfirm = (module: Module) => {
+    setSelectedModule(module);
+    setShowDeleteConfirm(true);
   };
 
   return (
@@ -120,7 +159,10 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
               >
                 Edit
               </button>
-              <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <button 
+                className="px-3 py-1 text-sm border border-red-100 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                onClick={() => openDeleteConfirm(module)}
+              >
                 Delete
               </button>
             </div>
@@ -157,9 +199,22 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
           module={selectedModule}
         />
       )}
+
+      {showDeleteConfirm && selectedModule && (
+        <DeleteModuleConfirm
+          onClose={() => {
+            setShowDeleteConfirm(false);
+            setSelectedModule(null);
+          }}
+          onConfirm={handleDeleteModule}
+          module={selectedModule}
+        />
+      )}
     </div>
   );
 };
+
+export default ModulesTab;
 
 // components/TabContent/QuizzesTab.tsx
 const QuizzesTab: React.FC<QuizzesTabProps> = ({ quizzes = [] }) => {
