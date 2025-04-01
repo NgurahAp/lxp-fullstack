@@ -5,6 +5,7 @@ import { Module, Quiz, Task } from "../../../../../types/training";
 import AddModuleForm from "./AddModule";
 import {
   useCreateModule,
+  useDeleteModule,
   useUpdateModule,
 } from "../../../../../hooks/useModule";
 import EditModuleForm from "./EditModule";
@@ -44,7 +45,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
 
   const createModuleMutation = useCreateModule();
   const updateModuleMutation = useUpdateModule();
-  // const deleteModuleMutation = useDeleteModule();
+  const deleteModuleMutation = useDeleteModule();
 
   const handleAddModule = async (formData: FormData): Promise<void> => {
     const module = {
@@ -107,17 +108,17 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
     };
 
     try {
-      // return new Promise<void>((resolve, reject) => {
-      //   deleteModuleMutation.mutate(deletePayload, {
-      //     onSuccess: () => {
-      //       resolve();
-      //     },
-      //     onError: (error) => {
-      //       console.error("Error deleting module:", error);
-      //       reject(error);
-      //     },
-      //   });
-      // });
+      return new Promise<void>((resolve, reject) => {
+        deleteModuleMutation.mutate(deletePayload, {
+          onSuccess: () => {
+            resolve();
+          },
+          onError: (error) => {
+            console.error("Error deleting module:", error);
+            reject(error);
+          },
+        });
+      });
     } catch (error) {
       console.error("Error deleting module:", error);
       throw error;

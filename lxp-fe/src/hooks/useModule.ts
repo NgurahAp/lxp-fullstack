@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import {
   createModule,
+  deleteModule,
   getModule,
   submitModuleAnswer,
   updateModule,
@@ -13,7 +14,9 @@ import {
 import toast from "react-hot-toast";
 import {
   CreateModuleParams,
+  DeleteModuleParams,
   ModuleData,
+  ModuleResponse,
   UpdateModuleParams,
 } from "../types/module";
 
@@ -120,6 +123,29 @@ export const useUpdateModule = () => {
     onError: (error: Error) => {
       console.log(error.message);
       toast.error("Terjadi kesalahan saat mengedit modul");
+    },
+  });
+};
+
+export const useDeleteModule = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ModuleResponse, Error, DeleteModuleParams>({
+    mutationFn: (params) => deleteModule(params),
+
+    onSuccess: () => {
+      // Invalidate related queries to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["detailTrainingInstructor"],
+      });
+
+      // Show success notification
+      toast.success("Module berhasi dihapus");
+    },
+
+    onError: (error: Error) => {
+      console.log(error.message);
+      toast.error("Gagal menghapus module");
     },
   });
 };

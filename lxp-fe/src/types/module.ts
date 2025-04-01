@@ -45,3 +45,9 @@ export interface UpdateModuleParams {
   moduleId: string;
   payload: FormData;
 }
+
+export interface DeleteModuleParams {
+  trainingId: string;
+  meetingId: string;
+  moduleId: string;
+}
