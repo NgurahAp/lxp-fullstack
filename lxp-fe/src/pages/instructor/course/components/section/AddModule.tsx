@@ -1,16 +1,10 @@
 import React, { useState, FormEvent } from "react";
 import { X, FileText, Upload } from "lucide-react";
 
-// Interface for the module data
-interface ModuleFormData {
-  title: string;
-  content: File | null;
-}
-
 // Props interface with explicit types
 interface AddModuleFormProps {
   onClose: () => void;
-  onSubmit: (data: ModuleFormData) => Promise<void>; // Return Promise
+  onSubmit: (data: FormData) => Promise<void>; // Return Promise
   isLoading?: boolean;
 }
 
@@ -33,8 +27,13 @@ const AddModuleForm: React.FC<AddModuleFormProps> = ({
     e.preventDefault();
     setIsSubmitting(true);
 
+    const module = new FormData();
+    module.append("title", title);
+    if (file) {
+      module.append("content", file);
+    }
     try {
-      await onSubmit({ title, content: file }); // Wait for the promise to resolve
+      await onSubmit(module);
       onClose(); // Only close after successful completion
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -141,8 +140,12 @@ const AddModuleForm: React.FC<AddModuleFormProps> = ({
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
-              disabled={isProcessing}
+              className={`px-4 py-2 text-white rounded-lg transition-colors ${
+                isProcessing || file == null
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gray-900 hover:bg-gray-800"
+              }`}
+              disabled={isProcessing || file == null}
             >
               {isProcessing ? "Adding..." : "Add Module"}
             </button>

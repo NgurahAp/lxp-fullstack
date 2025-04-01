@@ -3,13 +3,12 @@ import React, { useState } from "react";
 import { FileText, PlusCircle } from "lucide-react";
 import { Module, Quiz, Task } from "../../../../../types/training";
 import AddModuleForm from "./AddModule";
+import { useCreateModule } from "../../../../../hooks/useModule";
 
 interface ModulesTabProps {
   modules?: Module[];
-  onAddModule?: (data: {
-    title: string;
-    content: File | null;
-  }) => Promise<void>;
+  meetingId: string;
+  onAddModule?: (data: FormData) => Promise<void>;
 }
 
 interface QuizzesTabProps {
@@ -23,9 +22,37 @@ interface TasksTabProps {
 // components/TabContent/ModulesTab.tsx
 const ModulesTab: React.FC<ModulesTabProps> = ({
   modules = [],
-  onAddModule,
+  meetingId,
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const createModuleMutation = useCreateModule();
+
+  const handleAddModule = async (formData: FormData): Promise<void> => {
+    const module = {
+      meetingId: meetingId,
+      payload: formData,
+    };
+
+    try {
+      return new Promise<void>((resolve, reject) => {
+        createModuleMutation.mutate(module, {
+          onSuccess: () => {
+            // setIsSubmitting(false);
+            resolve();
+          },
+          onError: (error) => {
+            // setIsSubmitting(false);
+            console.error("Error creating meeting:", error);
+            reject(error);
+          },
+        });
+      });
+    } catch (error) {
+      // setIsSubmitting(false);
+      console.error("Error creating meeting:", error);
+      throw error;
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -71,7 +98,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
       {showAddForm && (
         <AddModuleForm
           onClose={() => setShowAddForm(false)}
-          onSubmit={onAddModule || (async () => {})}
+          onSubmit={handleAddModule}
         />
       )}
     </div>

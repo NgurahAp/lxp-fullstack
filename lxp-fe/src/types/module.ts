@@ -33,3 +33,8 @@ export interface ModuleResponse {
 export interface SubmitModuleResponse {
   data: ModuleData;
 }
+
+export interface CreateModuleParams {
+  meetingId: string;
+  payload: FormData;
+}

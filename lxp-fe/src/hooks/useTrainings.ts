@@ -68,7 +68,7 @@ export const useGetInstructorDetailTrainings = (
   trainingId: string | undefined
 ): UseQueryResult<DetailTrainingData, Error> => {
   return useQuery({
-    queryKey: ["detailTraining"],
+    queryKey: ["detailTrainingInstructor"],
     queryFn: async () => {
       const response = await getInstructorDetailTraining(trainingId);
       const detailTrainingData = response.data;

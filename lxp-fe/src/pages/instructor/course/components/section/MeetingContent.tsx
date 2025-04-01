@@ -90,7 +90,9 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Tab Content */}
-        {activeTab === "modules" && <ModulesTab modules={meeting.modules} />}
+        {activeTab === "modules" && (
+          <ModulesTab modules={meeting.modules} meetingId={meeting.id} />
+        )}
         {activeTab === "quizzes" && <QuizzesTab quizzes={meeting.quizzes} />}
         {activeTab === "tasks" && <TasksTab tasks={meeting.tasks} />}
       </div>

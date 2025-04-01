@@ -1,7 +1,16 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
-import { getModule, submitModuleAnswer } from "../service/moduleService";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
+import {
+  createModule,
+  getModule,
+  submitModuleAnswer,
+} from "../service/moduleService";
 import toast from "react-hot-toast";
-import { ModuleData } from "../types/module";
+import { CreateModuleParams, ModuleData } from "../types/module";
 
 export const useGetModule = (
   meetingId: string | undefined,
@@ -56,6 +65,30 @@ export const useSubmitModuleAnswer = () => {
         return false;
       }
       return failureCount < 3;
+    },
+  });
+};
+
+export const useCreateModule = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ meetingId, payload }: CreateModuleParams) =>
+      createModule({ meetingId, payload }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["detailTrainingInstructor"],
+      });
+
+      // Show success notification
+      toast.success("Module berhasil ditambah");
+    },
+
+    onError: (error: Error) => {
+      // Show error notification with specific message
+      console.log(error.message);
+      toast.error("Terjadi kesalahan saat menambah modul");
     },
   });
 };
