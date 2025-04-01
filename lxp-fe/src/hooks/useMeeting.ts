@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { createMeeting } from "../service/meetingService";
+import { createMeeting, updateMeeting } from "../service/meetingService";
+import { CreateMeetingResponse, UpdateMeetingParams } from "../types/meeting";
 
 export const useCreateMeeting = () => {
   const queryClient = useQueryClient();
@@ -22,6 +23,29 @@ export const useCreateMeeting = () => {
     onError: (error: Error) => {
       console.log(error.message);
       toast.error("Gagal membuat pelatihan");
+    },
+  });
+};
+
+export const useUpdateMeeting = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<CreateMeetingResponse, Error, UpdateMeetingParams>({
+    mutationFn: (params) => updateMeeting(params),
+
+    onSuccess: () => {
+      // Invalidate related queries to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["detailTraining"],
+      });
+
+      // Show success notification
+      toast.success("Meeting berhasil diedit");
+    },
+
+    onError: (error: Error) => {
+      console.log(error.message);
+      toast.error("Gagal mengedit Meeting");
     },
   });
 };

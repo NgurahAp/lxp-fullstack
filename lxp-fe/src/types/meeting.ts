@@ -10,3 +10,9 @@ export interface MeetingData {
 export interface CreateMeetingResponse {
   data: MeetingData;
 }
+
+export interface UpdateMeetingParams {
+  trainingId: string | undefined;
+  meetingId: string | undefined;
+  title: string;
+}

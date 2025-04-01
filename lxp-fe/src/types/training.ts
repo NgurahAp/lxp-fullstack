@@ -1,12 +1,12 @@
 // GET ALL TRAINING
 export interface Instructor {
-  id: number;
+  id: string;
   name: string;
   email: string;
 }
 
 export interface Training {
-  id: number;
+  id: string;
   title: string;
   description: string;
   image: string;
@@ -15,7 +15,7 @@ export interface Training {
 }
 
 export interface TrainingData {
-  id: number;
+  id: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -29,25 +29,25 @@ export interface TrainingResponse {
 // GET DETAIL TRAINING
 
 export interface Module {
-  id: number;
+  id: string;
   title: string;
   moduleAnswer: string;
 }
 
 export interface Quiz {
-  id: number;
+  id: string;
   title: string;
   quizScore: number;
 }
 
 export interface Task {
-  id: number;
+  id: string;
   title: string;
   taskAnswer: string;
 }
 
 export interface Meeting {
-  id: number;
+  id: string;
   title: string;
   meetingDate: string | null;
   createdAt: string;
@@ -63,7 +63,7 @@ interface Count {
 }
 
 export interface DetailTrainingData {
-  id: number;
+  id: string;
   title: string;
   description: string;
   image: string;

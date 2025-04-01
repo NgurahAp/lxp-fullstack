@@ -6,13 +6,17 @@ import {
   Calendar,
   FileText,
   CheckSquare,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useGetInstructorDetailTrainings } from "../../../hooks/useTrainings";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
 import { Meeting, Module, Quiz, Task } from "../../../types/training";
 import AddMeetingForm from "./components/AddMeeting";
-import { useCreateMeeting } from "../../../hooks/useMeeting";
+import { useCreateMeeting, useUpdateMeeting } from "../../../hooks/useMeeting";
+import DeleteMeetingConfirm from "./components/DeleteMeeting";
+import EditMeetingForm from "./components/EditMeeting";
 
 const DetailCoursePage = () => {
   const { trainingId } = useParams<{ trainingId: string }>();
@@ -22,7 +26,15 @@ const DetailCoursePage = () => {
   const [activeTab, setActiveTab] = useState("modules");
   const [showAddMeetingModal, setShowAddMeetingModal] =
     useState<boolean>(false);
+  const [showEditMeetingModal, setShowEditMeetingModal] =
+    useState<boolean>(false);
+  const [showDeleteMeetingModal, setShowDeleteMeetingModal] =
+    useState<boolean>(false);
+  const [meetingToEdit, setMeetingToEdit] = useState<Meeting | null>(null);
+  const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
+
   const createMeetingMutation = useCreateMeeting();
+  const updateMeetingMutation = useUpdateMeeting();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Update selectedMeeting when data is loaded
@@ -52,6 +64,16 @@ const DetailCoursePage = () => {
       </div>
     );
   }
+
+  const handleEditMeeting = (meeting: Meeting) => {
+    setMeetingToEdit(meeting);
+    setShowEditMeetingModal(true);
+  };
+
+  const handleDeleteMeeting = (meeting: Meeting) => {
+    setMeetingToDelete(meeting);
+    setShowDeleteMeetingModal(true);
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen p-6">
@@ -102,27 +124,60 @@ const DetailCoursePage = () => {
           {data.meetings && data.meetings.length > 0 ? (
             <div className="space-y-2">
               {data.meetings.map((meeting) => (
-                <div
-                  key={meeting.id}
-                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                    selectedMeeting && selectedMeeting.id === meeting.id
-                      ? "bg-gray-900 text-white"
-                      : "hover:bg-gray-100 text-gray-700"
-                  }`}
-                  onClick={() => setSelectedMeeting(meeting)}
-                >
-                  <h3 className="font-medium text-sm">{meeting.title}</h3>
+                <div key={meeting.id} className="relative">
                   <div
-                    className={`flex items-center mt-1 text-xs ${
+                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
                       selectedMeeting && selectedMeeting.id === meeting.id
-                        ? "text-gray-300"
-                        : "text-gray-500"
+                        ? "bg-gray-900 text-white"
+                        : "hover:bg-gray-100 text-gray-700"
                     }`}
+                    onClick={() => setSelectedMeeting(meeting)}
                   >
-                    <Calendar size={12} className="mr-1" />
-                    {new Date(
-                      meeting.meetingDate || Date.now()
-                    ).toLocaleDateString()}
+                    <h3 className="font-medium text-sm pr-16">
+                      {meeting.title}
+                    </h3>
+                    <div
+                      className={`flex items-center mt-1 text-xs ${
+                        selectedMeeting && selectedMeeting.id === meeting.id
+                          ? "text-gray-300"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      <Calendar size={12} className="mr-1" />
+                      {new Date(
+                        meeting.meetingDate || Date.now()
+                      ).toLocaleDateString()}
+                    </div>
+
+                    {/* Edit/Delete buttons */}
+                    <div className="absolute top-3 right-3 flex space-x-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditMeeting(meeting);
+                        }}
+                        className={`p-1 rounded hover:bg-gray-200 ${
+                          selectedMeeting && selectedMeeting.id === meeting.id
+                            ? "text-white hover:text-gray-800"
+                            : "text-gray-500 hover:text-gray-800"
+                        }`}
+                      >
+                        <Edit size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteMeeting(meeting);
+                        }}
+                        className={`p-1 rounded hover:bg-gray-200 ${
+                          selectedMeeting && selectedMeeting.id === meeting.id
+                            ? "text-white hover:text-gray-800"
+                            : "text-gray-500 hover:text-gray-800"
+                        }`}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -130,7 +185,10 @@ const DetailCoursePage = () => {
           ) : (
             <div className="py-6 text-center text-gray-500">
               <p>No meetings available</p>
-              <button className="mt-3 px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors mx-auto">
+              <button
+                className="mt-3 px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors mx-auto"
+                onClick={() => setShowAddMeetingModal(true)}
+              >
                 <PlusCircle size={16} /> Add First Meeting
               </button>
             </div>
@@ -140,13 +198,33 @@ const DetailCoursePage = () => {
         {/* Main Content */}
         {selectedMeeting ? (
           <div className="md:col-span-3 bg-white rounded-lg shadow-sm">
-            <div className="p-4 border-b border-gray-100">
-              <h2 className="font-semibold text-lg">{selectedMeeting.title}</h2>
-              <div className="flex items-center mt-1 text-sm text-gray-500">
-                <Calendar size={14} className="mr-1" />
-                {new Date(
-                  selectedMeeting.meetingDate || Date.now()
-                ).toLocaleDateString()}
+            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+              <div>
+                <h2 className="font-semibold text-lg">
+                  {selectedMeeting.title}
+                </h2>
+                <div className="flex items-center mt-1 text-sm text-gray-500">
+                  <Calendar size={14} className="mr-1" />
+                  {new Date(
+                    selectedMeeting.meetingDate || Date.now()
+                  ).toLocaleDateString()}
+                </div>
+              </div>
+
+              {/* Meeting actions */}
+              <div className="flex gap-2">
+                <button
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+                  onClick={() => handleEditMeeting(selectedMeeting)}
+                >
+                  <Edit size={16} />
+                </button>
+                <button
+                  className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg"
+                  onClick={() => handleDeleteMeeting(selectedMeeting)}
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
 
@@ -321,12 +399,17 @@ const DetailCoursePage = () => {
               Please add a meeting to this course or select an existing one to
               view its content.
             </p>
-            <button className="px-4 py-2 bg-gray-900 text-white rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors">
+            <button
+              className="px-4 py-2 bg-gray-900 text-white rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
+              onClick={() => setShowAddMeetingModal(true)}
+            >
               <PlusCircle size={16} /> Add First Meeting
             </button>
           </div>
         )}
       </div>
+
+      {/* Add Meeting Modal */}
       {showAddMeetingModal && (
         <AddMeetingForm
           onClose={() => setShowAddMeetingModal(false)}
@@ -339,25 +422,106 @@ const DetailCoursePage = () => {
             };
 
             try {
-              // Return a promise that the modal can await
               return new Promise<void>((resolve, reject) => {
                 createMeetingMutation.mutate(training, {
                   onSuccess: () => {
                     setIsSubmitting(false);
-                    resolve(); // Resolve the promise on success
+                    resolve();
                   },
                   onError: (error) => {
                     setIsSubmitting(false);
                     console.error("Error creating training:", error);
-                    reject(error); // Reject the promise on error
+                    reject(error);
                   },
                 });
               });
             } catch (error) {
               setIsSubmitting(false);
               console.error("Error creating training:", error);
-              throw error; // Re-throw to be caught by the form's error handler
+              throw error;
             }
+          }}
+        />
+      )}
+
+      {/* Edit Meeting Modal */}
+      {showEditMeetingModal && meetingToEdit && (
+        <EditMeetingForm
+          onClose={() => {
+            setShowEditMeetingModal(false);
+            setMeetingToEdit(null);
+          }}
+          isLoading={isSubmitting}
+          initialTitle={meetingToEdit.title}
+          onSubmit={async (data: { title: string }) => {
+            setIsSubmitting(true);
+            const updatedMeeting = {
+              trainingId: trainingId,
+              meetingId: meetingToEdit.id,
+              title: data.title,
+            };
+
+            try {
+              return new Promise<void>((resolve, reject) => {
+                updateMeetingMutation.mutate(updatedMeeting, {
+                  onSuccess: () => {
+                    setIsSubmitting(false);
+                    resolve();
+                  },
+                  onError: (error) => {
+                    setIsSubmitting(false);
+                    console.error("Error updating meeting:", error);
+                    reject(error);
+                  },
+                });
+              });
+            } catch (error) {
+              setIsSubmitting(false);
+              console.error("Error updating meeting:", error);
+              throw error;
+            }
+          }}
+        />
+      )}
+
+      {/* Delete Meeting Confirmation Modal */}
+      {showDeleteMeetingModal && meetingToDelete && (
+        <DeleteMeetingConfirm
+          onClose={() => {
+            setShowDeleteMeetingModal(false);
+            setMeetingToDelete(null);
+          }}
+          isLoading={isSubmitting}
+          meetingTitle={meetingToDelete.title}
+          onConfirm={async () => {
+            setIsSubmitting(true);
+
+            // try {
+            //   return new Promise<void>((resolve, reject) => {
+            //     deleteMeetingMutation.mutate(meetingToDelete.id, {
+            //       onSuccess: () => {
+            //         // If the deleted meeting was selected, clear selection
+            //         if (
+            //           selectedMeeting &&
+            //           selectedMeeting.id === meetingToDelete.id
+            //         ) {
+            //           setSelectedMeeting(null);
+            //         }
+            //         setIsSubmitting(false);
+            //         resolve();
+            //       },
+            //       onError: (error) => {
+            //         setIsSubmitting(false);
+            //         console.error("Error deleting meeting:", error);
+            //         reject(error);
+            //       },
+            //     });
+            //   });
+            // } catch (error) {
+            //   setIsSubmitting(false);
+            //   console.error("Error deleting meeting:", error);
+            //   throw error;
+            // }
           }}
         />
       )}
