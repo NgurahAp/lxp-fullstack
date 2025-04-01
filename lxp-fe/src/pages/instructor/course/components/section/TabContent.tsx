@@ -4,6 +4,7 @@ import { FileText, PlusCircle } from "lucide-react";
 import { Module, Quiz, Task } from "../../../../../types/training";
 import AddModuleForm from "./AddModule";
 import { useCreateModule } from "../../../../../hooks/useModule";
+import EditModuleForm from "./EditModule";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -20,11 +21,11 @@ interface TasksTabProps {
 }
 
 // components/TabContent/ModulesTab.tsx
-const ModulesTab: React.FC<ModulesTabProps> = ({
-  modules = [],
-  meetingId,
-}) => {
+const ModulesTab: React.FC<ModulesTabProps> = ({ modules = [], meetingId }) => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null);
+
   const createModuleMutation = useCreateModule();
 
   const handleAddModule = async (formData: FormData): Promise<void> => {
@@ -37,21 +38,42 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
       return new Promise<void>((resolve, reject) => {
         createModuleMutation.mutate(module, {
           onSuccess: () => {
-            // setIsSubmitting(false);
             resolve();
           },
           onError: (error) => {
-            // setIsSubmitting(false);
-            console.error("Error creating meeting:", error);
+            console.error("Error creating module:", error);
             reject(error);
           },
         });
       });
     } catch (error) {
-      // setIsSubmitting(false);
-      console.error("Error creating meeting:", error);
+      console.error("Error creating module:", error);
       throw error;
     }
+  };
+
+  const handleEditModule = async (formData: FormData): Promise<void> => {
+    try {
+      // return new Promise<void>((resolve, reject) => {
+      //   updateModuleMutation.mutate(formData, {
+      //     onSuccess: () => {
+      //       resolve();
+      //     },
+      //     onError: () => {
+      //       console.error("Error updating module:", error);
+      //       reject(error);
+      //     },
+      //   });
+      // });
+    } catch (error) {
+      console.error("Error updating module:", error);
+      throw error;
+    }
+  };
+
+  const openEditForm = (module: Module) => {
+    setSelectedModule(module);
+    setShowEditForm(true);
   };
 
   return (
@@ -73,7 +95,10 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
               </a>
             </div>
             <div className="mt-4 flex gap-2">
-              <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <button
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => openEditForm(module)}
+              >
                 Edit
               </button>
               <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
@@ -95,10 +120,23 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
           <PlusCircle size={16} /> Add Module
         </button>
       </div>
+
       {showAddForm && (
         <AddModuleForm
           onClose={() => setShowAddForm(false)}
           onSubmit={handleAddModule}
+        />
+      )}
+
+      {showEditForm && selectedModule && (
+        <EditModuleForm
+          onClose={() => {
+            setShowEditForm(false);
+            setSelectedModule(null);
+          }}
+          onSubmit={handleEditModule}
+          // isLoading={updateModuleMutation.isLoading}
+          module={selectedModule}
         />
       )}
     </div>
