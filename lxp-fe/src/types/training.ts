@@ -31,7 +31,7 @@ export interface TrainingResponse {
 export interface Module {
   id: string;
   title: string;
-  moduleAnswer: string;
+  content: string;
 }
 
 export interface Quiz {
