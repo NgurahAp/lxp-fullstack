@@ -79,7 +79,7 @@ const AppRoutes: React.FC = () => {
           }
         />
         <Route
-          path="/instructorCourse/quiz"
+          path="/instructorCourse/:trainingId/:meetingId/:quizId"
           element={
             <ProtectedRoute>
               <InstructorLayout>

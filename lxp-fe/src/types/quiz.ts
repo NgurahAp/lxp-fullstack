@@ -12,8 +12,9 @@ interface Meeting {
 }
 
 interface Question {
-  question: string;
   options: string[];
+  question: string;
+  correctAnswer: number;
 }
 
 interface Submission {
@@ -55,4 +56,17 @@ export interface QuizQuestion {
 
 export interface QuizResponse {
   data: QuizData;
+}
+
+export interface DetailQuizInstructorData {
+  id: string;
+  title: string;
+  questions: Question[];
+  createdAt: string;
+  updatedAt: string;
+  meeting: Meeting;
+}
+
+export interface DetailQuizInstructorResponse {
+  data: DetailQuizInstructorData;
 }

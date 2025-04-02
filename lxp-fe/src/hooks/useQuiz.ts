@@ -4,8 +4,18 @@ import {
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
-import {  QuizData, QuizQuestion, QuizSubmissionParams } from "../types/quiz";
-import { getQuiz, getQuizQuestion, submitQuiz } from "../service/quizService";
+import {
+  DetailQuizInstructorData,
+  QuizData,
+  QuizQuestion,
+  QuizSubmissionParams,
+} from "../types/quiz";
+import {
+  getDetailQuizInstructor,
+  getQuiz,
+  getQuizQuestion,
+  submitQuiz,
+} from "../service/quizService";
 import toast from "react-hot-toast";
 
 export const useGetQuiz = (
@@ -35,6 +45,26 @@ export const useGetQuizQuestion = (
       return quizQuestionData;
     },
     enabled: !!meetingId && !!quizId,
+  });
+};
+
+export const useGetInstructorDetailQuiz = (
+  trainingId: string | undefined,
+  meetingId: string | undefined,
+  quizId: string | undefined
+): UseQueryResult<DetailQuizInstructorData, Error> => {
+  return useQuery({
+    queryKey: ["InstructorDetailQuiz", trainingId, meetingId, quizId],
+    queryFn: async () => {
+      const response = await getDetailQuizInstructor(
+        trainingId,
+        meetingId,
+        quizId
+      );
+      const quizData = response.data;
+      return quizData;
+    },
+    enabled: !!trainingId && !!meetingId && !!quizId,
   });
 };
 

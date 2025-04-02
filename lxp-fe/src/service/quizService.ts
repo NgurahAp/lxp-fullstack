@@ -1,7 +1,11 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { API_URL } from "../config/api";
-import {  QuizResponse, QuizSubmissionPayload } from "../types/quiz";
+import {
+  DetailQuizInstructorResponse,
+  QuizResponse,
+  QuizSubmissionPayload,
+} from "../types/quiz";
 
 export const getQuiz = async (
   meetingId: string | undefined,
@@ -50,6 +54,39 @@ export const getQuizQuestion = async (
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        throw new Error("Quiz tidak ditemukan");
+      }
+      throw new Error(
+        error.response?.data?.message || "Terjadi kesalahan pada server"
+      );
+    }
+    throw new Error("Terjadi kesalahan yang tidak diketahui");
+  }
+};
+
+export const getDetailQuizInstructor = async (
+  trainingId: string | undefined,
+  meetingId: string | undefined,
+  quizId: string | undefined
+): Promise<DetailQuizInstructorResponse> => {
+  const token = Cookies.get("token");
+
+  try {
+    const response = await axios.get(
+      `${API_URL}/trainings/${trainingId}/meetings/${meetingId}/quizzes/${quizId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        throw new Error("Kamu tidak memiliki hak akses");
+      }
       if (error.response?.status === 404) {
         throw new Error("Quiz tidak ditemukan");
       }

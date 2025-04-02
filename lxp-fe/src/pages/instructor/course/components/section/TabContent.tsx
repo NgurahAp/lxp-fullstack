@@ -21,6 +21,8 @@ interface ModulesTabProps {
 
 interface QuizzesTabProps {
   quizzes?: Quiz[];
+  meetingId: string;
+  trainingId: string;
 }
 
 interface TasksTabProps {
@@ -219,7 +221,11 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
 export default ModulesTab;
 
 // components/TabContent/QuizzesTab.tsx
-const QuizzesTab: React.FC<QuizzesTabProps> = ({ quizzes = [] }) => {
+const QuizzesTab: React.FC<QuizzesTabProps> = ({
+  quizzes = [],
+  meetingId,
+  trainingId,
+}) => {
   return (
     <div className="space-y-4">
       {quizzes.length > 0 ? (
@@ -231,7 +237,7 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({ quizzes = [] }) => {
             <h3 className="font-medium">{quiz.title}</h3>
             <div className="flex items-center mt-2 text-sm">
               <Link
-                to={`/instructorCourse/quiz`}
+                to={`/instructorCourse/${trainingId}/${meetingId}/${quiz.id}`}
                 className="text-gray-900 hover:underline flex items-center"
               >
                 <FileText size={14} className="mr-1" /> View Quiz

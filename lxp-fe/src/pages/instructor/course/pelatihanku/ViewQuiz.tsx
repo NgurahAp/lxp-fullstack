@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import LoadingSpinner from "../../../../Components/LoadingSpinner";
+import { useGetInstructorDetailQuiz } from "../../../../hooks/useQuiz";
 
 interface QuizQuestion {
   question: string;
@@ -26,7 +28,11 @@ interface QuizData {
 }
 
 const InstructorQuiz: React.FC = () => {
-  const { quizId } = useParams<{ quizId: string }>();
+  const { trainingId, meetingId, quizId } = useParams<{
+    trainingId: string;
+    meetingId: string;
+    quizId: string;
+  }>();
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -34,7 +40,6 @@ const InstructorQuiz: React.FC = () => {
     Record<number, boolean>
   >({});
 
-  // Dummy data - using the API response structure provided
   useEffect(() => {
     // Simulate API fetch
     setTimeout(() => {
@@ -126,6 +131,26 @@ const InstructorQuiz: React.FC = () => {
       setLoading(false);
     }, 1000);
   }, [quizId]);
+
+  const { data, isLoading, error } = useGetInstructorDetailQuiz(
+    trainingId,
+    meetingId,
+    quizId
+  );
+
+  if (isLoading) {
+    return <LoadingSpinner text="Loading..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[85vh] w-screen flex items-center justify-center">
+        Error loading data
+      </div>
+    );
+  }
+
+  console.log(data);
 
   const toggleQuestion = (questionIndex: number) => {
     setExpandedQuestions((prev) => ({
