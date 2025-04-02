@@ -215,6 +215,11 @@ userRouter.get(
   authMiddleware,
   taskController.getTaskDetail
 );
+userRouter.get(
+  "/api/trainings/:trainingId/meetings/:meetingId/tasks/:taskId",
+  authMiddleware,
+  taskController.getInstructorDetailTask
+);
 userRouter.post(
   "/api/tasks/:taskId/score",
   authMiddleware,

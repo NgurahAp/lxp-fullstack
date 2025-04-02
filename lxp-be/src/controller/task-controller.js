@@ -55,6 +55,26 @@ const getTaskDetail = async (req, res, next) => {
   }
 };
 
+const getInstructorDetailTask = async (req, res, next) => {
+  try {
+    const trainingId = req.params.trainingId;
+    const meetingId = req.params.meetingId;
+    const taskId = req.params.taskId;
+
+    const result = await taskService.getInstructorDetailTask(req.user, {
+      trainingId,
+      meetingId,
+      taskId,
+    });
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 const submitTaskScore = async (req, res, next) => {
   try {
     const taskId = req.params.taskId; // Ambil taskId dari URL
@@ -108,6 +128,7 @@ export default {
   createTask,
   submitTask,
   getTaskDetail,
+  getInstructorDetailTask,
   submitTaskScore,
   updateTask,
   deleteTask,

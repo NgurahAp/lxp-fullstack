@@ -289,7 +289,7 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({
                 Edit
               </Link>
               <button
-                className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-3 py-1 text-sm border border-red-100 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
                 onClick={() => handleDeleteClick(quiz)}
               >
                 Delete

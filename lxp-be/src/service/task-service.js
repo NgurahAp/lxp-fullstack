@@ -1,10 +1,10 @@
-import { request } from "http";
 import { prismaClient } from "../application/database.js";
 import { ResponseError } from "../error/response-error.js";
 import {
   createTaskValidation,
   deleteTaskValidation,
   getDetailTaskValidation,
+  getInstructorDetailTaskValidation,
   submitScoreTaskValidation,
   updateTaskValidation,
 } from "../validation/task-validation.js";
@@ -260,6 +260,54 @@ const getDetailTask = async (user, request) => {
     ...task,
     submission: taskSubmission || { answer: null, score: 0 },
   };
+};
+
+const getInstructorDetailTask = async (user, request) => {
+  const validationResult = validate(getInstructorDetailTaskValidation, request);
+  const { trainingId, meetingId, taskId } = validationResult;
+
+  const task = await prismaClient.task.findFirst({
+    where: {
+      id: taskId,
+      meetingId: meetingId,
+      meeting: {
+        training: {
+          id: trainingId,
+          instructorId: user.id,
+        },
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      taskQuestion: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          meetingDate: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!task) {
+    throw new ResponseError(
+      404,
+      "Task not found or you're not instructor in this training"
+    );
+  }
+
+  return task;
 };
 
 const submitTaskScore = async (user, taskId, request) => {
@@ -564,6 +612,7 @@ export default {
   createTask,
   submitTask,
   getDetailTask,
+  getInstructorDetailTask,
   submitTaskScore,
   updateTask,
   deleteTask,
