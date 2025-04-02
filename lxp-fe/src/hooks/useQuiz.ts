@@ -6,14 +6,17 @@ import {
 } from "@tanstack/react-query";
 import {
   CreateQuizParams,
+  DeleteQuizParams,
   DetailQuizInstructorData,
   QuizData,
   QuizQuestion,
+  QuizResponse,
   QuizSubmissionParams,
   UpdateQuizParams,
 } from "../types/quiz";
 import {
   createQuiz,
+  deleteQuiz,
   getDetailQuizInstructor,
   getQuiz,
   getQuizQuestion,
@@ -152,7 +155,7 @@ export const useUpdateQuiz = (trainingId: string | undefined) => {
       });
 
       // Show success notification
-      toast.success("Module berhasil ditambah");
+      toast.success("Quiz berhasil ditambah");
       navigate(`/instructorCourse/${trainingId}`);
     },
 
@@ -160,6 +163,31 @@ export const useUpdateQuiz = (trainingId: string | undefined) => {
       // Show error notification with specific message
       console.log(error.message);
       toast.error("Terjadi kesalahan saat mengedit quiz");
+    },
+  });
+};
+
+export const useDeleteQuiz = (trainingId: string | undefined) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation<QuizResponse, Error, DeleteQuizParams>({
+    mutationFn: (params) => deleteQuiz(params),
+
+    onSuccess: () => {
+      // Invalidate related queries to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ["detailTrainingInstructor"],
+      });
+
+      // Show success notification
+      toast.success("Quiz berhasi dihapus");
+      navigate(`/instructorCourse/${trainingId}`);
+    },
+
+    onError: (error: Error) => {
+      console.log(error.message);
+      toast.error("Gagal menghapus Quiz");
     },
   });
 };

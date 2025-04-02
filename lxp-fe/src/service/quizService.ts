@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 import { API_URL } from "../config/api";
 import {
   CreateQuizParams,
+  DeleteQuizParams,
   DetailQuizInstructorResponse,
   QuizResponse,
   QuizSubmissionPayload,
@@ -191,6 +192,40 @@ export const updateQuiz = async ({
       }
       if (error.response?.status === 404) {
         throw new Error("Meeting tidak di temukan atau kamu bukan instructor");
+      }
+      throw new Error(
+        error.response?.data?.message || "Terjadi kesalahan pada server"
+      );
+    }
+    throw new Error("Terjadi kesalahan yang tidak diketahui");
+  }
+};
+
+export const deleteQuiz = async ({
+  trainingId,
+  meetingId,
+  quizId,
+}: DeleteQuizParams): Promise<QuizResponse> => {
+  const token = Cookies.get("token");
+
+  try {
+    const response = await axios.delete(
+      `${API_URL}/trainings/${trainingId}/meetings/${meetingId}/quizes/${quizId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // Error handling tetap sama
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        throw new Error("Kamu tidak memiliki hak akses");
+      }
+      if (error.response?.status === 404) {
+        throw new Error("Quiz tidak di temukan atau kamu bukan instructor");
       }
       throw new Error(
         error.response?.data?.message || "Terjadi kesalahan pada server"

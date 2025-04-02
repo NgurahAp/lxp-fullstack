@@ -11,6 +11,8 @@ import {
 import EditModuleForm from "./EditModule";
 import DeleteModuleConfirm from "./DeleteModule";
 import { Link } from "react-router-dom";
+import { useDeleteQuiz } from "../../../../../hooks/useQuiz";
+import DeleteQuizConfirm from "./DeleteQuiz";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -226,6 +228,42 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({
   meetingId,
   trainingId,
 }) => {
+  const deleteQuizMutation = useDeleteQuiz(trainingId);
+  const [quizToDelete, setQuizToDelete] = useState<Quiz | null>(null);
+
+  const handleDeleteClick = (quiz: Quiz) => {
+    setQuizToDelete(quiz);
+  };
+
+  const handleConfirmDelete = async (quizId: string) => {
+    const deletePayload = {
+      trainingId: trainingId,
+      meetingId: meetingId,
+      quizId: quizId,
+    };
+
+    try {
+      return new Promise<void>((resolve, reject) => {
+        deleteQuizMutation.mutate(deletePayload, {
+          onSuccess: () => {
+            resolve();
+          },
+          onError: (error) => {
+            console.error("Error deleting module:", error);
+            reject(error);
+          },
+        });
+      });
+    } catch (error) {
+      console.error("Error deleting module:", error);
+      throw error;
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setQuizToDelete(null);
+  };
+
   return (
     <div className="space-y-4">
       {quizzes.length > 0 ? (
@@ -250,7 +288,10 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({
               >
                 Edit
               </Link>
-              <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <button
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => handleDeleteClick(quiz)}
+              >
                 Delete
               </button>
             </div>
@@ -269,6 +310,13 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({
           <PlusCircle size={16} /> Add Quiz
         </Link>
       </div>
+      {quizToDelete && (
+        <DeleteQuizConfirm
+          quiz={quizToDelete}
+          onClose={handleCloseDeleteModal}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </div>
   );
 };

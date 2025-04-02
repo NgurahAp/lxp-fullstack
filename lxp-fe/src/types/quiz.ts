@@ -87,3 +87,9 @@ export interface UpdateQuizParams {
   quizId: string | undefined;
   formData: QuizForm;
 }
+
+export interface DeleteQuizParams {
+  trainingId: string | undefined;
+  meetingId: string | undefined;
+  quizId: string | undefined;
+}
