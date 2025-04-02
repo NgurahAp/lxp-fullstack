@@ -1,31 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../../../Components/LoadingSpinner";
 import { useGetInstructorDetailQuiz } from "../../../../hooks/useQuiz";
-
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
-
-interface QuizData {
-  id: string;
-  title: string;
-  questions: QuizQuestion[];
-  createdAt: string;
-  updatedAt: string;
-  meeting: {
-    id: string;
-    title: string;
-    meetingDate: string | null;
-    training: {
-      id: string;
-      title: string;
-      description: string;
-    };
-  };
-}
 
 const InstructorQuiz: React.FC = () => {
   const { trainingId, meetingId, quizId } = useParams<{
@@ -34,109 +10,15 @@ const InstructorQuiz: React.FC = () => {
     quizId: string;
   }>();
   const navigate = useNavigate();
-  const [quiz, setQuiz] = useState<QuizData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [expandedQuestions, setExpandedQuestions] = useState<
     Record<number, boolean>
   >({});
 
-  useEffect(() => {
-    // Simulate API fetch
-    setTimeout(() => {
-      // Use the actual API response structure
-      const apiResponse = {
-        data: {
-          id: "c04258ae-9322-421a-8e41-cbb57f77aa9f",
-          title: "Quiz - Sesi 2",
-          createdAt: "2025-04-02T10:06:50.145Z",
-          updatedAt: "2025-04-02T10:06:50.145Z",
-          meeting: {
-            id: "7a0811b5-32ed-40a6-9d33-00cca74975af",
-            title: "Sesi 1 - BSI RBC Peran dan Kompetensi anti fraud DP",
-            meetingDate: null,
-            training: {
-              id: "1a0c7aaf-c3dc-4b82-9bbe-edf0f7bb0c4f",
-              title:
-                "Level Up Pencegahan dan Deteksi Dini Terhadap Potensi Fraud Untuk Pegawai RBC",
-              description:
-                'Training "Level Up Pencegahan dan Deteksi Dini Terhadap Potensi Fraud untuk Pegawai RBC" bertujuan untuk meningkatkan kesadaran dan keterampilan pegawai dalam mengenali, mencegah, dan mendeteksi potensi fraud sejak dini. Peserta akan memahami jenis-jenis fraud, indikator utama kecurangan, serta strategi pencegahan berbasis kebijakan dan teknologi melalui studi kasus serta simulasi. Dengan pelatihan ini, pegawai diharapkan lebih proaktif dalam menjaga integritas dan transparansi di lingkungan kerja.',
-            },
-          },
-          submission: {},
-        },
-      };
-
-      const dummyQuiz: QuizData = {
-        ...apiResponse.data,
-        questions: [
-          {
-            options: [
-              "Menjaga bahasa tubuh yang kaku",
-              "Menghindari kontak mata",
-              "Memahami perbedaan budaya dan menyesuaikan komunikasi",
-              "Menggunakan satu gaya komunikasi yang sama untuk semua orang",
-            ],
-            question:
-              "Apa yang menjadi salah satu faktor utama dalam komunikasi antar budaya?",
-            correctAnswer: 2,
-          },
-          {
-            options: [
-              "Ekspresif dan suka bercerita",
-              "Analitis, detail, dan objektif",
-              "Mudah bergaul dan spontan",
-              "Mendominasi percakapan dan tegas",
-            ],
-            question:
-              "Tipe kepribadian 'Pemikir' dalam komunikasi biasanya memiliki karakteristik seperti?",
-            correctAnswer: 1,
-          },
-          {
-            options: [
-              "Pendekatan Pengendalian",
-              "Pendekatan Ekspresif",
-              "Pendekatan Pasif",
-              "Pendekatan Intelektual",
-            ],
-            question:
-              "Apa pendekatan yang digunakan untuk menjual ide dengan memberikan jaminan kualitas dan referensi?",
-            correctAnswer: 2,
-          },
-          {
-            options: [
-              "Melalui nada suara dan pola bicara",
-              "Melihat ekspresi wajah",
-              "Memeriksa gaya berpakaian",
-              "Menganalisis tulisan tangan mereka",
-            ],
-            question:
-              "Bagaimana cara mengenali kepribadian seseorang saat berkomunikasi via telepon?",
-            correctAnswer: 0,
-          },
-          {
-            options: [
-              "Berani mengambil risiko dan suka tantangan",
-              "Sensitif, peduli, dan mendukung",
-              "Struktural dan disiplin",
-              "Analitis dan suka berdebat",
-            ],
-            question:
-              "Karakteristik utama dari tipe kepribadian 'Harmoni' dalam komunikasi adalah?",
-            correctAnswer: 1,
-          },
-        ],
-      };
-
-      setQuiz(dummyQuiz);
-      setLoading(false);
-    }, 1000);
-  }, [quizId]);
-
-  const { data, isLoading, error } = useGetInstructorDetailQuiz(
-    trainingId,
-    meetingId,
-    quizId
-  );
+  const {
+    data: quiz,
+    isLoading,
+    error,
+  } = useGetInstructorDetailQuiz(trainingId, meetingId, quizId);
 
   if (isLoading) {
     return <LoadingSpinner text="Loading..." />;
@@ -150,7 +32,6 @@ const InstructorQuiz: React.FC = () => {
     );
   }
 
-  console.log(data);
 
   const toggleQuestion = (questionIndex: number) => {
     setExpandedQuestions((prev) => ({
@@ -185,7 +66,7 @@ const InstructorQuiz: React.FC = () => {
     return new Date(dateString).toLocaleDateString("id-ID", options);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -212,7 +93,7 @@ const InstructorQuiz: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-white shadow mx-4">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center">
             <div>
@@ -274,7 +155,7 @@ const InstructorQuiz: React.FC = () => {
                 </div>
                 <div className="flex">
                   <span className="text-gray-500 w-32">Nilai Lulus:</span>
-                  <span className="text-gray-800 font-medium">10%</span>
+                  <span className="text-gray-800 font-medium">80%</span>
                 </div>
               </div>
             </div>
