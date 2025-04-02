@@ -33,6 +33,12 @@ const getDetailQuizValidation = Joi.object({
   quizId: Joi.string().required(),
 });
 
+const getInstructorDetailQuizValudation = Joi.object({
+  trainingId: Joi.string().required(),
+  meetingId: Joi.string().required(),
+  quizId: Joi.string().required(),
+});
+
 const updateQuizValidation = Joi.object({
   trainingId: Joi.string().required(),
   meetingId: Joi.string().required(),
@@ -60,6 +66,7 @@ export {
   createQuizValidation,
   submitQuizValidation,
   getDetailQuizValidation,
+  getInstructorDetailQuizValudation,
   updateQuizValidation,
   deleteQuizValidation,
 };

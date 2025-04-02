@@ -173,6 +173,12 @@ userRouter.get(
   quizController.getQuizDetail
 );
 userRouter.get(
+  "/api/trainings/:trainingId/meetings/:meetingId/quizzes/:quizId",
+  authMiddleware,
+  instruktorMiddleware,
+  quizController.getInstructorDetailQuiz
+);
+userRouter.get(
   "/api/meetings/:meetingId/quizzes/:quizId/questions",
   authMiddleware,
   quizController.getQuizQuestions

@@ -42,6 +42,26 @@ const getQuizDetail = async (req, res, next) => {
   }
 };
 
+const getInstructorDetailQuiz = async (req, res, next) => {
+  try {
+    const trainingId = req.params.trainingId;
+    const meetingId = req.params.meetingId;
+    const quizId = req.params.quizId;
+
+    const result = await quizService.getInstructorDetailQuiz(req.user, {
+      trainingId,
+      meetingId,
+      quizId,
+    });
+
+    res.status(200).json({
+      data: result,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
 const getQuizQuestions = async (req, res, next) => {
   try {
     const meetingId = req.params.meetingId;
@@ -101,6 +121,7 @@ export default {
   submitQuiz,
   getQuizDetail,
   getQuizQuestions,
+  getInstructorDetailQuiz,
   updateQuiz,
   deleteQuiz,
 };

@@ -4,6 +4,7 @@ import {
   createQuizValidation,
   deleteQuizValidation,
   getDetailQuizValidation,
+  getInstructorDetailQuizValudation,
   submitQuizValidation,
   updateQuizValidation,
 } from "../validation/quiz-validation.js";
@@ -349,6 +350,54 @@ const getQuizQuestions = async (user, request) => {
   };
 };
 
+const getInstructorDetailQuiz = async (user, request) => {
+  const validationResult = validate(getInstructorDetailQuizValudation, request);
+  const { trainingId, meetingId, quizId } = validationResult;
+
+  const quiz = await prismaClient.quiz.findFirst({
+    where: {
+      id: quizId,
+      meetingId: meetingId,
+      meeting: {
+        training: {
+          id: trainingId,
+          instructorId: user.id,
+        },
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      questions: true,
+      createdAt: true,
+      updatedAt: true,
+      meeting: {
+        select: {
+          id: true,
+          title: true,
+          meetingDate: true,
+          training: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!quiz) {
+    throw new ResponseError(
+      404,
+      "Quiz not found or you're not the instructor in this training"
+    );
+  }
+
+  return quiz;
+};
+
 const updateQuiz = async (user, request) => {
   const quiz = validate(updateQuizValidation, request);
   const { trainingId, meetingId, quizId, title, questions } = quiz;
@@ -448,62 +497,62 @@ const deleteQuiz = async (user, request) => {
     );
   }
 
-   return prismaClient.$transaction(async (tx) => {
-      // Get module submissions and group them by user to update scores
-      const submissions = await tx.quizSubmission.findMany({
-        where: { quizId: quizId },
-      });
-  
-      // Group submissions by trainingUserId and calculate total score per user
-      const userScores = {};
-      for (const submission of submissions) {
-        const userId = submission.trainingUserId;
-        if (!userScores[userId]) {
-          userScores[userId] = 0;
-        }
-        userScores[userId] += submission.score;
+  return prismaClient.$transaction(async (tx) => {
+    // Get module submissions and group them by user to update scores
+    const submissions = await tx.quizSubmission.findMany({
+      where: { quizId: quizId },
+    });
+
+    // Group submissions by trainingUserId and calculate total score per user
+    const userScores = {};
+    for (const submission of submissions) {
+      const userId = submission.trainingUserId;
+      if (!userScores[userId]) {
+        userScores[userId] = 0;
       }
-  
-      // Delete module submissions
-      await tx.quizSubmission.deleteMany({
-        where: { quizId: quizId },
-      });
-  
-      // Update only quizScore for each affected user
-      for (const [userId, scoreToReduce] of Object.entries(userScores)) {
-        if (scoreToReduce > 0) {
-          // Find user's score for this meeting
-          const userScore = await tx.score.findFirst({
-            where: {
-              trainingUserId: userId,
-              meetingId: meetingId,
+      userScores[userId] += submission.score;
+    }
+
+    // Delete module submissions
+    await tx.quizSubmission.deleteMany({
+      where: { quizId: quizId },
+    });
+
+    // Update only quizScore for each affected user
+    for (const [userId, scoreToReduce] of Object.entries(userScores)) {
+      if (scoreToReduce > 0) {
+        // Find user's score for this meeting
+        const userScore = await tx.score.findFirst({
+          where: {
+            trainingUserId: userId,
+            meetingId: meetingId,
+          },
+        });
+
+        if (userScore) {
+          // Only update quizScore, leave totalScore unchanged
+          await tx.score.update({
+            where: { id: userScore.id },
+            data: {
+              quizScore: Math.max(0, userScore.quizScore - scoreToReduce),
             },
           });
-  
-          if (userScore) {
-            // Only update quizScore, leave totalScore unchanged
-            await tx.score.update({
-              where: { id: userScore.id },
-              data: {
-                quizScore: Math.max(0, userScore.quizScore - scoreToReduce),
-              },
-            });
-          }
         }
       }
-  
-      // Delete the quiz
-      return tx.quiz.delete({
-        where: {
-          id: quizId,
-        },
-        select: {
-          id: true,
-          meetingId: true,
-          title: true,
-        },
-      });
+    }
+
+    // Delete the quiz
+    return tx.quiz.delete({
+      where: {
+        id: quizId,
+      },
+      select: {
+        id: true,
+        meetingId: true,
+        title: true,
+      },
     });
+  });
 };
 
 export default {
@@ -511,6 +560,7 @@ export default {
   submitQuiz,
   getDetailQuiz,
   getQuizQuestions,
+  getInstructorDetailQuiz,
   updateQuiz,
   deleteQuiz,
 };

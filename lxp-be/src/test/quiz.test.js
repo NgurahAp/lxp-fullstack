@@ -378,15 +378,61 @@ describe("DELETE  /api/trainings/:trainingId/meetings/:meetingId/quizes/:quizId"
     expect(quizStillExists).not.toBeNull();
   });
 
-   it("Should reject deletion for non-existent module", async () => {
-      const nonExistentId = "module-not-exist";
-  
-      const result = await supertest(web)
-        .delete(
-          `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${nonExistentId}`
-        )
-        .set("Authorization", "Bearer test-instructor");
-  
-      expect(result.status).toBe(404);
-    });
+  it("Should reject deletion for non-existent module", async () => {
+    const nonExistentId = "module-not-exist";
+
+    const result = await supertest(web)
+      .delete(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/modules/${nonExistentId}`
+      )
+      .set("Authorization", "Bearer test-instructor");
+
+    expect(result.status).toBe(404);
+  });
+});
+
+describe("GET /api/trainings/:trainingId/meetings/:meetingId/quizzes/:quizId", () => {
+  let meeting;
+  let training;
+  let quiz;
+  beforeEach(async () => {
+    const user = await createTestUser();
+    const instructor = await createTestInstructor();
+    training = await createTraining(instructor.id);
+    await createTrainingUser(training.id, user.id);
+    meeting = await createMeeting(training.id);
+    quiz = await createQuiz(meeting.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("Should get quiz detail successfully", async () => {
+    const result = await supertest(web)
+      .get(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/quizzes/${quiz.id}`
+      )
+      .set("Authorization", "Bearer test-instructor");
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBeDefined();
+    expect(result.body.data.id).toBe(quiz.id);
+    expect(result.body.data.title).toBe(quiz.title);
+    expect(result.body.data.questions).toBeDefined();
+  });
+
+  it("Should reject quiz if user not instructor", async () => {
+    const result = await supertest(web)
+      .get(
+        `/api/trainings/${training.id}/meetings/${meeting.id}/quizzes/${quiz.id}`
+      )
+      .set("Authorization", "Bearer test");
+
+    console.log(result.body);
+
+    expect(result.status).toBe(403);
+  });
 });
