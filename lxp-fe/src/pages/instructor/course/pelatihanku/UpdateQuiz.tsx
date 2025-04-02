@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { QuizForm } from "../../../../types/quiz";
 import {
-  useCreateQuiz,
   useGetInstructorDetailQuiz,
+  useUpdateQuiz,
 } from "../../../../hooks/useQuiz";
 import LoadingSpinner from "../../../../Components/LoadingSpinner";
 
@@ -15,7 +15,7 @@ const UpdateQuiz: React.FC = () => {
     quizId: string;
   }>();
   const navigate = useNavigate();
-  const createQuizMutation = useCreateQuiz(trainingId);
+  const updateQuizMutation = useUpdateQuiz(trainingId);
   const {
     data: quiz,
     isLoading,
@@ -39,11 +39,11 @@ const UpdateQuiz: React.FC = () => {
     if (quiz) {
       setFormData({
         title: quiz.title,
-        questions: quiz.questions.map(q => ({
+        questions: quiz.questions.map((q) => ({
           question: q.question,
           options: q.options,
-          correctAnswer: q.correctAnswer
-        }))
+          correctAnswer: q.correctAnswer,
+        })),
       });
     }
   }, [quiz]);
@@ -132,7 +132,7 @@ const UpdateQuiz: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      createQuizMutation.mutate({ meetingId, formData });
+      updateQuizMutation.mutate({ trainingId, meetingId, quizId, formData });
     } catch (error) {
       console.error("Error creating training:", error);
     }

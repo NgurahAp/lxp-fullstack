@@ -173,7 +173,7 @@ export const updateQuiz = async ({
   const token = Cookies.get("token");
 
   try {
-    const response = await axios.post(
+    const response = await axios.put(
       `${API_URL}/trainings/${trainingId}/meetings/${meetingId}/quizes/${quizId}`,
       formData,
       {

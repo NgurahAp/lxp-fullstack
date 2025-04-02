@@ -133,7 +133,7 @@ export const useCreateQuiz = (trainingId: string | undefined) => {
   });
 };
 
-export const useUpdateQuiz = (trainingId: string) => {
+export const useUpdateQuiz = (trainingId: string | undefined) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -159,7 +159,7 @@ export const useUpdateQuiz = (trainingId: string) => {
     onError: (error: Error) => {
       // Show error notification with specific message
       console.log(error.message);
-      toast.error("Terjadi kesalahan saat menambah modul");
+      toast.error("Terjadi kesalahan saat mengedit quiz");
     },
   });
 };

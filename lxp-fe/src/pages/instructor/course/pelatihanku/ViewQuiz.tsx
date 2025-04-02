@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import LoadingSpinner from "../../../../Components/LoadingSpinner";
 import { useGetInstructorDetailQuiz } from "../../../../hooks/useQuiz";
 
@@ -31,7 +31,6 @@ const InstructorQuiz: React.FC = () => {
       </div>
     );
   }
-
 
   const toggleQuestion = (questionIndex: number) => {
     setExpandedQuestions((prev) => ({
@@ -289,9 +288,12 @@ const InstructorQuiz: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="mt-8 flex justify-end space-x-4">
-          <button className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors">
+          <Link
+            to={`/instructorCourse/${trainingId}/${meetingId}/updateQuiz/${quiz.id}`}
+            className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors"
+          >
             Edit
-          </button>
+          </Link>
           <button className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors">
             Delete
           </button>
