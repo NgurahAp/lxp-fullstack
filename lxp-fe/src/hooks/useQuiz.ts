@@ -5,18 +5,21 @@ import {
   UseQueryResult,
 } from "@tanstack/react-query";
 import {
+  CreateQuizParams,
   DetailQuizInstructorData,
   QuizData,
   QuizQuestion,
   QuizSubmissionParams,
 } from "../types/quiz";
 import {
+  createQuiz,
   getDetailQuizInstructor,
   getQuiz,
   getQuizQuestion,
   submitQuiz,
 } from "../service/quizService";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export const useGetQuiz = (
   meetingId: string | undefined,
@@ -98,6 +101,32 @@ export const useSubmitQuiz = () => {
         return false;
       }
       return failureCount < 3;
+    },
+  });
+};
+
+export const useCreateQuiz = (trainingId: string | undefined) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: ({ meetingId, formData }: CreateQuizParams) =>
+      createQuiz({ meetingId, formData }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["detailTrainingInstructor"],
+      });
+
+      // Show success notification
+      toast.success("Module berhasil ditambah");
+      navigate(`/instructorCourse/${trainingId}`);
+    },
+
+    onError: (error: Error) => {
+      // Show error notification with specific message
+      console.log(error.message);
+      toast.error("Terjadi kesalahan saat menambah modul");
     },
   });
 };

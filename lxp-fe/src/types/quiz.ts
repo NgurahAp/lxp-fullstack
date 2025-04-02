@@ -11,7 +11,7 @@ interface Meeting {
   training: Training;
 }
 
-interface Question {
+export interface Question {
   options: string[];
   question: string;
   correctAnswer: number;
@@ -69,4 +69,14 @@ export interface DetailQuizInstructorData {
 
 export interface DetailQuizInstructorResponse {
   data: DetailQuizInstructorData;
+}
+
+export interface QuizForm {
+  title: string;
+  questions: Question[];
+}
+
+export interface CreateQuizParams {
+  meetingId: string | undefined;
+  formData: QuizForm
 }

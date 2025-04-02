@@ -1,17 +1,8 @@
 import { PlusCircle } from "lucide-react";
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
-interface Question {
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
-
-interface QuizForm {
-  title: string;
-  questions: Question[];
-}
+import { QuizForm } from "../../../../types/quiz";
+import { useCreateQuiz } from "../../../../hooks/useQuiz";
 
 const CreateQuiz: React.FC = () => {
   const { trainingId, meetingId } = useParams<{
@@ -19,6 +10,7 @@ const CreateQuiz: React.FC = () => {
     meetingId: string;
   }>();
   const navigate = useNavigate();
+  const createQuizMutation = useCreateQuiz(trainingId);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<QuizForm>({
@@ -116,20 +108,9 @@ const CreateQuiz: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // In a real application, you would send data to your API here
-      console.log("Quiz data to submit:", formData);
-
-      // Simulate API call with timeout
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Success message or redirect
-      alert("Quiz berhasil dibuat!");
-      navigate(`/instructor/trainings/${trainingId}/meetings/${meetingId}`);
+      createQuizMutation.mutate({ meetingId, formData });
     } catch (error) {
-      console.error("Error creating quiz:", error);
-      alert("Gagal membuat quiz. Silakan coba lagi.");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error creating training:", error);
     }
   };
 
@@ -140,9 +121,7 @@ const CreateQuiz: React.FC = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">
-                Create Quiz
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-800">Create Quiz</h1>
               <p className="text-gray-600 mt-1">
                 Tambahkan pertanyaan dan pilihan jawaban
               </p>
