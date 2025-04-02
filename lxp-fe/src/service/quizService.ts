@@ -6,6 +6,7 @@ import {
   DetailQuizInstructorResponse,
   QuizResponse,
   QuizSubmissionPayload,
+  UpdateQuizParams,
 } from "../types/quiz";
 
 export const getQuiz = async (
@@ -138,6 +139,42 @@ export const createQuiz = async ({
   try {
     const response = await axios.post(
       `${API_URL}/meetings/${meetingId}/quizzes`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // Error handling tetap sama
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        throw new Error("Kamu tidak memiliki hak akses");
+      }
+      if (error.response?.status === 404) {
+        throw new Error("Meeting tidak di temukan atau kamu bukan instructor");
+      }
+      throw new Error(
+        error.response?.data?.message || "Terjadi kesalahan pada server"
+      );
+    }
+    throw new Error("Terjadi kesalahan yang tidak diketahui");
+  }
+};
+
+export const updateQuiz = async ({
+  trainingId,
+  meetingId,
+  quizId,
+  formData,
+}: UpdateQuizParams): Promise<QuizResponse> => {
+  const token = Cookies.get("token");
+
+  try {
+    const response = await axios.post(
+      `${API_URL}/trainings/${trainingId}/meetings/${meetingId}/quizes/${quizId}`,
       formData,
       {
         headers: {

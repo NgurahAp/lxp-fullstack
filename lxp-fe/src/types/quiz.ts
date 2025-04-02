@@ -80,3 +80,10 @@ export interface CreateQuizParams {
   meetingId: string | undefined;
   formData: QuizForm
 }
+
+export interface UpdateQuizParams {
+  trainingId: string | undefined;
+  meetingId: string | undefined;
+  quizId: string | undefined;
+  formData: QuizForm;
+}

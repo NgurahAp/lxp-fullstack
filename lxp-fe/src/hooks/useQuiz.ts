@@ -10,6 +10,7 @@ import {
   QuizData,
   QuizQuestion,
   QuizSubmissionParams,
+  UpdateQuizParams,
 } from "../types/quiz";
 import {
   createQuiz,
@@ -17,6 +18,7 @@ import {
   getQuiz,
   getQuizQuestion,
   submitQuiz,
+  updateQuiz,
 } from "../service/quizService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -112,6 +114,37 @@ export const useCreateQuiz = (trainingId: string | undefined) => {
   return useMutation({
     mutationFn: ({ meetingId, formData }: CreateQuizParams) =>
       createQuiz({ meetingId, formData }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["detailTrainingInstructor"],
+      });
+
+      // Show success notification
+      toast.success("Module berhasil ditambah");
+      navigate(`/instructorCourse/${trainingId}`);
+    },
+
+    onError: (error: Error) => {
+      // Show error notification with specific message
+      console.log(error.message);
+      toast.error("Terjadi kesalahan saat menambah modul");
+    },
+  });
+};
+
+export const useUpdateQuiz = (trainingId: string) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: ({
+      trainingId,
+      meetingId,
+      quizId,
+      formData,
+    }: UpdateQuizParams) =>
+      updateQuiz({ trainingId, meetingId, quizId, formData }),
 
     onSuccess: () => {
       queryClient.invalidateQueries({

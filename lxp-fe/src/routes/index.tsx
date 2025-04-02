@@ -23,6 +23,7 @@ import CreateTrainingForm from "../pages/instructor/course/pelatihanku/CreateTra
 import EditTrainingForm from "../pages/instructor/course/pelatihanku/EditTraining";
 import InstructorQuiz from "../pages/instructor/course/pelatihanku/ViewQuiz";
 import CreateQuiz from "../pages/instructor/course/pelatihanku/CreateQuiz";
+import UpdateQuiz from "../pages/instructor/course/pelatihanku/UpdateQuiz";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -95,6 +96,16 @@ const AppRoutes: React.FC = () => {
             <ProtectedRoute>
               <InstructorLayout>
                 <CreateQuiz />
+              </InstructorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/instructorCourse/:trainingId/:meetingId/updateQuiz/:quizId"
+          element={
+            <ProtectedRoute>
+              <InstructorLayout>
+                <UpdateQuiz />
               </InstructorLayout>
             </ProtectedRoute>
           }

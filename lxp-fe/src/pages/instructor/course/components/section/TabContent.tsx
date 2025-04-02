@@ -244,9 +244,12 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({
               </Link>
             </div>
             <div className="mt-4 flex gap-2">
-              <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <Link
+                to={`/instructorCourse/${trainingId}/${meetingId}/updateQuiz/${quiz.id}`}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
                 Edit
-              </button>
+              </Link>
               <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 Delete
               </button>
