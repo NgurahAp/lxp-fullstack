@@ -418,7 +418,7 @@ describe("GET /api/trainings/:trainingId/meetings/:meetingId/quizzes/:quizId", (
     console.log(result.body);
 
     expect(result.status).toBe(200);
-    expect(result.body.data).toBeDefined();
+    expect(result.body.data).toBeDefined();``
     expect(result.body.data.id).toBe(quiz.id);
     expect(result.body.data.title).toBe(quiz.title);
     expect(result.body.data.questions).toBeDefined();

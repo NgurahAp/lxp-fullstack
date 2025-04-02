@@ -10,6 +10,7 @@ import {
 } from "../../../../../hooks/useModule";
 import EditModuleForm from "./EditModule";
 import DeleteModuleConfirm from "./DeleteModule";
+import { Link } from "react-router-dom";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -160,7 +161,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
               >
                 Edit
               </button>
-              <button 
+              <button
                 className="px-3 py-1 text-sm border border-red-100 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
                 onClick={() => openDeleteConfirm(module)}
               >
@@ -229,12 +230,12 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({ quizzes = [] }) => {
           >
             <h3 className="font-medium">{quiz.title}</h3>
             <div className="flex items-center mt-2 text-sm">
-              <a
-                href="#"
+              <Link
+                to={`/instructorCourse/quiz`}
                 className="text-gray-900 hover:underline flex items-center"
               >
                 <FileText size={14} className="mr-1" /> View Quiz
-              </a>
+              </Link>
             </div>
             <div className="mt-4 flex gap-2">
               <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
