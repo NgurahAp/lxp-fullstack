@@ -259,9 +259,12 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({
         </div>
       )}
       <div className="flex justify-center mt-4">
-        <button className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors">
+        <Link
+          to={`/instructorCourse/${trainingId}/${meetingId}/addQuiz`}
+          className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors"
+        >
           <PlusCircle size={16} /> Add Quiz
-        </button>
+        </Link>
       </div>
     </div>
   );
