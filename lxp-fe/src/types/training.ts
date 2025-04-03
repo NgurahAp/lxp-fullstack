@@ -43,7 +43,7 @@ export interface Quiz {
 export interface Task {
   id: string;
   title: string;
-  taskAnswer: string;
+  taskQuestion: string;
 }
 
 export interface Meeting {

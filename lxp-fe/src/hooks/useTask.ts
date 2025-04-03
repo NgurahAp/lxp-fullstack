@@ -1,6 +1,15 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import { SubmitTaskRequest, TaskData } from "../types/task";
-import { getTask, submitTaskAnswer } from "../service/taskService";
+import {
+  getInstructorDetailTask,
+  getTask,
+  submitTaskAnswer,
+} from "../service/taskService";
 import toast from "react-hot-toast";
 
 export const useGetTask = (
@@ -52,5 +61,25 @@ export const useSubmitTaskAnswer = () => {
       }
       return failureCount < 3;
     },
+  });
+};
+
+export const useGetInstructorDetailTask = (
+  trainingId: string | undefined,
+  meetingId: string | undefined,
+  taskId: string | undefined
+): UseQueryResult<TaskData, Error> => {
+  return useQuery({
+    queryKey: ["task", meetingId, taskId],
+    queryFn: async () => {
+      const response = await getInstructorDetailTask(
+        trainingId,
+        meetingId,
+        taskId
+      );
+      const taskData = response.data;
+      return taskData;
+    },
+    enabled: !!meetingId && !!taskId,
   });
 };

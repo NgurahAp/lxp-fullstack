@@ -13,6 +13,7 @@ import DeleteModuleConfirm from "./DeleteModule";
 import { Link } from "react-router-dom";
 import { useDeleteQuiz } from "../../../../../hooks/useQuiz";
 import DeleteQuizConfirm from "./DeleteQuiz";
+import ViewTaskDialog from "./ViewTask";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -323,6 +324,12 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({
 
 // components/TabContent/TasksTab.tsx
 const TasksTab: React.FC<TasksTabProps> = ({ tasks = [] }) => {
+  const [viewingTask, setViewingTask] = useState<Task | null>(null);
+
+  const openViewTask = (task: Task) => {
+    setViewingTask(task);
+  };
+
   return (
     <div className="space-y-4">
       {tasks.length > 0 ? (
@@ -333,18 +340,18 @@ const TasksTab: React.FC<TasksTabProps> = ({ tasks = [] }) => {
           >
             <h3 className="font-medium">{task.title}</h3>
             <div className="flex items-center mt-2 text-sm">
-              <a
-                href="#"
+              <button
+                onClick={() => openViewTask(task)}
                 className="text-gray-900 hover:underline flex items-center"
               >
                 <FileText size={14} className="mr-1" /> View Task
-              </a>
+              </button>
             </div>
             <div className="mt-4 flex gap-2">
               <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 Edit
               </button>
-              <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="px-3 py-1 text-sm border border-red-100 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
                 Delete
               </button>
             </div>
@@ -355,11 +362,19 @@ const TasksTab: React.FC<TasksTabProps> = ({ tasks = [] }) => {
           No tasks available for this meeting
         </div>
       )}
+
       <div className="flex justify-center mt-4">
         <button className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors">
           <PlusCircle size={16} /> Add Task
         </button>
       </div>
+
+      {viewingTask && (
+        <ViewTaskDialog
+          onClose={() => setViewingTask(null)}
+          task={viewingTask}
+        />
+      )}
     </div>
   );
 };

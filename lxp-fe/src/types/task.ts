@@ -34,3 +34,9 @@ export interface TaskData {
 export interface TaskResponse {
   data: TaskData;
 }
+
+export interface GetInstructorDetailTaskParams {
+  trainingId: string | undefined;
+  meetingId: string | undefined;
+  taskId: string | undefined;
+}
