@@ -15,7 +15,8 @@ import { useDeleteQuiz } from "../../../../../hooks/useQuiz";
 import DeleteQuizConfirm from "./DeleteQuiz";
 import ViewTaskDialog from "./ViewTask";
 import EditTaskForm from "./EditTask";
-import { useUpdateTask } from "../../../../../hooks/useTask";
+import { useCreateTask, useUpdateTask } from "../../../../../hooks/useTask";
+import CreateTask from "./CreateTask";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -334,8 +335,10 @@ const TasksTab: React.FC<TasksTabProps> = ({
 }) => {
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const updateTaskMutation = useUpdateTask(trainingId);
+  const createTaskMutation = useCreateTask(trainingId);
 
   const openViewTask = (task: Task) => {
     setViewingTask(task);
@@ -361,6 +364,35 @@ const TasksTab: React.FC<TasksTabProps> = ({
     try {
       return new Promise<void>((resolve, reject) => {
         updateTaskMutation.mutate(task, {
+          onSuccess: () => {
+            resolve();
+          },
+          onError: (error) => {
+            console.error("Error creating module:", error);
+            reject(error);
+          },
+        });
+      });
+    } catch (error) {
+      console.error("Error creating module:", error);
+      throw error;
+    }
+  };
+
+  const handleCreateTask = async (data: {
+    title: string;
+    taskQuestion: string;
+  }): Promise<void> => {
+    const task = {
+      meetingId: meetingId,
+      formData: { title: data.title, taskQuestion: data.taskQuestion },
+    };
+
+    console.log(task);
+
+    try {
+      return new Promise<void>((resolve, reject) => {
+        createTaskMutation.mutate(task, {
           onSuccess: () => {
             resolve();
           },
@@ -413,7 +445,10 @@ const TasksTab: React.FC<TasksTabProps> = ({
       )}
 
       <div className="flex justify-center mt-4">
-        <button className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors">
+        <button
+          className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 text-gray-700 transition-colors"
+          onClick={() => setShowAddForm(true)}
+        >
           <PlusCircle size={16} /> Add Task
         </button>
       </div>
@@ -430,6 +465,12 @@ const TasksTab: React.FC<TasksTabProps> = ({
           onClose={() => setEditingTask(null)}
           onSubmit={handleUpdateTask}
           task={editingTask}
+        />
+      )}
+      {showAddForm && (
+        <CreateTask
+          onClose={() => setShowAddForm(false)}
+          onSubmit={handleCreateTask}
         />
       )}
     </div>

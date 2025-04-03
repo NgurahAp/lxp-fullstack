@@ -4,8 +4,14 @@ import {
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
-import { SubmitTaskRequest, TaskData, UpdateTaskParams } from "../types/task";
 import {
+  CreateTaskParams,
+  SubmitTaskRequest,
+  TaskData,
+  UpdateTaskParams,
+} from "../types/task";
+import {
+  createTask,
   getInstructorDetailTask,
   getTask,
   submitTaskAnswer,
@@ -83,6 +89,32 @@ export const useGetInstructorDetailTask = (
       return taskData;
     },
     enabled: !!meetingId && !!taskId,
+  });
+};
+
+export const useCreateTask = (trainingId: string | undefined) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: ({ meetingId, formData }: CreateTaskParams) =>
+      createTask({ meetingId, formData }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["detailTrainingInstructor"],
+      });
+
+      // Show success notification
+      toast.success("Quiz berhasil ditambah");
+      navigate(`/instructorCourse/${trainingId}`);
+    },
+
+    onError: (error: Error) => {
+      // Show error notification with specific message
+      console.log(error.message);
+      toast.error("Terjadi kesalahan saat mengedit quiz");
+    },
   });
 };
 

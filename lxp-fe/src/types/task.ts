@@ -46,6 +46,11 @@ export interface TaskForm {
   taskQuestion: string;
 }
 
+export interface CreateTaskParams {
+  meetingId: string | undefined;
+  formData: TaskForm;
+}
+
 export interface UpdateTaskParams {
   trainingId: string | undefined;
   meetingId: string | undefined;
