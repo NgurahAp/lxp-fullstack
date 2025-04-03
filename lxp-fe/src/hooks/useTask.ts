@@ -6,12 +6,14 @@ import {
 } from "@tanstack/react-query";
 import {
   CreateTaskParams,
+  DeleteTaskParams,
   SubmitTaskRequest,
   TaskData,
   UpdateTaskParams,
 } from "../types/task";
 import {
   createTask,
+  deleteTask,
   getInstructorDetailTask,
   getTask,
   submitTaskAnswer,
@@ -138,6 +140,32 @@ export const useUpdateTask = (trainingId: string | undefined) => {
 
       // Show success notification
       toast.success("Quiz berhasil ditambah");
+      navigate(`/instructorCourse/${trainingId}`);
+    },
+
+    onError: (error: Error) => {
+      // Show error notification with specific message
+      console.log(error.message);
+      toast.error("Terjadi kesalahan saat mengedit quiz");
+    },
+  });
+};
+
+export const useDeleteTask = (trainingId: string | undefined) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: ({ trainingId, meetingId, taskId }: DeleteTaskParams) =>
+      deleteTask({ trainingId, meetingId, taskId }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["detailTrainingInstructor"],
+      });
+
+      // Show success notification
+      toast.success("Task berhasil dihapus");
       navigate(`/instructorCourse/${trainingId}`);
     },
 

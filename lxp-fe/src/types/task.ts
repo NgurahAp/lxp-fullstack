@@ -57,3 +57,9 @@ export interface UpdateTaskParams {
   taskId: string | undefined;
   formData: TaskForm;
 }
+
+export interface DeleteTaskParams {
+  trainingId: string | undefined;
+  meetingId: string | undefined;
+  taskId: string | undefined;
+}

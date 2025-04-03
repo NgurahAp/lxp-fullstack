@@ -15,8 +15,13 @@ import { useDeleteQuiz } from "../../../../../hooks/useQuiz";
 import DeleteQuizConfirm from "./DeleteQuiz";
 import ViewTaskDialog from "./ViewTask";
 import EditTaskForm from "./EditTask";
-import { useCreateTask, useUpdateTask } from "../../../../../hooks/useTask";
+import {
+  useCreateTask,
+  useDeleteTask,
+  useUpdateTask,
+} from "../../../../../hooks/useTask";
 import CreateTask from "./CreateTask";
+import DeleteTask from "./DeleteTask";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -335,10 +340,12 @@ const TasksTab: React.FC<TasksTabProps> = ({
 }) => {
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [deleteTask, setDeleteTask] = useState<Task | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
   const updateTaskMutation = useUpdateTask(trainingId);
   const createTaskMutation = useCreateTask(trainingId);
+  const deleteTaskMutation = useDeleteTask(trainingId);
 
   const openViewTask = (task: Task) => {
     setViewingTask(task);
@@ -346,6 +353,10 @@ const TasksTab: React.FC<TasksTabProps> = ({
 
   const openEditTask = (task: Task) => {
     setEditingTask(task);
+  };
+
+  const openDeleteTask = (task: Task) => {
+    setDeleteTask(task);
   };
 
   // Mock function to handle task updates
@@ -364,6 +375,30 @@ const TasksTab: React.FC<TasksTabProps> = ({
     try {
       return new Promise<void>((resolve, reject) => {
         updateTaskMutation.mutate(task, {
+          onSuccess: () => {
+            resolve();
+          },
+          onError: (error) => {
+            console.error("Error creating module:", error);
+            reject(error);
+          },
+        });
+      });
+    } catch (error) {
+      console.error("Error creating module:", error);
+      throw error;
+    }
+  };
+
+  const handleDeleteTask = async (id: string): Promise<void> => {
+    const task = {
+      trainingId: trainingId,
+      meetingId: meetingId,
+      taskId: id,
+    };
+    try {
+      return new Promise<void>((resolve, reject) => {
+        deleteTaskMutation.mutate(task, {
           onSuccess: () => {
             resolve();
           },
@@ -432,7 +467,10 @@ const TasksTab: React.FC<TasksTabProps> = ({
               >
                 Edit
               </button>
-              <button className="px-3 py-1 text-sm border border-red-100 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+              <button
+                className="px-3 py-1 text-sm border border-red-100 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                onClick={() => openDeleteTask(task)}
+              >
                 Delete
               </button>
             </div>
@@ -459,12 +497,18 @@ const TasksTab: React.FC<TasksTabProps> = ({
           task={viewingTask}
         />
       )}
-
       {editingTask && (
         <EditTaskForm
           onClose={() => setEditingTask(null)}
           onSubmit={handleUpdateTask}
           task={editingTask}
+        />
+      )}
+      {deleteTask && (
+        <DeleteTask
+          onClose={() => setDeleteTask(null)}
+          onConfirm={handleDeleteTask}
+          task={deleteTask}
         />
       )}
       {showAddForm && (

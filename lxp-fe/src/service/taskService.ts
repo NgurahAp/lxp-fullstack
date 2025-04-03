@@ -3,6 +3,7 @@ import { API_URL } from "../config/api";
 import axios from "axios";
 import {
   CreateTaskParams,
+  DeleteTaskParams,
   SubmitTaskRequest,
   TaskResponse,
   UpdateTaskParams,
@@ -147,6 +148,40 @@ export const updateTask = async ({
     const response = await axios.put(
       `${API_URL}/trainings/${trainingId}/meetings/${meetingId}/tasks/${taskId}`,
       { title: formData.title, taskQuestion: formData.taskQuestion },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // Error handling tetap sama
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        throw new Error("Kamu tidak memiliki hak akses");
+      }
+      if (error.response?.status === 404) {
+        throw new Error("Task tidak di temukan atau kamu bukan instructor");
+      }
+      throw new Error(
+        error.response?.data?.message || "Terjadi kesalahan pada server"
+      );
+    }
+    throw new Error("Terjadi kesalahan yang tidak diketahui");
+  }
+};
+
+export const deleteTask = async ({
+  trainingId,
+  meetingId,
+  taskId,
+}: DeleteTaskParams): Promise<TaskResponse> => {
+  const token = Cookies.get("token");
+
+  try {
+    const response = await axios.delete(
+      `${API_URL}/trainings/${trainingId}/meetings/${meetingId}/tasks/${taskId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
