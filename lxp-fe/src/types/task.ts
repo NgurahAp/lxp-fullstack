@@ -40,3 +40,15 @@ export interface GetInstructorDetailTaskParams {
   meetingId: string | undefined;
   taskId: string | undefined;
 }
+
+export interface TaskForm {
+  title: string;
+  taskQuestion: string;
+}
+
+export interface UpdateTaskParams {
+  trainingId: string | undefined;
+  meetingId: string | undefined;
+  taskId: string | undefined;
+  formData: TaskForm;
+}

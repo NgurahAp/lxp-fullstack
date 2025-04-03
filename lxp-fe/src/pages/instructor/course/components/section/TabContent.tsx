@@ -15,6 +15,7 @@ import { useDeleteQuiz } from "../../../../../hooks/useQuiz";
 import DeleteQuizConfirm from "./DeleteQuiz";
 import ViewTaskDialog from "./ViewTask";
 import EditTaskForm from "./EditTask";
+import { useUpdateTask } from "../../../../../hooks/useTask";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -31,6 +32,8 @@ interface QuizzesTabProps {
 
 interface TasksTabProps {
   tasks?: Task[];
+  meetingId: string;
+  trainingId: string;
 }
 
 // components/TabContent/ModulesTab.tsx
@@ -324,9 +327,15 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({
 };
 
 // components/TabContent/TasksTab.tsx
-const TasksTab: React.FC<TasksTabProps> = ({ tasks = [] }) => {
+const TasksTab: React.FC<TasksTabProps> = ({
+  tasks = [],
+  meetingId,
+  trainingId,
+}) => {
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  const updateTaskMutation = useUpdateTask(trainingId);
 
   const openViewTask = (task: Task) => {
     setViewingTask(task);
@@ -342,15 +351,29 @@ const TasksTab: React.FC<TasksTabProps> = ({ tasks = [] }) => {
     title: string;
     taskQuestion: string;
   }): Promise<void> => {
-    return new Promise<void>((resolve) => {
-      // In a real application, you would send this to your API
-      console.log("Updating task with data:", data);
+    const task = {
+      trainingId: trainingId,
+      meetingId: meetingId,
+      taskId: data.id,
+      formData: { title: data.title, taskQuestion: data.taskQuestion },
+    };
 
-      // Simulate API delay
-      setTimeout(() => {
-        resolve();
-      }, 500);
-    });
+    try {
+      return new Promise<void>((resolve, reject) => {
+        updateTaskMutation.mutate(task, {
+          onSuccess: () => {
+            resolve();
+          },
+          onError: (error) => {
+            console.error("Error creating module:", error);
+            reject(error);
+          },
+        });
+      });
+    } catch (error) {
+      console.error("Error creating module:", error);
+      throw error;
+    }
   };
 
   return (

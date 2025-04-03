@@ -106,7 +106,13 @@ const MainContent: React.FC<MainContentProps> = ({
             trainingId={trainingId}
           />
         )}
-        {activeTab === "tasks" && <TasksTab tasks={meeting.tasks} />}
+        {activeTab === "tasks" && (
+          <TasksTab
+            tasks={meeting.tasks}
+            meetingId={meeting.id}
+            trainingId={trainingId}
+          />
+        )}
       </div>
     </div>
   );
