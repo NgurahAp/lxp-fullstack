@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { useDeleteQuiz } from "../../../../../hooks/useQuiz";
 import DeleteQuizConfirm from "./DeleteQuiz";
 import ViewTaskDialog from "./ViewTask";
+import EditTaskForm from "./EditTask";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -325,9 +326,31 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({
 // components/TabContent/TasksTab.tsx
 const TasksTab: React.FC<TasksTabProps> = ({ tasks = [] }) => {
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const openViewTask = (task: Task) => {
     setViewingTask(task);
+  };
+
+  const openEditTask = (task: Task) => {
+    setEditingTask(task);
+  };
+
+  // Mock function to handle task updates
+  const handleUpdateTask = async (data: {
+    id: string;
+    title: string;
+    taskQuestion: string;
+  }): Promise<void> => {
+    return new Promise<void>((resolve) => {
+      // In a real application, you would send this to your API
+      console.log("Updating task with data:", data);
+
+      // Simulate API delay
+      setTimeout(() => {
+        resolve();
+      }, 500);
+    });
   };
 
   return (
@@ -348,7 +371,10 @@ const TasksTab: React.FC<TasksTabProps> = ({ tasks = [] }) => {
               </button>
             </div>
             <div className="mt-4 flex gap-2">
-              <button className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <button
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => openEditTask(task)}
+              >
                 Edit
               </button>
               <button className="px-3 py-1 text-sm border border-red-100 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
@@ -373,6 +399,14 @@ const TasksTab: React.FC<TasksTabProps> = ({ tasks = [] }) => {
         <ViewTaskDialog
           onClose={() => setViewingTask(null)}
           task={viewingTask}
+        />
+      )}
+
+      {editingTask && (
+        <EditTaskForm
+          onClose={() => setEditingTask(null)}
+          onSubmit={handleUpdateTask}
+          task={editingTask}
         />
       )}
     </div>
