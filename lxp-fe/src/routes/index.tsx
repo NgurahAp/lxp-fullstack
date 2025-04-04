@@ -24,8 +24,8 @@ import EditTrainingForm from "../pages/instructor/course/pelatihanku/EditTrainin
 import InstructorQuiz from "../pages/instructor/course/pelatihanku/ViewQuiz";
 import CreateQuiz from "../pages/instructor/course/pelatihanku/CreateQuiz";
 import UpdateQuiz from "../pages/instructor/course/pelatihanku/UpdateQuiz";
-import AdminStudentPage from "../pages/instructor/course/students";
-import StudentSubmissionsPage from "../pages/instructor/course/students/Submission";
+import AdminStudentPage from "../pages/instructor/students";
+import StudentSubmissionsPage from "../pages/instructor/students/Submission";
 
 const AppRoutes: React.FC = () => {
   return (

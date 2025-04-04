@@ -9,6 +9,7 @@ import quizController from "../controller/quiz-controller.js";
 import taskController from "../controller/task-controller.js";
 import scoreController from "../controller/score-controller.js";
 import dashboardController from "../controller/dashboard-controller.js";
+import studentsController from "../controller/students-controller.js";
 
 const userRouter = express.Router();
 
@@ -251,6 +252,13 @@ userRouter.get(
   "/api/trainings/:trainingId/scores",
   authMiddleware,
   scoreController.getTrainingScores
+);
+
+userRouter.get(
+  "/api/instructorStudents",
+  authMiddleware,
+  instruktorMiddleware,
+  studentsController.getStudents
 );
 
 export { userRouter };
