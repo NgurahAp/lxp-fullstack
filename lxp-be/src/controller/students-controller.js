@@ -7,7 +7,7 @@ const getStudents = async (req, res, next) => {
       req.user,
       req.query
     );
-    res.status(200).json({ data: result });
+    res.status(200).json(result);
   } catch (e) {
     next(e);
   }

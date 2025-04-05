@@ -8,10 +8,28 @@ import {
   User,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useGetStudents } from "../../../hooks/useStudents";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
 
 const AdminStudentPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+
+  const { data, isLoading, error } = useGetStudents();
+
+  if (isLoading) {
+    return <LoadingSpinner text="Loading..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[85vh] w-screen flex items-center justify-center">
+        Error loading data
+      </div>
+    );
+  }
+
+  console.log(data)
 
   // Dummy data for students
   const students = [
