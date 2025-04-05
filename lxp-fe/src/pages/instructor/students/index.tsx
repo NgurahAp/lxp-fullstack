@@ -29,83 +29,18 @@ const AdminStudentPage = () => {
     );
   }
 
-  console.log(data)
-
-  // Dummy data for students
-  const students = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      email: "sarah.j@example.com",
-      enrolledCourses: 3,
-      completedCourses: 1,
-      pendingAssignments: 4,
-      status: "enrolled",
-      lastActive: "2025-04-01T14:30:00",
-    },
-    {
-      id: "2",
-      name: "Michael Chen",
-      email: "michael.c@example.com",
-      enrolledCourses: 2,
-      completedCourses: 2,
-      pendingAssignments: 0,
-      status: "completed",
-      lastActive: "2025-04-02T09:15:00",
-    },
-    {
-      id: "3",
-      name: "Emma Rodriguez",
-      email: "emma.r@example.com",
-      enrolledCourses: 4,
-      completedCourses: 2,
-      pendingAssignments: 5,
-      status: "enrolled",
-      lastActive: "2025-04-02T16:45:00",
-    },
-    {
-      id: "4",
-      name: "David Kim",
-      email: "david.k@example.com",
-      enrolledCourses: 1,
-      completedCourses: 0,
-      pendingAssignments: 3,
-      status: "enrolled",
-      lastActive: "2025-03-28T11:20:00",
-    },
-    {
-      id: "5",
-      name: "Lisa Wong",
-      email: "lisa.w@example.com",
-      enrolledCourses: 2,
-      completedCourses: 1,
-      pendingAssignments: 2,
-      status: "enrolled",
-      lastActive: "2025-04-03T10:05:00",
-    },
-    {
-      id: "6",
-      name: "James Parker",
-      email: "james.p@example.com",
-      enrolledCourses: 3,
-      completedCourses: 0,
-      pendingAssignments: 8,
-      status: "dropped",
-      lastActive: "2025-03-15T08:30:00",
-    },
-  ];
-
   // Filter students based on search term and status
-  const filteredStudents = students.filter((student) => {
-    const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredStudents =
+    data?.data.students?.filter((student) => {
+      const matchesSearch =
+        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      filterStatus === "all" || student.status === filterStatus;
+      const matchesStatus =
+        filterStatus === "all" || student.status === filterStatus;
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    }) || [];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -218,7 +153,7 @@ const AdminStudentPage = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Last Active
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -288,17 +223,17 @@ const AdminStudentPage = () => {
                     <div className="flex justify-end space-x-2">
                       <Link
                         to={`/instructorStudent/submission`}
-                        className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs flex items-center gap-1 hover:bg-gray-200 transition-colors"
+                        className="pr-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs flex items-center gap-1 hover:bg-gray-200 transition-colors"
                       >
                         <FileText size={14} />
                         <span>Submissions</span>
                       </Link>
-                      <Link
+                      {/* <Link
                         to={`/student/${student.id}`}
                         className="px-3 py-1.5 bg-gray-900 text-white rounded-md text-xs flex items-center gap-1 hover:bg-gray-800 transition-colors"
                       >
                         <span>View Profile</span>
-                      </Link>
+                      </Link> */}
                     </div>
                   </td>
                 </tr>
