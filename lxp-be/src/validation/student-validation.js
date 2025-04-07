@@ -6,4 +6,8 @@ const getStudentsValidation = Joi.object({
   status: Joi.number().valid("enrolled", "completed", "dropped").optional(),
 });
 
-export { getStudentsValidation };
+const getDetailStudentValidation = Joi.object({
+  studentId: Joi.string().required(),
+});
+
+export { getStudentsValidation, getDetailStudentValidation };

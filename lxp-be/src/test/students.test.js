@@ -72,16 +72,18 @@ describe("GET /api/instructorStudents", () => {
       .get("/api/instructorStudents")
       .set("Authorization", `Bearer test-instructor`);
 
+    console.log(result.body);
+
     expect(result.status).toBe(200);
     expect(result.body.data).toBeDefined();
-    expect(result.body.data.data.students).toBeDefined();
-    expect(Array.isArray(result.body.data.data.students)).toBe(true);
-    expect(result.body.data.data.students.length).toBe(2);
-    expect(result.body.data.paging).toBeDefined();
-    expect(result.body.data.paging.page).toBe(1);
+    expect(result.body.data.students).toBeDefined();
+    expect(Array.isArray(result.body.data.students)).toBe(true);
+    expect(result.body.data.students.length).toBe(2);
+    expect(result.body.paging).toBeDefined();
+    expect(result.body.paging.page).toBe(1);
 
     // Check first student data - with pending assignments
-    const student1 = result.body.data.data.students[0];
+    const student1 = result.body.data.students[0];
     expect(student1.name).toBe("test");
     expect(student1.email).toBe("test1@gmail.com");
     expect(student1.enrolledCourses).toBe(1);
@@ -91,7 +93,7 @@ describe("GET /api/instructorStudents", () => {
     expect(student1.lastActive).toBeDefined();
 
     // Check second student data - completed status
-    const student2 = result.body.data.data.students[1];
+    const student2 = result.body.data.students[1];
     expect(student2.name).toBe("test");
     expect(student2.email).toBe("test2@gmail.com");
     expect(student2.enrolledCourses).toBe(1);
@@ -110,9 +112,9 @@ describe("GET /api/instructorStudents", () => {
       });
 
     expect(result.status).toBe(200);
-    expect(result.body.data.data.students.length).toBe(1);
-    expect(result.body.data.data.students[0].status).toBe("completed");
-    expect(result.body.data.data.students[0].email).toBe("test2@gmail.com");
+    expect(result.body.data.students.length).toBe(1);
+    expect(result.body.data.students[0].status).toBe("completed");
+    expect(result.body.data.students[0].email).toBe("test2@gmail.com");
   });
 
   it("should paginate results correctly", async () => {
@@ -130,9 +132,9 @@ describe("GET /api/instructorStudents", () => {
       });
 
     expect(page1.status).toBe(200);
-    expect(page1.body.data.data.students.length).toBe(1);
-    expect(page1.body.data.paging.total_pages).toBe(3);
-    expect(page1.body.data.paging.page).toBe(1);
+    expect(page1.body.data.students.length).toBe(1);
+    expect(page1.body.paging.total_pages).toBe(3);
+    expect(page1.body.paging.page).toBe(1);
 
     // Test second page with size=1
     const page2 = await supertest(web)
@@ -144,12 +146,12 @@ describe("GET /api/instructorStudents", () => {
       });
 
     expect(page2.status).toBe(200);
-    expect(page2.body.data.data.students.length).toBe(1);
-    expect(page2.body.data.paging.page).toBe(2);
+    expect(page2.body.data.students.length).toBe(1);
+    expect(page2.body.paging.page).toBe(2);
 
     // Ensure we're getting different students on different pages
-    expect(page1.body.data.data.students[0].id).not.toBe(
-      page2.body.data.data.students[0].id
+    expect(page1.body.data.students[0].id).not.toBe(
+      page2.body.data.students[0].id
     );
   });
 
@@ -171,5 +173,83 @@ describe("GET /api/instructorStudents", () => {
       });
 
     expect(result.status).toBe(400);
+  });
+});
+
+describe("GET /api/instructorStudents/:studentId", () => {
+  let instructor;
+  let user;
+  let training;
+  let meeting;
+  let trainingUser;
+  let module;
+  let quiz;
+  let task;
+
+  beforeEach(async () => {
+    // Create test users and instructor
+    instructor = await createTestInstructor();
+    user = await createTestUser();
+
+    // Create trainings by the instructor
+    training = await createTraining(instructor.id);
+
+    // Create a meeting for the first training
+    meeting = await createMeeting(training.id);
+
+    // Create learning materials
+    module = await createModule(meeting.id);
+    quiz = await createQuiz(meeting.id);
+    task = await createTask(meeting.id);
+
+    // Enroll users in trainings with different statuses
+    trainingUser = await createTrainingUser(training.id, user.id);
+
+    // Set one user as completed
+    await prismaClient.training_Users.update({
+      where: { id: trainingUser.id },
+      data: { status: "completed" },
+    });
+
+    // Create some sample submissions for testing pending assignments
+    await createModuleSubmission(module.id, trainingUser.id);
+    await createQuizSubmission(quiz.id, trainingUser.id);
+    await createTaskSubmission(task.id, trainingUser.id);
+  });
+
+  afterEach(async () => {
+    await removeAll();
+  });
+
+  it("should return 200 and students data for instructor", async () => {
+    const result = await supertest(web)
+      .get(`/api/instructorStudents/${user.id}`)
+      .set("Authorization", `Bearer test-instructor`);
+
+    console.log(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.profile).toBeDefined();
+    expect(Array.isArray(result.body.data.modules)).toBe(true);
+    expect(Array.isArray(result.body.data.quizzes)).toBe(true);
+    expect(Array.isArray(result.body.data.tasks)).toBe(true);
+  });
+
+  it("should return 404 if student not found", async () => {
+    const result = await supertest(web)
+      .get(`/api/instructorStudents/invalid-student-id`)
+      .set("Authorization", `Bearer test-instructor`);
+
+    expect(result.status).toBe(404);
+  });
+
+  it("should return 403 if not the instructor", async () => {
+    const result = await supertest(web)
+      .get(`/api/instructorStudents/${user.id}`)
+      .set("Authorization", `Bearer test`);
+
+    console.log(result.body);
+
+    expect(result.status).toBe(403);
   });
 });

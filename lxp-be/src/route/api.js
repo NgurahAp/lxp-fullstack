@@ -261,4 +261,11 @@ userRouter.get(
   studentsController.getStudents
 );
 
+userRouter.get(
+  "/api/instructorStudents/:studentId",
+  authMiddleware,
+  instruktorMiddleware,
+  studentsController.getDetailStudent
+);
+
 export { userRouter };
