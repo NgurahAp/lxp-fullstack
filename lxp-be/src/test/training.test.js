@@ -72,12 +72,15 @@ describe("POST /api/trainings", () => {
 });
 
 describe("POST /api/training-users", () => {
+  let user;
   beforeEach(async () => {
-    await createTestUser();
-
+    user = await createTestUser();
     const instructor = await createTestInstructor();
-
-    await createTraining(instructor.id);
+    const training = await createTraining(instructor.id);
+    const meeting = await createMeeting(training.id);
+    await createModule(meeting.id);
+    await createQuiz(meeting.id);
+    await createTask(meeting.id);
   });
 
   afterEach(async () => {
@@ -89,8 +92,56 @@ describe("POST /api/training-users", () => {
       where: { title: "test training" },
     });
 
-    const user = await prismaClient.user.findFirst({
-      where: { email: "test@gmail.com" },
+    // First enrollment
+    await supertest(web)
+      .post("/api/training-users")
+      .set("Authorization", "Bearer test")
+      .send({
+        trainingId: training.id,
+      });
+
+    // Second attempt should fail
+    const result = await supertest(web)
+      .post("/api/training-users")
+      .set("Authorization", "Bearer test")
+      .send({
+        trainingId: training.id,
+      });
+
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBe("User already enrolled in this training");
+  });
+
+  it("Should create a training user record when student joins training", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
+    const result = await supertest(web)
+      .post("/api/training-users")
+      .set("Authorization", "Bearer test")
+      .send({
+        trainingId: training.id,
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.trainingId).toBe(training.id);
+    expect(result.body.data.userId).toBe(user.id);
+    expect(result.body.data.status).toBe("enrolled");
+
+    // Verify a training_user record was created
+    const trainingUser = await prismaClient.training_Users.findFirst({
+      where: {
+        trainingId: training.id,
+        userId: user.id,
+      },
+    });
+    expect(trainingUser).not.toBeNull();
+  });
+
+  it("Should automatically create module submissions when student joins training", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
     });
 
     await supertest(web)
@@ -98,19 +149,206 @@ describe("POST /api/training-users", () => {
       .set("Authorization", "Bearer test")
       .send({
         trainingId: training.id,
-        userId: user.id,
       });
 
-    const result = await supertest(web)
+    // Get the training user record
+    const trainingUser = await prismaClient.training_Users.findFirst({
+      where: {
+        trainingId: training.id,
+        userId: user.id,
+      },
+    });
+
+    // Get module records for this training
+    const meeting = await prismaClient.meeting.findFirst({
+      where: { trainingId: training.id },
+    });
+
+    const module = await prismaClient.module.findFirst({
+      where: { meetingId: meeting.id },
+    });
+
+    // Verify module submission was created
+    const moduleSubmission = await prismaClient.moduleSubmission.findFirst({
+      where: {
+        moduleId: module.id,
+        trainingUserId: trainingUser.id,
+      },
+    });
+
+    expect(moduleSubmission).not.toBeNull();
+    expect(moduleSubmission.score).toBe(0);
+  });
+
+  it("Should automatically create quiz submissions when student joins training", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
+    await supertest(web)
       .post("/api/training-users")
       .set("Authorization", "Bearer test")
       .send({
         trainingId: training.id,
-        userId: user.id,
       });
 
-    expect(result.status).toBe(400);
-    expect(result.body.errors).toBe("User already enrolled in this training");
+    // Get the training user record
+    const trainingUser = await prismaClient.training_Users.findFirst({
+      where: {
+        trainingId: training.id,
+        userId: user.id,
+      },
+    });
+
+    // Get quiz records for this training
+    const meeting = await prismaClient.meeting.findFirst({
+      where: { trainingId: training.id },
+    });
+
+    const quiz = await prismaClient.quiz.findFirst({
+      where: { meetingId: meeting.id },
+    });
+
+    // Verify quiz submission was created
+    const quizSubmission = await prismaClient.quizSubmission.findFirst({
+      where: {
+        quizId: quiz.id,
+        trainingUserId: trainingUser.id,
+      },
+    });
+
+    expect(quizSubmission).not.toBeNull();
+    expect(quizSubmission.score).toBe(0);
+  });
+
+  it("Should automatically create task submissions when student joins training", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
+    await supertest(web)
+      .post("/api/training-users")
+      .set("Authorization", "Bearer test")
+      .send({
+        trainingId: training.id,
+      });
+
+    // Get the training user record
+    const trainingUser = await prismaClient.training_Users.findFirst({
+      where: {
+        trainingId: training.id,
+        userId: user.id,
+      },
+    });
+
+    // Get task records for this training
+    const meeting = await prismaClient.meeting.findFirst({
+      where: { trainingId: training.id },
+    });
+
+    const task = await prismaClient.task.findFirst({
+      where: { meetingId: meeting.id },
+    });
+
+    // Verify task submission was created
+    const taskSubmission = await prismaClient.taskSubmission.findFirst({
+      where: {
+        taskId: task.id,
+        trainingUserId: trainingUser.id,
+      },
+    });
+
+    expect(taskSubmission).not.toBeNull();
+    expect(taskSubmission.score).toBe(0);
+  });
+
+  it("Should automatically create score records when student joins training", async () => {
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+
+    await supertest(web)
+      .post("/api/training-users")
+      .set("Authorization", "Bearer test")
+      .send({
+        trainingId: training.id,
+      });
+
+    // Get the training user record
+    const trainingUser = await prismaClient.training_Users.findFirst({
+      where: {
+        trainingId: training.id,
+        userId: user.id,
+      },
+    });
+
+    // Get meeting for this training
+    const meeting = await prismaClient.meeting.findFirst({
+      where: { trainingId: training.id },
+    });
+
+    // Verify score record was created
+    const score = await prismaClient.score.findFirst({
+      where: {
+        meetingId: meeting.id,
+        trainingUserId: trainingUser.id,
+      },
+    });
+
+    expect(score).not.toBeNull();
+    expect(score.moduleScore).toBe(0);
+    expect(score.quizScore).toBe(0);
+    expect(score.taskScore).toBe(0);
+    expect(score.totalScore).toBe(0);
+  });
+
+  it("Should handle multiple meetings with their components correctly", async () => {
+    // Create a second meeting with components
+    const training = await prismaClient.training.findFirst({
+      where: { title: "test training" },
+    });
+    const meeting2 = await createMeeting(training.id);
+    await createModule(meeting2.id);
+    await createQuiz(meeting2.id);
+    await createTask(meeting2.id);
+
+    await supertest(web)
+      .post("/api/training-users")
+      .set("Authorization", "Bearer test")
+      .send({
+        trainingId: training.id,
+      });
+
+    // Get the training user record
+    const trainingUser = await prismaClient.training_Users.findFirst({
+      where: {
+        trainingId: training.id,
+        userId: user.id,
+      },
+    });
+
+    // Count all created submissions
+    const moduleSubmissions = await prismaClient.moduleSubmission.count({
+      where: { trainingUserId: trainingUser.id },
+    });
+
+    const quizSubmissions = await prismaClient.quizSubmission.count({
+      where: { trainingUserId: trainingUser.id },
+    });
+
+    const taskSubmissions = await prismaClient.taskSubmission.count({
+      where: { trainingUserId: trainingUser.id },
+    });
+
+    const scores = await prismaClient.score.count({
+      where: { trainingUserId: trainingUser.id },
+    });
+
+    // We should have 2 of each since we have 2 meetings
+    expect(moduleSubmissions).toBe(2);
+    expect(quizSubmissions).toBe(2);
+    expect(taskSubmissions).toBe(2);
+    expect(scores).toBe(2);
   });
 });
 

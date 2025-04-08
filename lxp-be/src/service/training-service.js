@@ -53,29 +53,39 @@ const createTraining = async (user, request, file) => {
   });
 };
 
-const createTrainingUser = async (request) => {
+const createTrainingUser = async (user, request) => {
   const trainingUser = validate(createTrainingUserValidation, request);
 
   // Verify if training and user exist
   const training = await prismaClient.training.findUnique({
     where: { id: trainingUser.trainingId },
+    include: {
+      meetings: {
+        include: {
+          modules: true,
+          quizzes: true,
+          tasks: true,
+        },
+      },
+    },
   });
+
   if (!training) {
     throw new ResponseError(404, "Training not Found");
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: trainingUser.userId },
+  const existingUser = await prismaClient.user.findUnique({
+    where: { id: user.id },
   });
 
-  if (!user) {
+  if (!existingUser) {
     throw new ResponseError(404, "User not Found");
   }
 
   const existingEnrollment = await prismaClient.training_Users.findFirst({
     where: {
       trainingId: trainingUser.trainingId,
-      userId: trainingUser.userId,
+      userId: user.id,
     },
   });
 
@@ -83,8 +93,67 @@ const createTrainingUser = async (request) => {
     throw new ResponseError(400, "User already enrolled in this training");
   }
 
-  return prismaClient.training_Users.create({
-    data: trainingUser,
+  // Create the enrollment record first to get the training_user ID
+  const enrolledUser = await prismaClient.training_Users.create({
+    data: {
+      trainingId: trainingUser.trainingId,
+      userId: user.id, // This was missing!
+      status: trainingUser.status,
+    },
+  });
+
+  // For each meeting in the training, create related submissions and scores
+  for (const meeting of training.meetings) {
+    // Create module submissions for this meeting
+    for (const module of meeting.modules) {
+      await prismaClient.moduleSubmission.create({
+        data: {
+          moduleId: module.id,
+          trainingUserId: enrolledUser.id,
+          score: 0,
+        },
+      });
+    }
+
+    // Create quiz submissions for this meeting
+    for (const quiz of meeting.quizzes) {
+      await prismaClient.quizSubmission.create({
+        data: {
+          quizId: quiz.id,
+          trainingUserId: enrolledUser.id,
+          score: 0,
+          answers: {}, // Empty JSON object for answers
+        },
+      });
+    }
+
+    // Create task submissions for this meeting
+    for (const task of meeting.tasks) {
+      await prismaClient.taskSubmission.create({
+        data: {
+          taskId: task.id,
+          trainingUserId: enrolledUser.id,
+          score: 0,
+        },
+      });
+    }
+
+    // Create a score record for this meeting
+    await prismaClient.score.create({
+      data: {
+        meetingId: meeting.id,
+        trainingUserId: enrolledUser.id,
+        moduleScore: 0,
+        quizScore: 0,
+        taskScore: 0,
+        totalScore: 0,
+      },
+    });
+  }
+
+  // Return the created training user with additional information
+  return prismaClient.training_Users.findUnique({
+    where: { id: enrolledUser.id },
     select: {
       id: true,
       trainingId: true,
@@ -103,6 +172,9 @@ const createTrainingUser = async (request) => {
           email: true,
         },
       },
+      moduleSubmissions: true,
+      quizSubmissions: true,
+      taskSubmissions: true,
     },
   });
 };

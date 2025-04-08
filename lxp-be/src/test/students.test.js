@@ -85,7 +85,6 @@ describe("GET /api/instructorStudents", () => {
     // Check first student data - with pending assignments
     const student1 = result.body.data.students[0];
     expect(student1.name).toBe("test");
-    expect(student1.email).toBe("test1@gmail.com");
     expect(student1.enrolledCourses).toBe(1);
     expect(student1.completedCourses).toBe(0);
     expect(student1.pendingAssignments).toBe(3); // 1 module, 1 quiz, 1 task

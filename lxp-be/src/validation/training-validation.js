@@ -8,7 +8,6 @@ const createTrainingValidation = Joi.object({
 
 const createTrainingUserValidation = Joi.object({
   trainingId: Joi.string().required(),
-  userId: Joi.string().required(),
   status: Joi.string()
     .valid("enrolled", "completed", "dropped")
     .default("enrolled"),
