@@ -125,7 +125,7 @@ const AppRoutes: React.FC = () => {
         />
 
         <Route
-          path="/instructorStudent/submission"
+          path="/instructorStudent/submission/:studentId"
           element={
             <ProtectedRoute>
               <InstructorLayout>

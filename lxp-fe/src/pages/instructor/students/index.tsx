@@ -222,7 +222,7 @@ const AdminStudentPage = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <Link
-                        to={`/instructorStudent/submission`}
+                        to={`/instructorStudent/submission/${student.id}`}
                         className="pr-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs flex items-center gap-1 hover:bg-gray-200 transition-colors"
                       >
                         <FileText size={14} />

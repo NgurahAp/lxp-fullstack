@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   User,
@@ -54,9 +54,14 @@ interface TaskSubmission extends BaseSubmission {
 // Define parameters type for useParams
 
 const StudentSubmissionsPage: React.FC = () => {
+  const { studentId } = useParams<{
+    studentId: string;
+  }>();
   const [activeTab, setActiveTab] = useState<"modules" | "quizzes" | "tasks">(
     "modules"
   );
+
+  console.log(studentId)
 
   // Dummy student data
   const student: Student = {

@@ -84,13 +84,18 @@ const getInstructorStudents = async (user, request) => {
       });
 
       // Count pending assignments (module, quiz, task submissions)
+      // MODIFIED: Now checking for NOT null answers with score: 0 for modules
       const pendingModules = await prismaClient.moduleSubmission.count({
         where: {
           trainingUserId: student.id,
           score: 0,
+          NOT: {
+            answer: null,
+          },
         },
       });
 
+      // For quizzes, keep the original logic (checking score: 0)
       const pendingQuizzes = await prismaClient.quizSubmission.count({
         where: {
           trainingUserId: student.id,
@@ -98,10 +103,14 @@ const getInstructorStudents = async (user, request) => {
         },
       });
 
+      // MODIFIED: Now checking for NOT null answers with score: 0 for tasks
       const pendingTasks = await prismaClient.taskSubmission.count({
         where: {
           trainingUserId: student.id,
           score: 0,
+          NOT: {
+            answer: null,
+          },
         },
       });
 
@@ -133,6 +142,7 @@ const getInstructorStudents = async (user, request) => {
 };
 
 const getDetailStudent = async (user, request) => {
+  w;
   const validationResult = validate(getDetailStudentValidation, request);
   const { studentId } = validationResult;
 
