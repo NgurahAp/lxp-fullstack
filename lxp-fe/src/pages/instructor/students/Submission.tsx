@@ -11,6 +11,8 @@ import {
   Award,
   Calendar,
 } from "lucide-react";
+import { useGetDetailStudent } from "../../../hooks/useStudents";
+import LoadingSpinner from "../../../Components/LoadingSpinner";
 
 // Define TypeScript interfaces for our data structures
 interface Student {
@@ -57,9 +59,24 @@ const StudentSubmissionsPage: React.FC = () => {
   const { studentId } = useParams<{
     studentId: string;
   }>();
+  const { data, isLoading, error } = useGetDetailStudent(studentId);
   const [activeTab, setActiveTab] = useState<"modules" | "quizzes" | "tasks">(
     "modules"
   );
+
+  if (isLoading) {
+    return <LoadingSpinner text="Loading..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[85vh] w-screen flex items-center justify-center">
+        Error loading data
+      </div>
+    );
+  }
+
+  console.log(data);
 
   // Dummy student data
   const student: Student = {
