@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, User } from "lucide-react";
 import {
-  ArrowLeft,
-  User,
-} from "lucide-react";
-import { useGetDetailStudent } from "../../../hooks/useStudents";
+  useGetDetailStudent,
+  useSubmitModuleScore,
+} from "../../../hooks/useStudents";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
-import QuizSubmissions, { ModuleSubmissions, TaskSubmissions } from "./components/studentSubmission";
-
+import QuizSubmissions, {
+  ModuleSubmissions,
+  TaskSubmissions,
+} from "./components/studentSubmission";
 
 const StudentSubmissionsPage: React.FC = () => {
   const { studentId } = useParams<{
@@ -17,6 +19,9 @@ const StudentSubmissionsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"modules" | "quizzes" | "tasks">(
     "modules"
   );
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const moduleScoreMutation = useSubmitModuleScore(studentId);
 
   if (isLoading) {
     return <LoadingSpinner text="Loading..." />;
@@ -31,27 +36,52 @@ const StudentSubmissionsPage: React.FC = () => {
   }
 
   // Score updating function (would connect to API)
-  const updateScore = (
+  const moduleScore = async (
     submissionId: string,
-    submissionType: string,
+    trainingUserId: string,
     newScore: string
-  ): void => {
-    console.log(
-      `Updating ${submissionType} submission ${submissionId} with score: ${newScore}`
-    );
-    // Would call API here to update the score
+  ): Promise<void> => {
+    const submission = {
+      moduleScore: parseInt(newScore),
+      moduleId: submissionId,
+      trainingUserId: trainingUserId,
+    };
+
+    console.log(submissionId)
+    console.log(trainingUserId)
+    console.log(newScore)
+
+    try {
+      return new Promise<void>((resolve, reject) => {
+        moduleScoreMutation.mutate(submission, {
+          onSuccess: () => {
+            setIsSubmitting(false);
+            resolve();
+          },
+          onError: () => {
+            setIsSubmitting(false);
+            console.error("Error updating meeting:", error);
+            reject(error);
+          },
+        });
+      });
+    } catch (error) {
+      setIsSubmitting(false);
+      console.error("Error updating meeting:", error);
+      throw error;
+    }
   };
 
   return (
     <div className="min-h-screen p-6">
       <div className="mb-6">
-        <Link
-          to="/admin/students"
+        <button
+          onClick={() => navigate(-1)}
           className="flex items-center text-gray-600 hover:text-gray-900"
         >
           <ArrowLeft size={18} className="mr-1" />
           <span>Back to Students</span>
-        </Link>
+        </button>
       </div>
 
       <div className="mb-8 bg-white p-5 rounded-md shadow-sm">
@@ -151,7 +181,7 @@ const StudentSubmissionsPage: React.FC = () => {
           {activeTab === "modules" && (
             <ModuleSubmissions
               modules={data?.data.modules || []}
-              updateScore={updateScore}
+              updateScore={moduleScore}
             />
           )}
           {activeTab === "quizzes" && (
@@ -160,7 +190,7 @@ const StudentSubmissionsPage: React.FC = () => {
           {activeTab === "tasks" && (
             <TaskSubmissions
               tasks={data?.data.tasks || []}
-              updateScore={updateScore}
+              updateScore={moduleScore}
             />
           )}
         </div>

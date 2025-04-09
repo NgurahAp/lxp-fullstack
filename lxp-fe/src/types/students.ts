@@ -34,6 +34,7 @@ export interface Module {
   moduleTitle: string;
   meetingTitle: string;
   trainingTitle: string;
+  trainingUserId: string;
 }
 
 export interface Quiz {
@@ -43,6 +44,7 @@ export interface Quiz {
   quizTitle: string;
   meetingTitle: string;
   trainingTitle: string;
+  trainingUserId: string;
 }
 
 export interface Task {
@@ -54,6 +56,13 @@ export interface Task {
   taskQuestion: string;
   meetingTitle: string;
   trainingTitle: string;
+  trainingUserId: string;
+}
+
+export interface ModuleScoreSubmission {
+  moduleScore: number;
+  moduleId: string;
+  trainingUserId: string;
 }
 
 export interface StudentsResponse {

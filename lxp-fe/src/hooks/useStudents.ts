@@ -1,6 +1,22 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { DetailStudentResponse, StudentsResponse } from "../types/students";
-import { getDetailStudent, getStudents } from "../service/studentsService";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
+import {
+  DetailStudentResponse,
+  ModuleScoreSubmission,
+  StudentsResponse,
+} from "../types/students";
+import {
+  getDetailStudent,
+  getStudents,
+  submitModuleScore,
+} from "../service/studentsService";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { ModuleResponse } from "../types/module";
 
 export const useGetStudents = (): UseQueryResult<StudentsResponse, Error> => {
   return useQuery({
@@ -22,6 +38,29 @@ export const useGetDetailStudent = (
       const response = await getDetailStudent(studentId);
 
       return response;
+    },
+  });
+};
+
+export const useSubmitModuleScore = (userId: string | undefined) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation<ModuleResponse, Error, ModuleScoreSubmission>({
+    mutationFn: (params) => submitModuleScore(params),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["detailStudent"],
+      });
+
+      toast.success("Module berhasil dinilai");
+      navigate(`/instructorStudent/submission/${userId}`);
+    },
+
+    onError: (error: Error) => {
+      console.log(error.message);
+      toast.error("Terjadi kesalahan saat mengedit quiz");
     },
   });
 };

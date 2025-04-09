@@ -230,9 +230,11 @@ const getDetailStudent = async (user, request) => {
       answer: true,
       score: true,
       updatedAt: true,
+      trainingUserId: true,
       module: {
         select: {
           title: true,
+          id: true,
           meeting: {
             select: {
               title: true,
@@ -259,9 +261,11 @@ const getDetailStudent = async (user, request) => {
       id: true,
       score: true,
       updatedAt: true,
+      trainingUserId: true,
       quiz: {
         select: {
           title: true,
+          id: true,
           meeting: {
             select: {
               title: true,
@@ -289,10 +293,12 @@ const getDetailStudent = async (user, request) => {
       answer: true,
       score: true,
       updatedAt: true,
+      trainingUserId: true,
       task: {
         select: {
           title: true,
           taskQuestion: true,
+          id: true,
           meeting: {
             select: {
               title: true,
@@ -310,13 +316,14 @@ const getDetailStudent = async (user, request) => {
 
   // Format the results to make the training and meeting titles more accessible
   const formattedModules = modules.map((module) => ({
-    id: module.id,
+    id: module.module.id,
     answer: module.answer,
     score: module.score,
     updatedAt: module.updatedAt,
     moduleTitle: module.module.title,
     meetingTitle: module.module.meeting.title,
     trainingTitle: module.module.meeting.training.title,
+    trainingUserId: module.trainingUserId,
   }));
 
   const formattedQuizzes = quizzes.map((quiz) => ({
@@ -326,6 +333,7 @@ const getDetailStudent = async (user, request) => {
     quizTitle: quiz.quiz.title,
     meetingTitle: quiz.quiz.meeting.title,
     trainingTitle: quiz.quiz.meeting.training.title,
+    trainingUserId: quiz.trainingUserId,
   }));
 
   const formattedTasks = tasks.map((task) => ({
@@ -337,6 +345,7 @@ const getDetailStudent = async (user, request) => {
     taskQuestion: task.task.taskQuestion,
     meetingTitle: task.task.meeting.title,
     trainingTitle: task.task.meeting.training.title,
+    trainingUserId: task.trainingUserId,
   }));
 
   return {
