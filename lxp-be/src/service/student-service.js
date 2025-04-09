@@ -84,7 +84,6 @@ const getInstructorStudents = async (user, request) => {
       });
 
       // Count pending assignments (module, quiz, task submissions)
-      // MODIFIED: Now checking for NOT null answers with score: 0 for modules
       const pendingModules = await prismaClient.moduleSubmission.count({
         where: {
           trainingUserId: student.id,
@@ -92,14 +91,6 @@ const getInstructorStudents = async (user, request) => {
           NOT: {
             answer: null,
           },
-        },
-      });
-
-      // For quizzes, keep the original logic (checking score: 0)
-      const pendingQuizzes = await prismaClient.quizSubmission.count({
-        where: {
-          trainingUserId: student.id,
-          score: 0,
         },
       });
 
@@ -114,7 +105,7 @@ const getInstructorStudents = async (user, request) => {
         },
       });
 
-      const pendingAssignments = pendingModules + pendingQuizzes + pendingTasks;
+      const pendingAssignments = pendingModules + pendingTasks;
 
       return {
         id: student.user.id,
@@ -142,7 +133,6 @@ const getInstructorStudents = async (user, request) => {
 };
 
 const getDetailStudent = async (user, request) => {
-  w;
   const validationResult = validate(getDetailStudentValidation, request);
   const { studentId } = validationResult;
 
@@ -235,7 +225,7 @@ const getDetailStudent = async (user, request) => {
     lastActive: student.updatedAt.toISOString(),
   };
 
-  // Get module submissions for all training user records
+  // Get module submissions with training and meeting information
   const modules = await prismaClient.moduleSubmission.findMany({
     where: {
       trainingUserId: {
@@ -250,12 +240,22 @@ const getDetailStudent = async (user, request) => {
       module: {
         select: {
           title: true,
+          meeting: {
+            select: {
+              title: true,
+              training: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
         },
       },
     },
   });
 
-  // Get quiz submissions for all training user records
+  // Get quiz submissions with training and meeting information
   const quizzes = await prismaClient.quizSubmission.findMany({
     where: {
       trainingUserId: {
@@ -269,12 +269,22 @@ const getDetailStudent = async (user, request) => {
       quiz: {
         select: {
           title: true,
+          meeting: {
+            select: {
+              title: true,
+              training: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
         },
       },
     },
   });
 
-  // Get task submissions for all training user records
+  // Get task submissions with training and meeting information
   const tasks = await prismaClient.taskSubmission.findMany({
     where: {
       trainingUserId: {
@@ -290,17 +300,58 @@ const getDetailStudent = async (user, request) => {
         select: {
           title: true,
           taskQuestion: true,
+          meeting: {
+            select: {
+              title: true,
+              training: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
         },
       },
     },
   });
 
+  // Format the results to make the training and meeting titles more accessible
+  const formattedModules = modules.map((module) => ({
+    id: module.id,
+    answer: module.answer,
+    score: module.score,
+    updatedAt: module.updatedAt,
+    moduleTitle: module.module.title,
+    meetingTitle: module.module.meeting.title,
+    trainingTitle: module.module.meeting.training.title,
+  }));
+
+  const formattedQuizzes = quizzes.map((quiz) => ({
+    id: quiz.id,
+    score: quiz.score,
+    updatedAt: quiz.updatedAt,
+    quizTitle: quiz.quiz.title,
+    meetingTitle: quiz.quiz.meeting.title,
+    trainingTitle: quiz.quiz.meeting.training.title,
+  }));
+
+  const formattedTasks = tasks.map((task) => ({
+    id: task.id,
+    answer: task.answer,
+    score: task.score,
+    updatedAt: task.updatedAt,
+    taskTitle: task.task.title,
+    taskQuestion: task.task.taskQuestion,
+    meetingTitle: task.task.meeting.title,
+    trainingTitle: task.task.meeting.training.title,
+  }));
+
   return {
     data: {
       profile: profile,
-      modules: modules,
-      quizzes: quizzes,
-      tasks: tasks,
+      modules: formattedModules,
+      quizzes: formattedQuizzes,
+      tasks: formattedTasks,
     },
   };
 };

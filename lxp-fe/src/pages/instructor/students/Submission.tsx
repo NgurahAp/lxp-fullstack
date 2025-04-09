@@ -61,8 +61,6 @@ const StudentSubmissionsPage: React.FC = () => {
     "modules"
   );
 
-  console.log(studentId)
-
   // Dummy student data
   const student: Student = {
     id: "",
