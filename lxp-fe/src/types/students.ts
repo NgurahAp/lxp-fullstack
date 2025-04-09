@@ -65,6 +65,12 @@ export interface ModuleScoreSubmission {
   trainingUserId: string;
 }
 
+export interface TaskScoreSubmission {
+  taskScore: number;
+  taskId: string;
+  trainingUserId: string;
+}
+
 export interface StudentsResponse {
   data: {
     students: Student[];

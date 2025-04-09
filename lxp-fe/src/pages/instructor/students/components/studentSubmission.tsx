@@ -251,14 +251,17 @@ const TaskSubmissions: React.FC<TaskSubmissionsProps> = ({
   const [editingScoreId, setEditingScoreId] = useState<string | null>(null);
   const [newScore, setNewScore] = useState<string>("");
 
-  const handleSaveScore = (submissionId: string): void => {
+  const handleSaveScore = (
+    submissionId: string,
+    trainingUserId: string
+  ): void => {
     if (
       newScore !== "" &&
       !isNaN(Number(newScore)) &&
       Number(newScore) >= 0 &&
       Number(newScore) <= 100
     ) {
-      updateScore(submissionId, "task", newScore);
+      updateScore(submissionId, trainingUserId, newScore);
       setEditingScoreId(null);
       setNewScore("");
     }
@@ -337,7 +340,9 @@ const TaskSubmissions: React.FC<TaskSubmissionsProps> = ({
                   />
                   <span className="text-sm text-gray-500">/ 100</span>
                   <button
-                    onClick={() => handleSaveScore(submission.id)}
+                    onClick={() =>
+                      handleSaveScore(submission.id, submission.trainingUserId)
+                    }
                     className="ml-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                   >
                     Save

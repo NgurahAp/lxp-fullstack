@@ -1,9 +1,10 @@
-import { DetailStudentResponse, StudentsResponse } from "../types/students";
+import { DetailStudentResponse, StudentsResponse, TaskScoreSubmission } from "../types/students";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { API_URL } from "../config/api";
 import { ModuleScoreSubmission } from "../types/students";
 import { ModuleResponse } from "../types/module";
+import { TaskResponse } from "../types/task";
 
 export const getStudents = async (): Promise<StudentsResponse> => {
   const token = Cookies.get("token");
@@ -85,6 +86,41 @@ export const submitModuleScore = async ({
       }
       if (error.response?.status === 404) {
         throw new Error("Modul tidak ditemukan atau kamu bukan instructor");
+      }
+      throw new Error(
+        error.response?.data?.message || "Terjadi kesalahan pada server"
+      );
+    }
+    throw new Error("Terjadi kesalahan yang tidak diketahui");
+  }
+};
+
+export const submitTaskScore = async ({
+  taskScore,
+  taskId,
+  trainingUserId,
+}: TaskScoreSubmission): Promise<TaskResponse> => {
+  const token = Cookies.get("token");
+
+  try {
+    const response = await axios.post(
+      `${API_URL}/tasks/${taskId}/score`,
+      { taskScore: taskScore, trainingUserId: trainingUserId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // Error handling tetap sama
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        throw new Error("Kamu tidak memiliki hak akses");
+      }
+      if (error.response?.status === 404) {
+        throw new Error("Task tidak ditemukan atau kamu bukan instructor");
       }
       throw new Error(
         error.response?.data?.message || "Terjadi kesalahan pada server"

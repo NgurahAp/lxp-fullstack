@@ -4,6 +4,7 @@ import { ArrowLeft, User } from "lucide-react";
 import {
   useGetDetailStudent,
   useSubmitModuleScore,
+  useSubmitTaskScore,
 } from "../../../hooks/useStudents";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
 import QuizSubmissions, {
@@ -22,6 +23,7 @@ const StudentSubmissionsPage: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const moduleScoreMutation = useSubmitModuleScore(studentId);
+  const taskScoreMutation = useSubmitTaskScore(studentId);
 
   if (isLoading) {
     return <LoadingSpinner text="Loading..." />;
@@ -47,13 +49,46 @@ const StudentSubmissionsPage: React.FC = () => {
       trainingUserId: trainingUserId,
     };
 
-    console.log(submissionId)
-    console.log(trainingUserId)
-    console.log(newScore)
+    console.log(submissionId);
+    console.log(trainingUserId);
+    console.log(newScore);
 
     try {
       return new Promise<void>((resolve, reject) => {
         moduleScoreMutation.mutate(submission, {
+          onSuccess: () => {
+            setIsSubmitting(false);
+            resolve();
+          },
+          onError: () => {
+            setIsSubmitting(false);
+            console.error("Error updating meeting:", error);
+            reject(error);
+          },
+        });
+      });
+    } catch (error) {
+      setIsSubmitting(false);
+      console.error("Error updating meeting:", error);
+      throw error;
+    }
+  };
+
+  // Score updating function (would connect to API)
+  const taskScore = async (
+    submissionId: string,
+    trainingUserId: string,
+    newScore: string
+  ): Promise<void> => {
+    const submission = {
+      taskScore: parseInt(newScore),
+      taskId: submissionId,
+      trainingUserId: trainingUserId,
+    };
+
+    try {
+      return new Promise<void>((resolve, reject) => {
+        taskScoreMutation.mutate(submission, {
           onSuccess: () => {
             setIsSubmitting(false);
             resolve();
@@ -190,7 +225,7 @@ const StudentSubmissionsPage: React.FC = () => {
           {activeTab === "tasks" && (
             <TaskSubmissions
               tasks={data?.data.tasks || []}
-              updateScore={moduleScore}
+              updateScore={taskScore}
             />
           )}
         </div>

@@ -337,7 +337,7 @@ const getDetailStudent = async (user, request) => {
   }));
 
   const formattedTasks = tasks.map((task) => ({
-    id: task.id,
+    id: task.task.id,
     answer: task.answer,
     score: task.score,
     updatedAt: task.updatedAt,
