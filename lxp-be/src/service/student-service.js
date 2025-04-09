@@ -187,32 +187,25 @@ const getDetailStudent = async (user, request) => {
   // Count pending assignments (module, quiz, task submissions)
   const pendingModules = await prismaClient.moduleSubmission.count({
     where: {
-      trainingUserId: {
-        in: trainingUserIds,
-      },
+      trainingUserId: student.id,
       score: 0,
-    },
-  });
-
-  const pendingQuizzes = await prismaClient.quizSubmission.count({
-    where: {
-      trainingUserId: {
-        in: trainingUserIds,
+      NOT: {
+        answer: null,
       },
-      score: 0,
     },
   });
 
   const pendingTasks = await prismaClient.taskSubmission.count({
     where: {
-      trainingUserId: {
-        in: trainingUserIds,
-      },
+      trainingUserId: student.id,
       score: 0,
+      NOT: {
+        answer: null,
+      },
     },
   });
 
-  const pendingAssignments = pendingModules + pendingQuizzes + pendingTasks;
+  const pendingAssignments = pendingModules + pendingTasks;
 
   const profile = {
     studentId: student.id,
