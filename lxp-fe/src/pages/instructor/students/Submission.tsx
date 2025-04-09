@@ -37,7 +37,7 @@ const StudentSubmissionsPage: React.FC = () => {
     );
   }
 
-  // Score updating function (would connect to API)
+  // Score updating function for modules
   const moduleScore = async (
     submissionId: string,
     trainingUserId: string,
@@ -49,9 +49,14 @@ const StudentSubmissionsPage: React.FC = () => {
       trainingUserId: trainingUserId,
     };
 
-    console.log(submissionId);
-    console.log(trainingUserId);
-    console.log(newScore);
+    console.log("Updating module score:", {
+      submissionId,
+      trainingUserId,
+      newScore,
+    });
+
+    // Set loading state to true before submitting
+    setIsSubmitting(true);
 
     try {
       return new Promise<void>((resolve, reject) => {
@@ -60,21 +65,21 @@ const StudentSubmissionsPage: React.FC = () => {
             setIsSubmitting(false);
             resolve();
           },
-          onError: () => {
+          onError: (err) => {
             setIsSubmitting(false);
-            console.error("Error updating meeting:", error);
-            reject(error);
+            console.error("Error updating module score:", err);
+            reject(err);
           },
         });
       });
     } catch (error) {
       setIsSubmitting(false);
-      console.error("Error updating meeting:", error);
+      console.error("Error in module score mutation:", error);
       throw error;
     }
   };
 
-  // Score updating function (would connect to API)
+  // Score updating function for tasks
   const taskScore = async (
     submissionId: string,
     trainingUserId: string,
@@ -86,6 +91,9 @@ const StudentSubmissionsPage: React.FC = () => {
       trainingUserId: trainingUserId,
     };
 
+    // Set loading state to true before submitting
+    setIsSubmitting(true);
+
     try {
       return new Promise<void>((resolve, reject) => {
         taskScoreMutation.mutate(submission, {
@@ -93,16 +101,16 @@ const StudentSubmissionsPage: React.FC = () => {
             setIsSubmitting(false);
             resolve();
           },
-          onError: () => {
+          onError: (err) => {
             setIsSubmitting(false);
-            console.error("Error updating meeting:", error);
-            reject(error);
+            console.error("Error updating task score:", err);
+            reject(err);
           },
         });
       });
     } catch (error) {
       setIsSubmitting(false);
-      console.error("Error updating meeting:", error);
+      console.error("Error in task score mutation:", error);
       throw error;
     }
   };
@@ -217,6 +225,7 @@ const StudentSubmissionsPage: React.FC = () => {
             <ModuleSubmissions
               modules={data?.data.modules || []}
               updateScore={moduleScore}
+              isSubmitting={isSubmitting}
             />
           )}
           {activeTab === "quizzes" && (
@@ -226,6 +235,7 @@ const StudentSubmissionsPage: React.FC = () => {
             <TaskSubmissions
               tasks={data?.data.tasks || []}
               updateScore={taskScore}
+              isSubmitting={isSubmitting}
             />
           )}
         </div>

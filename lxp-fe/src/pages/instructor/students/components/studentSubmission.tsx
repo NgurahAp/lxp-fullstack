@@ -17,29 +17,37 @@ interface ModuleSubmissionsProps {
     submissionId: string,
     trainingUserId: string,
     newScore: string
-  ) => void;
+  ) => Promise<void>;
+  isSubmitting: boolean; // Tambahkan prop isSubmitting
 }
 
 const ModuleSubmissions: React.FC<ModuleSubmissionsProps> = ({
   modules,
   updateScore,
+  isSubmitting, // Terima prop isSubmitting
 }) => {
   const [editingScoreId, setEditingScoreId] = useState<string | null>(null);
   const [newScore, setNewScore] = useState<string>("");
 
-  const handleSaveScore = (
+  const handleSaveScore = async (
     submissionId: string,
     trainingUserId: string
-  ): void => {
+  ): Promise<void> => {
     if (
       newScore !== "" &&
       !isNaN(Number(newScore)) &&
       Number(newScore) >= 0 &&
       Number(newScore) <= 100
     ) {
-      updateScore(submissionId, trainingUserId, newScore);
-      setEditingScoreId(null);
-      setNewScore("");
+      try {
+        await updateScore(submissionId, trainingUserId, newScore);
+        // Setelah berhasil update, reset state form
+        setEditingScoreId(null);
+        setNewScore("");
+      } catch (error) {
+        console.error("Error saving score:", error);
+        // Bisa tambahkan notifikasi error di sini jika diperlukan
+      }
     }
   };
 
@@ -113,19 +121,33 @@ const ModuleSubmissions: React.FC<ModuleSubmissionsProps> = ({
                     value={newScore}
                     onChange={(e) => setNewScore(e.target.value)}
                     className="w-16 px-2 py-1 border border-gray-300 rounded"
+                    disabled={isSubmitting}
                   />
                   <span className="text-sm text-gray-500">/ 100</span>
                   <button
                     onClick={() =>
                       handleSaveScore(submission.id, submission.trainingUserId)
                     }
-                    className="ml-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                    className={`ml-2 px-3 py-1 ${
+                      isSubmitting
+                        ? "bg-green-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    } text-white text-sm rounded`}
+                    disabled={isSubmitting}
                   >
-                    Save
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-2">
+                        <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        Saving...
+                      </div>
+                    ) : (
+                      "Save"
+                    )}
                   </button>
                   <button
                     onClick={() => setEditingScoreId(null)}
                     className="px-3 py-1 border border-gray-300 text-gray-600 text-sm rounded hover:bg-gray-100"
+                    disabled={isSubmitting}
                   >
                     Cancel
                   </button>
@@ -239,31 +261,39 @@ interface TaskSubmissionsProps {
   tasks: Task[];
   updateScore: (
     submissionId: string,
-    submissionType: string,
+    trainingUserId: string,
     newScore: string
-  ) => void;
+  ) => Promise<void>;
+  isSubmitting: boolean; // Tambahkan prop isSubmitting
 }
 
 const TaskSubmissions: React.FC<TaskSubmissionsProps> = ({
   tasks,
   updateScore,
+  isSubmitting, // Terima prop isSubmitting
 }) => {
   const [editingScoreId, setEditingScoreId] = useState<string | null>(null);
   const [newScore, setNewScore] = useState<string>("");
 
-  const handleSaveScore = (
+  const handleSaveScore = async (
     submissionId: string,
     trainingUserId: string
-  ): void => {
+  ): Promise<void> => {
     if (
       newScore !== "" &&
       !isNaN(Number(newScore)) &&
       Number(newScore) >= 0 &&
       Number(newScore) <= 100
     ) {
-      updateScore(submissionId, trainingUserId, newScore);
-      setEditingScoreId(null);
-      setNewScore("");
+      try {
+        await updateScore(submissionId, trainingUserId, newScore);
+        // Setelah berhasil update, reset state form
+        setEditingScoreId(null);
+        setNewScore("");
+      } catch (error) {
+        console.error("Error saving task score:", error);
+        // Bisa tambahkan notifikasi error di sini jika diperlukan
+      }
     }
   };
 
@@ -337,19 +367,33 @@ const TaskSubmissions: React.FC<TaskSubmissionsProps> = ({
                     value={newScore}
                     onChange={(e) => setNewScore(e.target.value)}
                     className="w-16 px-2 py-1 border border-gray-300 rounded"
+                    disabled={isSubmitting}
                   />
                   <span className="text-sm text-gray-500">/ 100</span>
                   <button
                     onClick={() =>
                       handleSaveScore(submission.id, submission.trainingUserId)
                     }
-                    className="ml-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                    className={`ml-2 px-3 py-1 ${
+                      isSubmitting
+                        ? "bg-green-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    } text-white text-sm rounded`}
+                    disabled={isSubmitting}
                   >
-                    Save
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-2">
+                        <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        Saving...
+                      </div>
+                    ) : (
+                      "Save"
+                    )}
                   </button>
                   <button
                     onClick={() => setEditingScoreId(null)}
                     className="px-3 py-1 border border-gray-300 text-gray-600 text-sm rounded hover:bg-gray-100"
+                    disabled={isSubmitting}
                   >
                     Cancel
                   </button>
