@@ -47,7 +47,7 @@ export interface Quiz {
 
 export interface Task {
   id: string;
-  answer: string | null;
+  answer: string | undefined;
   score: number;
   updatedAt: string; // ISO date string
   taskTitle: string;

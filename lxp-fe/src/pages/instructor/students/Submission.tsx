@@ -14,45 +14,6 @@ import {
 import { useGetDetailStudent } from "../../../hooks/useStudents";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
 
-// Define TypeScript interfaces for our data structures
-interface Student {
-  id: string;
-  name: string;
-  email: string;
-  enrolledCourses: number;
-  completedCourses: number;
-  pendingAssignments: number;
-  status: "enrolled" | "completed" | "dropped";
-  lastActive: string;
-}
-
-interface BaseSubmission {
-  id: string;
-  trainingName: string;
-  submittedOn: string;
-  score: number | null;
-  maxScore: number;
-  status: "scored" | "pending";
-  meetingTitle: string;
-}
-
-interface ModuleSubmission extends BaseSubmission {
-  moduleId: string;
-  moduleName: string;
-  answer: string;
-}
-
-interface QuizSubmission extends BaseSubmission {
-  quizId: string;
-  quizName: string;
-}
-
-interface TaskSubmission extends BaseSubmission {
-  taskId: string;
-  taskName: string;
-  answer: string;
-}
-
 // Define parameters type for useParams
 
 const StudentSubmissionsPage: React.FC = () => {
@@ -79,111 +40,6 @@ const StudentSubmissionsPage: React.FC = () => {
   console.log(data);
 
   // Dummy student data
-  const student: Student = {
-    id: "",
-    name: "Sarah Johnson",
-    email: "sarah.j@example.com",
-    enrolledCourses: 3,
-    completedCourses: 1,
-    pendingAssignments: 4,
-    status: "enrolled",
-    lastActive: "2025-04-01T14:30:00",
-  };
-
-  // Dummy submission data
-  const moduleSubmissions: ModuleSubmission[] = [
-    {
-      id: "ms1",
-      moduleId: "m1",
-      moduleName: "Introduction to React",
-      trainingName: "Web Development Fundamentals",
-      submittedOn: "2025-03-28T15:30:00",
-      answer:
-        "React is a JavaScript library for building user interfaces. It's declarative, efficient, and flexible. React lets you compose complex UIs from small and isolated pieces of code called 'components'.",
-      score: 85,
-      maxScore: 100,
-      status: "scored",
-      meetingTitle: "Frontend Basics",
-    },
-    {
-      id: "ms2",
-      moduleId: "m2",
-      moduleName: "State Management",
-      trainingName: "Web Development Fundamentals",
-      submittedOn: "2025-03-29T09:15:00",
-      answer:
-        "State management in React can be handled using useState hooks, Context API, or external libraries like Redux. The choice depends on the complexity of your application and the state-sharing requirements.",
-      score: null,
-      maxScore: 100,
-      status: "pending",
-      meetingTitle: "Advanced Concepts",
-    },
-    {
-      id: "ms3",
-      moduleId: "m3",
-      moduleName: "Database Design",
-      trainingName: "Backend Development",
-      submittedOn: "2025-03-30T16:45:00",
-      answer:
-        "Database normalization is the process of structuring a relational database in accordance with a series of normal forms in order to reduce data redundancy and improve data integrity.",
-      score: 92,
-      maxScore: 100,
-      status: "scored",
-      meetingTitle: "Database Foundations",
-    },
-  ];
-
-  const quizSubmissions: QuizSubmission[] = [
-    {
-      id: "qs1",
-      quizId: "q1",
-      quizName: "React Fundamentals Quiz",
-      trainingName: "Web Development Fundamentals",
-      submittedOn: "2025-03-28T16:20:00",
-      score: 8,
-      maxScore: 10,
-      status: "scored",
-      meetingTitle: "Frontend Basics",
-    },
-    {
-      id: "qs2",
-      quizId: "q2",
-      quizName: "State Management Quiz",
-      trainingName: "Web Development Fundamentals",
-      submittedOn: "2025-03-29T10:30:00",
-      score: 7,
-      maxScore: 10,
-      status: "scored",
-      meetingTitle: "Advanced Concepts",
-    },
-  ];
-
-  const taskSubmissions: TaskSubmission[] = [
-    {
-      id: "ts1",
-      taskId: "t1",
-      taskName: "Build a Todo App",
-      trainingName: "Web Development Fundamentals",
-      submittedOn: "2025-03-28T18:45:00",
-      answer: "https://github.com/sarah-j/todo-app",
-      score: null,
-      maxScore: 100,
-      status: "pending",
-      meetingTitle: "Frontend Basics",
-    },
-    {
-      id: "ts2",
-      taskId: "t2",
-      taskName: "Create an API",
-      trainingName: "Backend Development",
-      submittedOn: "2025-03-31T14:20:00",
-      answer: "https://github.com/sarah-j/rest-api",
-      score: 90,
-      maxScore: 100,
-      status: "scored",
-      meetingTitle: "API Development",
-    },
-  ];
 
   // Score updating function (would connect to API)
   const updateScore = (
@@ -217,7 +73,7 @@ const StudentSubmissionsPage: React.FC = () => {
 
     return (
       <div className="space-y-6">
-        {moduleSubmissions.map((submission) => (
+        {data?.data.modules.map((submission) => (
           <div
             key={submission.id}
             className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm"
@@ -225,23 +81,25 @@ const StudentSubmissionsPage: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {submission.moduleName}
+                  {submission.moduleTitle}
                 </h3>
                 <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                   <BookOpen size={16} />
-                  <span>{submission.trainingName}</span>
+                  <span className="truncate w-72">
+                    {submission.trainingTitle}
+                  </span>
                   <span className="text-gray-400">|</span>
                   <Calendar size={16} />
-                  <span>{submission.meetingTitle}</span>
+                  <span className="truncate w-72">
+                    {submission.moduleTitle}
+                  </span>
                 </div>
               </div>
               <div className="mt-3 md:mt-0 flex items-center">
-                {submission.status === "scored" ? (
+                {submission.score != 0 ? (
                   <div className="flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
                     <CheckCircle size={16} />
-                    <span>
-                      Scored: {submission.score}/{submission.maxScore}
-                    </span>
+                    <span>Scored: {submission.score}/100</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-1 bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">
@@ -256,14 +114,20 @@ const StudentSubmissionsPage: React.FC = () => {
               <h4 className="text-sm font-medium text-gray-700 mb-2">
                 Student's Answer:
               </h4>
-              <p className="text-gray-800">{submission.answer}</p>
+              {submission.answer ? (
+                <p className="text-gray-800">{submission.answer}</p>
+              ) : (
+                <p className="text-gray-500 italic">
+                  Student hasn't submitted an answer yet.
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-3 border-t border-gray-100">
               <div className="text-sm text-gray-500">
                 Submitted on{" "}
-                {new Date(submission.submittedOn).toLocaleDateString()} at{" "}
-                {new Date(submission.submittedOn).toLocaleTimeString([], {
+                {new Date(submission.updatedAt).toLocaleDateString()} at{" "}
+                {new Date(submission.updatedAt).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -280,9 +144,7 @@ const StudentSubmissionsPage: React.FC = () => {
                       onChange={(e) => setNewScore(e.target.value)}
                       className="w-16 px-2 py-1 border border-gray-300 rounded"
                     />
-                    <span className="text-sm text-gray-500">
-                      / {submission.maxScore}
-                    </span>
+                    <span className="text-sm text-gray-500">/ 100</span>
                     <button
                       onClick={() => handleSaveScore(submission.id)}
                       className="ml-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
@@ -304,7 +166,7 @@ const StudentSubmissionsPage: React.FC = () => {
                     }}
                     className="px-4 py-1.5 bg-gray-900 text-white text-sm rounded hover:bg-gray-800"
                   >
-                    {submission.status === "scored"
+                    {submission.score != 0
                       ? "Update Score"
                       : "Grade Submission"}
                   </button>
@@ -314,7 +176,7 @@ const StudentSubmissionsPage: React.FC = () => {
           </div>
         ))}
 
-        {moduleSubmissions.length === 0 && (
+        {data?.data.modules.length === 0 && (
           <div className="text-center py-10 bg-white rounded-lg border border-gray-200">
             <FileText size={48} className="mx-auto text-gray-300 mb-3" />
             <h3 className="text-lg font-medium text-gray-800">
@@ -333,7 +195,7 @@ const StudentSubmissionsPage: React.FC = () => {
   const QuizSubmissions: React.FC = () => {
     return (
       <div className="space-y-6">
-        {quizSubmissions.map((submission) => (
+        {data?.data.quizzes.map((submission) => (
           <div
             key={submission.id}
             className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm"
@@ -341,22 +203,24 @@ const StudentSubmissionsPage: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {submission.quizName}
+                  {submission.quizTitle}
                 </h3>
                 <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                   <BookOpen size={16} />
-                  <span>{submission.trainingName}</span>
+                  <span className="truncate w-72">
+                    {submission.trainingTitle}
+                  </span>
                   <span className="text-gray-400">|</span>
                   <Calendar size={16} />
-                  <span>{submission.meetingTitle}</span>
+                  <span className="truncate w-72">
+                    {submission.meetingTitle}
+                  </span>
                 </div>
               </div>
               <div className="mt-3 md:mt-0">
                 <div className="flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
                   <Award size={16} />
-                  <span>
-                    Score: {submission.score}/{submission.maxScore}
-                  </span>
+                  <span>Score: {submission.score}/100</span>
                 </div>
               </div>
             </div>
@@ -364,8 +228,8 @@ const StudentSubmissionsPage: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-3 border-t border-gray-100">
               <div className="text-sm text-gray-500">
                 Submitted on{" "}
-                {new Date(submission.submittedOn).toLocaleDateString()} at{" "}
-                {new Date(submission.submittedOn).toLocaleTimeString([], {
+                {new Date(submission.updatedAt).toLocaleDateString()} at{" "}
+                {new Date(submission.updatedAt).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -373,7 +237,7 @@ const StudentSubmissionsPage: React.FC = () => {
 
               <div className="mt-3 md:mt-0">
                 <Link
-                  to={`/quiz-details/${submission.quizId}`}
+                  to={`/quiz-details/${submission.id}`}
                   className="px-4 py-1.5 bg-gray-100 text-gray-800 text-sm rounded hover:bg-gray-200"
                 >
                   View Quiz Details
@@ -383,7 +247,7 @@ const StudentSubmissionsPage: React.FC = () => {
           </div>
         ))}
 
-        {quizSubmissions.length === 0 && (
+        {data?.data.quizzes.length === 0 && (
           <div className="text-center py-10 bg-white rounded-lg border border-gray-200">
             <HelpCircle size={48} className="mx-auto text-gray-300 mb-3" />
             <h3 className="text-lg font-medium text-gray-800">
@@ -418,7 +282,7 @@ const StudentSubmissionsPage: React.FC = () => {
 
     return (
       <div className="space-y-6">
-        {taskSubmissions.map((submission) => (
+        {data?.data.tasks.map((submission) => (
           <div
             key={submission.id}
             className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm"
@@ -426,23 +290,25 @@ const StudentSubmissionsPage: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {submission.taskName}
+                  {submission.taskTitle}
                 </h3>
                 <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                   <BookOpen size={16} />
-                  <span>{submission.trainingName}</span>
+                  <span className="truncate w-72">
+                    {submission.trainingTitle}
+                  </span>
                   <span className="text-gray-400">|</span>
                   <Calendar size={16} />
-                  <span>{submission.meetingTitle}</span>
+                  <span className="truncate w-72">
+                    {submission.meetingTitle}
+                  </span>
                 </div>
               </div>
               <div className="mt-3 md:mt-0 flex items-center">
-                {submission.status === "scored" ? (
+                {submission.score != 0 ? (
                   <div className="flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
                     <CheckCircle size={16} />
-                    <span>
-                      Scored: {submission.score}/{submission.maxScore}
-                    </span>
+                    <span>Scored: {submission.score}/100</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-1 bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">
@@ -455,23 +321,22 @@ const StudentSubmissionsPage: React.FC = () => {
 
             <div className="bg-gray-50 p-4 rounded-lg my-3">
               <h4 className="text-sm font-medium text-gray-700 mb-2">
-                Submission Link:
+                Student's Answer:
               </h4>
-              <a
-                href={submission.answer}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                {submission.answer}
-              </a>
+              {submission.answer ? (
+                <p className="text-gray-800">{submission.answer}</p>
+              ) : (
+                <p className="text-gray-500 italic">
+                  Student hasn't submitted an answer yet.
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-3 border-t border-gray-100">
               <div className="text-sm text-gray-500">
                 Submitted on{" "}
-                {new Date(submission.submittedOn).toLocaleDateString()} at{" "}
-                {new Date(submission.submittedOn).toLocaleTimeString([], {
+                {new Date(submission.updatedAt).toLocaleDateString()} at{" "}
+                {new Date(submission.updatedAt).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
@@ -488,9 +353,7 @@ const StudentSubmissionsPage: React.FC = () => {
                       onChange={(e) => setNewScore(e.target.value)}
                       className="w-16 px-2 py-1 border border-gray-300 rounded"
                     />
-                    <span className="text-sm text-gray-500">
-                      / {submission.maxScore}
-                    </span>
+                    <span className="text-sm text-gray-500">/ 100</span>
                     <button
                       onClick={() => handleSaveScore(submission.id)}
                       className="ml-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
@@ -512,7 +375,7 @@ const StudentSubmissionsPage: React.FC = () => {
                     }}
                     className="px-4 py-1.5 bg-gray-900 text-white text-sm rounded hover:bg-gray-800"
                   >
-                    {submission.status === "scored"
+                    {submission.score != 0
                       ? "Update Score"
                       : "Grade Submission"}
                   </button>
@@ -522,7 +385,7 @@ const StudentSubmissionsPage: React.FC = () => {
           </div>
         ))}
 
-        {taskSubmissions.length === 0 && (
+        {data?.data.tasks.length === 0 && (
           <div className="text-center py-10 bg-white rounded-lg border border-gray-200">
             <FileText size={48} className="mx-auto text-gray-300 mb-3" />
             <h3 className="text-lg font-medium text-gray-800">
@@ -555,31 +418,50 @@ const StudentSubmissionsPage: React.FC = () => {
             <User size={24} className="text-gray-500" />
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">{student.name}</h1>
-            <p className="text-gray-600">{student.email}</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {data?.data.profile.name}
+            </h1>
+            <p className="text-gray-600">{data?.data.profile.email}</p>
             <div className="mt-1 flex items-center gap-3">
-              {getStatusBadge(student.status)}
+              {getStatusBadge(data?.data.profile.status)}
               <span className="text-sm text-gray-500">
-                Last active: {new Date(student.lastActive).toLocaleDateString()}
+                Last active:{" "}
+                {data?.data.profile.lastActive ? (
+                  <>
+                    {new Date(
+                      data.data.profile.lastActive
+                    ).toLocaleDateString()}{" "}
+                    at{" "}
+                    {new Date(data.data.profile.lastActive).toLocaleTimeString(
+                      [],
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </>
+                ) : (
+                  "Not available"
+                )}
               </span>
             </div>
           </div>
           <div className="mt-4 md:mt-0 grid grid-cols-2 md:grid-cols-3 gap-3 text-center">
             <div className="bg-gray-50 px-4 py-2 rounded-lg">
               <div className="text-2xl font-semibold text-gray-900">
-                {student.enrolledCourses}
+                {data?.data.profile.enrolledCourses}
               </div>
               <div className="text-xs text-gray-500">Enrolled Courses</div>
             </div>
             <div className="bg-gray-50 px-4 py-2 rounded-lg">
               <div className="text-2xl font-semibold text-gray-900">
-                {student.completedCourses}
+                {data?.data.profile.completedCourses}
               </div>
               <div className="text-xs text-gray-500">Completed</div>
             </div>
             <div className="bg-gray-50 px-4 py-2 rounded-lg">
               <div className="text-2xl font-semibold text-gray-900">
-                {student.pendingAssignments}
+                {data?.data.profile.pendingAssignments}
               </div>
               <div className="text-xs text-gray-500">Pending</div>
             </div>
@@ -634,9 +516,7 @@ const StudentSubmissionsPage: React.FC = () => {
 };
 
 // Helper function for status badges
-const getStatusBadge = (
-  status: "enrolled" | "completed" | "dropped"
-): React.ReactNode => {
+const getStatusBadge = (status: string | undefined): React.ReactNode => {
   switch (status) {
     case "enrolled":
       return (
