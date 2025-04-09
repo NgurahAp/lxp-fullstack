@@ -108,7 +108,7 @@ const getMeetings = async (user, request) => {
     where: { trainingId: validated.trainingId },
     skip,
     take: validated.size,
-    orderBy: { meetingDate: "asc" },
+    orderBy: { createdAt: "asc" },
     select: {
       id: true,
       title: true,

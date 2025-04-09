@@ -2,7 +2,7 @@ import Joi from "joi";
 
 const createTaskValidation = Joi.object({
   title: Joi.string().max(255).required(),
-  taskQuestion: Joi.string().max(255).required(),
+  taskQuestion: Joi.string().required(),
 });
 
 const getDetailTaskValidation = Joi.object({

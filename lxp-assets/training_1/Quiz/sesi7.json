@@ -1,0 +1,56 @@
+{
+    "title": "Quiz - Sesi 7-8",
+    "questions": [
+        {
+            "question": "Apa langkah pertama dalam membangun hubungan baik dengan customer?",
+            "options": [
+                "Langsung menawarkan produk",
+                "Mengeluh tentang masalah pribadi",
+                "Mengetahui tipologinya untuk menentukan pendekatan",
+                "Menanyakan harga pasar"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "question": "Apa yang dimaksud dengan teknik 'Ngalor-Ngidul' dalam penggalian informasi?",
+            "options": [
+                "Membahas isu utama secara langsung",
+                "Berbasa-basi yang tidak relevan",
+                "Strategi menggali informasi melalui obrolan tidak langsung dan santai",
+                "Menghindari topik pembicaraan"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "question": "Bagaimana teknik yang digunakan untuk 'mengademkan hati' seseorang dalam komunikasi?",
+            "options": [
+                "Langsung menyampaikan permintaan",
+                "Menyebutkan emosi, kata peduli, helaan napas, lalu permintaan",
+                "Memberi tekanan dan ultimatum",
+                "Mengalihkan pembicaraan ke hal lain"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "question": "Apa saja elemen penting yang perlu diperoleh saat investigasi terhadap potensi fraud?",
+            "options": [
+                "Alamat, usia, dan status sosial",
+                "Modus, motif, saksi, dan fakta hukum",
+                "Pakaian, gaya bicara, dan latar belakang pendidikan",
+                "Catatan belanja dan waktu liburan"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "question": "Mengapa penting untuk menyimpan dokumentasi dan bukti dalam menjaga hubungan kerja?",
+            "options": [
+                "Agar dapat diajukan ke polisi setiap saat",
+                "Sebagai alat untuk menyudutkan klien",
+                "Untuk referensi dan pembuktian bila ada ketidaksesuaian di masa depan",
+                "Untuk membuktikan status sosial pelanggan"
+            ],
+            "correctAnswer": 2
+        }
+    ]
+}
+

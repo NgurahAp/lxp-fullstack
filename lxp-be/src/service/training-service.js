@@ -501,7 +501,7 @@ const getTrainingDetail = async (user, trainingId) => {
           },
         },
         orderBy: {
-          meetingDate: "asc",
+          createdAt: "asc",
         },
       },
       _count: {
@@ -602,7 +602,7 @@ const getInstructorTrainingDetail = async (user, trainingId) => {
           },
         },
         orderBy: {
-          meetingDate: "asc",
+          createdAt: "asc", // sorted by their creation timestamp in ascending
         },
       },
       _count: {

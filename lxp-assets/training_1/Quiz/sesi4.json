@@ -1,0 +1,55 @@
+{
+    "title": "Quiz - Sesi 4",
+    "questions": [
+        {
+            "question": "Apa yang dimaksud dengan 'pendetilan' dalam komunikasi?",
+            "options": [
+                "Menyampaikan informasi dengan gaya meyakinkan",
+                "Mengajukan pertanyaan asumtif",
+                "Seni komunikasi untuk memperoleh informasi yang tepat tanpa asumsi",
+                "Membuat kesimpulan dari percakapan"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "question": "Apa makna dari tulisan tangan dengan ukuran super kecil?",
+            "options": [
+                "Cenderung ekstrovert dan menyukai interaksi sosial",
+                "Cenderung introvert ekstrem dan mengasingkan diri",
+                "Orang yang terganggu secara emosional",
+                "Orang yang kreatif dan visioner"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "question": "Apa arti tanda tangan dengan bentuk cangkang?",
+            "options": [
+                "Ingin dipuji dan dimanja",
+                "Cenderung menyembunyikan perasaan dan masa lalu yang menyakitkan",
+                "Memiliki pemikiran rasional",
+                "Orang yang dominan dan agresif"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "question": "Jika seseorang menuliskan huruf 't' dengan garis mendatar dan tekanan ringan, hal ini menandakan bahwa orang tersebut:",
+            "options": [
+                "Mudah menyerah",
+                "Berambisi tinggi",
+                "Keras kepala",
+                "Suka mendominasi"
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "question": "Dalam teknik klarifikasi, 'Lost Performative' berarti:",
+            "options": [
+                "Menganggap semua pengalaman sebagai satu hal yang sama",
+                "Menilai sesuatu tanpa menyebut siapa yang menilai",
+                "Menutupi fakta dalam pernyataan",
+                "Membandingkan dua hal tanpa dasar"
+            ],
+            "correctAnswer": 1
+        }
+    ]
+}

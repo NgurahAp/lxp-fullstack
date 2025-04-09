@@ -1,0 +1,55 @@
+{
+    "title": "Quiz - Sesi 5",
+    "questions": [
+        {
+            "question": "Apa yang dimaksud dengan TSP dalam membangun kedekatan komunikasi?",
+            "options": [
+                "Tanya, Simpulkan, Pendapat",
+                "Tiru, Samakan, Pimpin",
+                "Tekan, Serang, Pengaruhi",
+                "Tolak, Sangkal, Putuskan"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "question": "Salah satu cara untuk menciptakan kedekatan cepat dalam komunikasi adalah?",
+            "options": [
+                "Langsung menyampaikan tujuan",
+                "Menghindari kontak mata",
+                "Menunjukkan kesamaan minat dan bahasa tubuh",
+                "Memberi penawaran di awal"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "question": "Apa yang dimaksud dengan 'komunikasi bawah sadar' melalui cerita?",
+            "options": [
+                "Mengajukan pertanyaan eksplisit kepada lawan bicara",
+                "Membuat cerita agar orang lain menyimpulkan sendiri pesan yang dimaksud",
+                "Menjawab langsung semua pertanyaan",
+                "Menggunakan statistik dan data formal"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "question": "Apa efek dari penggunaan perumpamaan dalam komunikasi persuasif?",
+            "options": [
+                "Menimbulkan resistensi dan konfrontasi",
+                "Meningkatkan emosi negatif",
+                "Mempermudah orang menyimpulkan sendiri dan mengurangi emosi tinggi",
+                "Mengurangi pengaruh pesan"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "question": "Mengapa komunikasi bisa menjadi alot atau sulit?",
+            "options": [
+                "Karena lawan bicara terlalu banyak bicara",
+                "Karena tidak ada data pendukung",
+                "Karena adanya resistensi atau emotional block",
+                "Karena komunikasi dilakukan terlalu cepat"
+            ],
+            "correctAnswer": 2
+        }
+    ]
+}

@@ -21,7 +21,7 @@ export const useCreateMeeting = () => {
     onSuccess: () => {
       // Invalidate related queries to refetch updated data
       queryClient.invalidateQueries({
-        queryKey: ["detailTraining"],
+        queryKey: ["detailTrainingInstructor"],
       });
 
       // Show success notification
@@ -44,7 +44,7 @@ export const useUpdateMeeting = () => {
     onSuccess: () => {
       // Invalidate related queries to refetch updated data
       queryClient.invalidateQueries({
-        queryKey: ["detailTraining"],
+        queryKey: ["detailTrainingInstructor"],
       });
 
       // Show success notification
@@ -67,7 +67,7 @@ export const useDeleteMeeting = () => {
     onSuccess: () => {
       // Invalidate related queries to refetch updated data
       queryClient.invalidateQueries({
-        queryKey: ["detailTraining"],
+        queryKey: ["detailTrainingInstructor"],
       });
 
       // Show success notification

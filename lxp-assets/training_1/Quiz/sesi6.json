@@ -1,0 +1,55 @@
+{
+    "title": "Quiz - Sesi 6",
+    "questions": [
+        {
+            "question": "Apa yang sebaiknya dilakukan terlebih dahulu saat menghadapi lawan bicara yang sedang emosi?",
+            "options": [
+                "Langsung memberikan penjelasan teknis",
+                "Memberikan ancaman agar tenang",
+                "Menyelesaikan masalah emosionalnya terlebih dahulu",
+                "Meninggalkan ruangan agar suasana tenang"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "question": "Apa risiko utama dari komunikasi berbentuk debat?",
+            "options": [
+                "Meningkatkan kedekatan antar individu",
+                "Mendorong kerja sama tim",
+                "Menimbulkan emosi negatif dan menghambat logika",
+                "Mempermudah penyelesaian masalah"
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "question": "Apa inti dari teknik 'Sudut Pandang Baru' dalam menghadapi konflik?",
+            "options": [
+                "Mengubah topik pembicaraan",
+                "Memberi makna baru pada situasi dan kata-kata yang ada",
+                "Menekan lawan bicara secara halus",
+                "Menghindari pembicaraan langsung"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "question": "Dalam kondisi emosi tinggi, komunikasi menjadi tidak efektif karena...",
+            "options": [
+                "Sinyal bahasa tubuh menjadi tidak jelas",
+                "Logika cenderung hilang atau terblokir",
+                "Suara terlalu keras",
+                "Pembicaraan terlalu panjang"
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "question": "Apa tujuan dari teknik 'Mengalah untuk Menang' dalam komunikasi konflik?",
+            "options": [
+                "Membiarkan lawan bicara selalu menang",
+                "Menghindari diskusi yang panjang",
+                "Mencapai komitmen tindakan dari lawan bicara",
+                "Meninggalkan konflik tanpa penyelesaian"
+            ],
+            "correctAnswer": 2
+        }
+    ]
+}

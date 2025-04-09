@@ -106,7 +106,7 @@ const CreateTask: React.FC<CreateTaskProps> = ({
               }`}
               disabled={isProcessing || !isValid}
             >
-              {isProcessing ? "Updating..." : "Update Task"}
+              {isProcessing ? "Creating..." : "Create Task"}
             </button>
           </div>
         </form>
