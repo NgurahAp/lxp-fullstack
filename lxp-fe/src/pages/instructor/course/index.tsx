@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { PlusCircle, Search, Book, Users, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useGetTrainingsInstructor } from "../../../hooks/useTrainings";

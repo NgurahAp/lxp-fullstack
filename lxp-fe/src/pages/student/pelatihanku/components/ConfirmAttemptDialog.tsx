@@ -10,7 +10,7 @@ export const ConfirmAttemptQuizDialog: React.FC<ConfirmAttemptDialogProps> = ({
   onSubmit,
 }) => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center z-50 justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded-lg shadow-lg h-64 flex flex-col justify-center w-[30rem]">
         <h2 className="text-xl font-semibold text-center mb-2">
           Selesaikan Quiz?

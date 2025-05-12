@@ -11,7 +11,7 @@ export const PelatihankuDetail: React.FC = () => {
   const { data, isLoading, error } = useGetDetailTrainings(trainingId);
   const [openSessions, setOpenSessions] = useState<Record<string, boolean>>({});
 
-  const toggleDropdown = (sessionId: number) => {
+  const toggleDropdown = (sessionId: string) => {
     setOpenSessions((prev) => ({
       ...prev,
       [sessionId]: !prev[sessionId],

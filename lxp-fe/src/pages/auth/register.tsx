@@ -13,25 +13,12 @@ export const Register: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isValid, setIsValid] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
   const [emailError, setEmailError] = useState("");
 
   const { register } = useAuth();
 
   // Form validation
   useEffect(() => {
-    // Validate password
-    if (password) {
-      if (password.length < 8) {
-        setPasswordError("Kata sandi minimal 8 karakter");
-      } else if (confirmPassword && password !== confirmPassword) {
-        setPasswordError("Kata sandi tidak cocok");
-      } else {
-        setPasswordError("");
-      }
-    } else {
-      setPasswordError("");
-    }
 
     // Validate email
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

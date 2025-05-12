@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: ./lxp-be
+      dockerfile: Dockerfile
+    container_name: app-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./lxp-fe
+      dockerfile: Dockerfile
+    container_name: app-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    restart: unless-stopped

@@ -32,6 +32,7 @@ export interface Module {
   id: string;
   title: string;
   content: string;
+  moduleAnswer: string;
 }
 
 export interface Quiz {
@@ -44,6 +45,7 @@ export interface Task {
   id: string;
   title: string;
   taskQuestion: string;
+  taskAnswer: string;
 }
 
 export interface Meeting {
