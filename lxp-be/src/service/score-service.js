@@ -103,6 +103,7 @@ const getTrainingScores = async (user, request) => {
       title: true,
       description: true,
       meetings: {
+        orderBy: { createdAt: "asc" },
         select: {
           id: true,
           title: true,

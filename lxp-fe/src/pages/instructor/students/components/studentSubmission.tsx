@@ -339,7 +339,17 @@ const TaskSubmissions: React.FC<TaskSubmissionsProps> = ({
               Student's Answer:
             </h4>
             {submission.answer ? (
-              <p className="text-gray-800">{submission.answer}</p>
+              <button
+                onClick={() =>
+                  window.open(
+                    `http://localhost:3001/public/${submission.answer}`,
+                    "_blank"
+                  )
+                }
+                className="text-gray-800 italic underline"
+              >
+                PDF Link
+              </button>
             ) : (
               <p className="text-gray-500 italic">
                 Student hasn't submitted an answer yet.

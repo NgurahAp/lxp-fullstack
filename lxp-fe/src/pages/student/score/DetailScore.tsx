@@ -49,9 +49,6 @@ export const DetailScore = () => {
   return (
     <div className="flex flex-col md:pt-36 pt-24 md:px-24 px-4 bg-gray-100">
       <Breadcrumb items={breadcrumbItems} />
-      <div className="bg-white w-full h-14 flex items-center justify-between p-9 mt-5 rounded-xl">
-        <h1 className="md:text-lg text-sm font-semibold">Nilai</h1>
-      </div>
       <div className="bg-white w-full h-full items-center justify-between p-9 mt-5 rounded-xl mb-4">
         <h1 className="text-base md:text-xl font-semibold mb-4">
           Pelatihan Keterampilan Komunikasi
