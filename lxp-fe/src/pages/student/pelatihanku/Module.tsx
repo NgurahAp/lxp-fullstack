@@ -1,3 +1,5 @@
+"use client";
+
 import { Link, useParams } from "react-router-dom";
 import { IoDocumentText } from "react-icons/io5";
 import { ModuleSubmitDialog } from "./components/ModuleSubmitDialog";
@@ -21,7 +23,7 @@ export const Module = () => {
 
   if (error) {
     return (
-      <div className="min-h-[85vh] w-screen flex items-center justify-center">
+      <div className="min-h-[85vh] w-full flex items-center justify-center">
         Error loading data
       </div>
     );
@@ -46,109 +48,119 @@ export const Module = () => {
   ];
 
   return (
-    <div className="min-h-[85vh] w-screen flex flex-col md:pt-36 pt-24 md:px-24 px-4 bg-gray-100">
+    <div className="min-h-[85vh] w-full max-w-full flex flex-col md:pt-36 pt-24 md:px-24 px-4 bg-gray-100">
       {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
-      <div className="bg-white flex flex-col items-center mt-5 md:px-8 px-4 md:py-14 py-10 justify-center rounded-lg">
-        <h1 className="font-bold md:text-4xl text-xl md:mb-8 mb-4">
-          {data?.title}
-        </h1>
-        <div className="flex flex-col md:flex-row justify-center items-start md:gap-6 gap-16  bg-white w-full">
-          {/* Left Section */}
-          <div className="flex flex-col items-center h-full bg-white  md:p-6 p-4 w-full md:w-1/2">
-            <div className="flex flex-col items-center">
-              <img
-                src="/dashboard/empty-state.png"
-                alt="Illustration"
-                className="md:h-96 mb-1"
-              />
-              <p className="text-gray-500 text-sm md:text-lg">
-                Tidak ada video
+
+      <div className="bg-white flex flex-col mt-5 md:px-12 px-6 md:py-14 py-10 rounded-lg shadow-md">
+        {/* Module Header */}
+        <div className="flex flex-col items-center mb-10">
+          <h1 className="font-bold md:text-4xl text-2xl text-center text-gray-800 mb-4">
+            {data?.title}
+          </h1>
+          <div className="w-20 h-1 bg-blue-600 rounded-full"></div>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-10 w-full">
+          {/* Left Section - Document Content */}
+          <div className="w-full md:w-2/3 flex flex-col">
+            <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <IoDocumentText className="text-blue-600 mr-2 text-2xl flex-shrink-0" />
+                <span className="break-words">Materi Pembelajaran</span>
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Silakan pelajari dokumen materi berikut ini untuk menyelesaikan
+                modul.
               </p>
-            </div>
-            <div className="w-full flex flex-col pt-14">
-              <hr className="border-t-[1px] border-gray-300 w-full" />
-              <p className="text-gray-500 md:text-base text-sm pt-5">
-                "Tidak ada deskripsi"
-              </p>
-            </div>
-            <div className="w-full flex items-center md:pt-0 pt-4 justify-between">
-              {/* TODO */}
-              <BackLink to={`/pelatihanku/${data?.meeting.training.id}`} />
-              <Link
-                to={``}
-                className=" px-4 md:py-2 py-3 bg-blue-600 text-white rounded text-center md:text-base text-xs hover:bg-blue-700"
+
+              <button
+                onClick={() =>
+                  window.open(
+                    `http://localhost:3001/public/${data?.content}`,
+                    "_blank"
+                  )
+                }
+                className="flex items-center gap-4 w-full bg-white hover:bg-gray-50 transition-colors border border-gray-200 rounded-lg p-5 shadow-sm"
               >
-                Lanjutkan Ke Kuis
-              </Link>
-            </div>
-          </div>
-          {/* Right Section */}
-          <div className="flex flex-col h-full justify-between bg-white  p-10 w-full md:w-1/2 ">
-            <div>
-              <div className="mb-4">
-                <h2 className="text-gray-700 md:text-xl text-base font-semibold">
-                  Video
-                </h2>
-                <p className="text-gray-500 md:text-base text-sm py-5">
-                  Tidak ada video
-                </p>
-                <hr className="border-t-[1px] border-gray-300 w-full" />
-              </div>
-              <div className="mb-4">
-                <h2 className="text-gray-700 font-semibold ">Dokumen</h2>
-                <button
-                  onClick={() =>
-                    window.open(
-                      `http://localhost:3001/public/${data?.content}`,
-                      "_blank"
-                    )
-                  }
-                  className="text-gray-500 flex items-center w-full border-[1px] rounded-lg p-4 my-5 gap-3"
-                >
-                  <IoDocumentText className="text-3xl text-red-500" />
-                  <span className="md:text-base text-xs text-left">
+                <div className="flex-shrink-0 bg-red-100 p-3 rounded-lg">
+                  <IoDocumentText className="text-3xl text-red-600" />
+                </div>
+                <div className="flex flex-col flex-grow min-w-0">
+                  <span className="font-medium text-gray-800 md:text-lg text-sm truncate">
                     {data?.title}
                   </span>
-                </button>
-                <hr className="border-t-[1px] border-gray-300 w-full" />
-              </div>
-              <div className="mb-4">
-                <h2 className="text-gray-700 text-base md:text-xl font-semibold">
-                  Jurnal
-                </h2>
-                <p className="text-gray-500 md:text-base text-sm py-5">
-                  Tidak ada Jurnal
-                </p>
-                <hr className="border-t-[1px] border-gray-300 w-full" />
-              </div>
-              <div className="mb-4">
-                <h2 className="text-gray-700 text-base md:text-xl font-semibold">
-                  Artikel
-                </h2>
-                <p className="text-gray-500 md:text-base text-sm py-5">
-                  Tidak ada Artikel
-                </p>
-                <hr className="border-t-[1px] border-gray-300 w-full" />
-              </div>
+                  <span className="text-gray-500 text-xs md:text-sm">
+                    Klik untuk membuka dokumen
+                  </span>
+                </div>
+              </button>
             </div>
-            <div className="flex justify-center">
-              <div className="flex justify-center">
-                {data?.submission.answer ? (
-                  <button className="mt-4 md:px-20 px-10 py-4 flex rounded-lg items-center bg-green-500 text-base md:text-xl gap-3 text-white hover:bg-green-600">
-                    <div className="bg-white rounded-full">
-                      <FaCheck className="text-green-600 p-1 text-xl" />
-                    </div>
-                    Modul Selesai
-                  </button>
-                ) : (
-                  <ModuleSubmitDialog
-                    moduleId={data?.id}
-                    onComplete={() => {
-                      refetch();
-                    }}
-                  />
-                )}
+
+            <div className="mt-6">
+              <BackLink to={`/pelatihanku/${data?.meeting.training.id}`} />
+            </div>
+          </div>
+
+          {/* Right Section - Module Status */}
+          <div className="w-full md:w-1/3 flex flex-col">
+            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Status Modul
+              </h2>
+
+              <div className="flex items-center mb-6">
+                <div
+                  className={`w-3 h-3 rounded-full mr-2 ${
+                    data?.submission.answer ? "bg-green-500" : "bg-yellow-500"
+                  }`}
+                ></div>
+                <span className="text-gray-700">
+                  {data?.submission.answer ? "Selesai" : "Belum Selesai"}
+                </span>
+              </div>
+
+              {data?.submission.answer ? (
+                <button className="w-full py-3 flex justify-center items-center rounded-lg bg-green-500 text-white gap-2 hover:bg-green-600 transition-colors">
+                  <FaCheck className="text-sm" />
+                  <span>Modul Selesai</span>
+                </button>
+              ) : (
+                <ModuleSubmitDialog
+                  moduleId={data?.id}
+                  onComplete={() => {
+                    refetch();
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex flex-col gap-3">
+              <div className="mt-6 text-right">
+                <p className="text-gray-500 text-sm mb-1">
+                  Setelah mempelajari materi
+                </p>
+                <Link
+                  to={``}
+                  className="text-blue-600 hover:text-blue-800 font-medium text-lg inline-flex items-center gap-1 transition-colors"
+                >
+                  Lanjutkan ke Kuis
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="flex-shrink-0"
+                  >
+                    <path d="m9 18 6-6-6-6"></path>
+                  </svg>
+                </Link>
               </div>
             </div>
           </div>

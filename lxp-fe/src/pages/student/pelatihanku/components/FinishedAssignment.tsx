@@ -73,7 +73,7 @@ export const FinishedAssignment: React.FC<OngoingStatusProps> = ({
                     rel="noopener noreferrer"
                   >
                     <img src="/penugasan/pdf.png" className="w-8 mr-3" alt="" />{" "}
-                    Answer
+                    Jawaban
                   </a>
             </td>
             <td className="p-4 bg-gray-50">

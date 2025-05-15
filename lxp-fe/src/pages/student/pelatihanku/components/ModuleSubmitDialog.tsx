@@ -80,7 +80,7 @@ export const ModuleSubmitDialog: React.FC<ModuleSubmitDialogProps> = ({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="mt-4 px-20 py-4 flex rounded-lg items-center bg-blue-600 text-xl gap-2 text-white hover:bg-blue-700"
+        className="mt-4 px-20 py-4 flex rounded-lg items-center bg-blue-600 text-md gap-1 text-white hover:bg-blue-700"
       >
         <RiFileEditLine className="text-white text-2xl" />
         Selesaikan Modul

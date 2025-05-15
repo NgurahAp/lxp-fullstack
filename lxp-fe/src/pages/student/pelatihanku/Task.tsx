@@ -46,7 +46,7 @@ export const Task = () => {
   ];
 
   return (
-    <div className="min-h-[85vh] w-screen flex flex-col md:pt-36 pt-24 md:px-24 px-4 bg-gray-100">
+    <div className="min-h-[85vh] w-full flex flex-col md:pt-36 pt-24 md:px-24 px-4 bg-gray-100">
       <Breadcrumb items={breadcrumbItems} />
       <PageInfo title={data?.title} />
       <div className="bg-white mt-5 w-full p-8 h-full rounded-lg">

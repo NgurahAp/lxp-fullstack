@@ -46,7 +46,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
                 },
                 {
                   icon: "/dashboard/poin-avg.png",
-                  value: user.overallAverageScore,
+                  // value: user.overallAverageScore,
+                  value: 0,
                   label: "Rata-rata",
                 },
               ].map((item, index) => (
