@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { FaCheckCircle, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaCheckCircle, FaChevronDown, FaChevronUp, FaLock } from "react-icons/fa";
 import { useState } from "react";
 import { Breadcrumb } from "../../../Components/BreadCrumbs";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
@@ -11,7 +11,12 @@ export const PelatihankuDetail: React.FC = () => {
   const { data, isLoading, error } = useGetDetailTrainings(trainingId);
   const [openSessions, setOpenSessions] = useState<Record<string, boolean>>({});
 
-  const toggleDropdown = (sessionId: string) => {
+  const toggleDropdown = (sessionId: string, isLocked: boolean) => {
+    // Prevent toggling locked sessions
+    if (isLocked) {
+      return;
+    }
+    
     setOpenSessions((prev) => ({
       ...prev,
       [sessionId]: !prev[sessionId],
@@ -74,6 +79,26 @@ export const PelatihankuDetail: React.FC = () => {
     </div>
   );
 
+  // Show previous meeting requirement tooltip
+  const renderLockedMessage = (index: number) => {
+    if (index === 0) return null;
+    const previousMeeting = data?.meetings[index - 1];
+    
+    return (
+      <div className="bg-yellow-50 p-3 border border-yellow-200 rounded-b-lg text-sm text-yellow-700">
+        <p className="flex items-center">
+          <FaLock className="mr-2" /> 
+          Selesaikan semua materi pada {previousMeeting?.title} untuk membuka sesi ini:
+        </p>
+        <ul className="ml-8 mt-1 list-disc text-xs">
+          <li>Semua modul harus dikerjakan</li>
+          <li>Nilai quiz minimal 80</li>
+          <li>Semua tugas harus dikerjakan</li>
+        </ul>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return <LoadingSpinner text="Loading..." />;
   }
@@ -133,18 +158,34 @@ export const PelatihankuDetail: React.FC = () => {
 
       {/* Pertemuan Section */}
       <div className="mt-6">
-        {data?.meetings.map((session) => (
+        {data?.meetings.map((session, index) => (
           <div key={session.id} className="mb-4">
             <div className="mx-auto my-4 bg-white rounded-lg shadow">
               <button
-                onClick={() => toggleDropdown(session.id)}
-                className="w-full flex justify-between text-sm text-left items-center bg-blue-500 text-white px-4 py-5 rounded-t-lg"
+                onClick={() => toggleDropdown(session.id, session.isLocked)}
+                disabled={session.isLocked}
+                className={`w-full flex justify-between text-sm text-left items-center px-4 py-5 rounded-t-lg ${
+                  session.isLocked 
+                    ? "bg-gray-400 cursor-not-allowed" 
+                    : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                } text-white`}
               >
-                <span className="pr-5">{session.title}</span>
-                {openSessions[session.id] ? <FaChevronUp /> : <FaChevronDown />}
+                <div className="flex items-center">
+                  {session.isLocked && (
+                    <FaLock className="mr-2 text-white animate-pulse" />
+                  )}
+                  <span className="pr-5">{session.title}</span>
+                </div>
+                {session.isLocked ? null : (
+                  openSessions[session.id] ? <FaChevronUp /> : <FaChevronDown />
+                )}
               </button>
 
-              {openSessions[session.id] && renderSessionContent(session)}
+              {/* Show locked message for locked meetings */}
+              {session.isLocked && renderLockedMessage(index)}
+              
+              {/* Show meeting content only if unlocked and open */}
+              {!session.isLocked && openSessions[session.id] && renderSessionContent(session)}
             </div>
           </div>
         ))}

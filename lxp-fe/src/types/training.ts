@@ -57,6 +57,8 @@ export interface Meeting {
   modules: Module[];
   quizzes: Quiz[];
   tasks: Task[];
+  isLocked: boolean;
+  isCompleted: boolean;
 }
 
 interface Count {
