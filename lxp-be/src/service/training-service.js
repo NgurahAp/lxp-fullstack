@@ -423,7 +423,7 @@ const getTrainingDetail = async (user, trainingId) => {
   });
 
   if (!trainingUser) {
-    throw new ResponseError(403, "You dont have access to this training");
+    throw new ResponseError(403, "You don't have access to this training");
   }
 
   // Get training details with meetings
@@ -517,24 +517,51 @@ const getTrainingDetail = async (user, trainingId) => {
     throw new ResponseError(404, "Training not found");
   }
 
-  // Transform the data to format that matches the old structure but with submissions data
-  const transformedTraining = {
-    ...training,
-    meetings: training.meetings.map((meeting) => ({
+  // Add logic to determine if a meeting should be locked based on previous meeting completion
+  const meetingsWithLockStatus = [];
+  let previousMeetingCompleted = true; // First meeting is always unlocked
+
+  for (let i = 0; i < training.meetings.length; i++) {
+    const meeting = training.meetings[i];
+    
+    // Determine if this meeting should be locked
+    const isLocked = i > 0 && !previousMeetingCompleted;
+    
+    // Calculate completion status for current meeting based on specific criteria
+    const allModulesCompleted = meeting.modules.every(module => 
+      module.submissions.length > 0 && module.submissions[0]?.answer !== null
+    );
+    
+    const allQuizzesCompleted = meeting.quizzes.every(quiz => 
+      quiz.submissions.length > 0 && (quiz.submissions[0]?.score >= 80)
+    );
+    
+    const allTasksCompleted = meeting.tasks.every(task => 
+      task.submissions.length > 0 && task.submissions[0]?.answer !== null
+    );
+    
+    // Current meeting is considered complete if all modules, quizzes, and tasks meet the criteria
+    const isMeetingCompleted = allModulesCompleted && allQuizzesCompleted && allTasksCompleted;
+    
+    // Store the completion status for the next iteration
+    previousMeetingCompleted = isMeetingCompleted;
+
+    // Transform meeting data with lock status
+    meetingsWithLockStatus.push({
       ...meeting,
+      isLocked: isLocked,
+      isCompleted: isMeetingCompleted,
       modules: meeting.modules.map((module) => ({
         id: module.id,
         title: module.title,
         moduleAnswer: module.submissions[0]?.answer || null,
         moduleScore: module.submissions[0]?.score || 0,
-        hasSubmission: module.submissions.length > 0,
         submissionId: module.submissions[0]?.id || null,
       })),
       quizzes: meeting.quizzes.map((quiz) => ({
         id: quiz.id,
         title: quiz.title,
         quizScore: quiz.submissions[0]?.score || 0,
-        hasSubmission: quiz.submissions.length > 0,
         submissionId: quiz.submissions[0]?.id || null,
       })),
       tasks: meeting.tasks.map((task) => ({
@@ -542,10 +569,15 @@ const getTrainingDetail = async (user, trainingId) => {
         title: task.title,
         taskAnswer: task.submissions[0]?.answer || null,
         taskScore: task.submissions[0]?.score || 0,
-        hasSubmission: task.submissions.length > 0,
         submissionId: task.submissions[0]?.id || null,
       })),
-    })),
+    });
+  }
+
+  // Create the transformed training object with the updated meetings
+  const transformedTraining = {
+    ...training,
+    meetings: meetingsWithLockStatus,
   };
 
   return {
