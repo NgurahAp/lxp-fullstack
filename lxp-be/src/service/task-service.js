@@ -11,6 +11,7 @@ import {
 import { validate } from "../validation/validation.js";
 import path from "path";
 import fs from "fs";
+import trainingService from "./training-service.js";
 
 const createTask = async (user, meetingId, request) => {
   const task = validate(createTaskValidation, request);
@@ -75,6 +76,7 @@ const submitTask = async (user, taskId, file) => {
               users: {
                 where: {
                   userId: user.id,
+                  status: "enrolled",
                 },
               },
             },
@@ -88,18 +90,30 @@ const submitTask = async (user, taskId, file) => {
     throw new ResponseError(404, "Task not found");
   }
 
-  if (!file) {
-    throw new ResponseError(400, "PDF File is required");
+  if (task.meeting.training.users.length === 0) {
+    throw new ResponseError(403, "You are not enrolled in this training");
   }
 
-  // Extract just the relative path from /tasks/ onwards
+  if (!file) {
+    throw new ResponseError(400, "File is required");
+  }
+
+  // Validate file type
+  const allowedExtensions = ['.pdf', '.doc', '.docx'];
+  const fileExtension = path.extname(file.originalname || file.path).toLowerCase();
+  
+  if (!allowedExtensions.includes(fileExtension)) {
+    throw new ResponseError(400, "Only PDF, DOC, and DOCX files are allowed");
+  }
+
   const relativePath = "tasks/" + path.basename(file.path);
 
-  // Get the training user record (we need this ID for the submission)
+  // Get the training user record
   const trainingUser = await prismaClient.training_Users.findFirst({
     where: {
       userId: user.id,
       trainingId: task.meeting.training.id,
+      status: "enrolled",
     },
   });
 
@@ -107,78 +121,117 @@ const submitTask = async (user, taskId, file) => {
     throw new ResponseError(404, "You're not enrolled in this training");
   }
 
-  const existingSubmission = await prismaClient.taskSubmission.findFirst({
-    where: {
-      taskId: taskId,
-      trainingUserId: trainingUser.id,
-    },
-  });
-
-  let submission;
-
-  if (existingSubmission) {
-    submission = await prismaClient.taskSubmission.update({
+  return prismaClient.$transaction(async (tx) => {
+    const existingSubmission = await tx.taskSubmission.findFirst({
       where: {
-        id: existingSubmission.id,
-      },
-      data: {
-        answer: relativePath,
-        updatedAt: new Date(),
-      },
-      include: {
-        task: {
-          include: {
-            meeting: {
-              include: {
-                training: true,
-              },
-            },
-          },
-        },
-      },
-    });
-  } else {
-    submission = await prismaClient.taskSubmission.create({
-      data: {
         taskId: taskId,
         trainingUserId: trainingUser.id,
-        answer: relativePath,
       },
-      include: {
-        task: {
-          include: {
-            meeting: {
-              include: {
-                training: true,
+    });
+
+    let submission;
+
+    if (existingSubmission) {
+      submission = await tx.taskSubmission.update({
+        where: {
+          id: existingSubmission.id,
+        },
+        data: {
+          answer: relativePath,
+          updatedAt: new Date(),
+        },
+        include: {
+          task: {
+            include: {
+              meeting: {
+                include: {
+                  training: true,
+                },
               },
             },
           },
         },
+      });
+    } else {
+      submission = await tx.taskSubmission.create({
+        data: {
+          taskId: taskId,
+          trainingUserId: trainingUser.id,
+          answer: relativePath,
+        },
+        include: {
+          task: {
+            include: {
+              meeting: {
+                include: {
+                  training: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    // Update task score in the scores table
+    const existingScore = await tx.score.findFirst({
+      where: {
+        trainingUserId: trainingUser.id,
+        meetingId: task.meetingId,
       },
     });
-  }
 
-  return {
-    id: submission.id,
-    taskId: submission.taskId,
-    answer: submission.answer,
-    score: submission.score,
-    createdAt: submission.createdAt,
-    updatedAt: submission.updatedAt,
-    task: {
-      id: submission.task.id,
-      title: submission.task.title,
-      meetingId: submission.task.meetingId,
-      meeting: {
-        id: submission.task.meeting.id,
-        title: submission.task.meeting.title,
-        training: {
-          id: submission.task.meeting.training.id,
-          title: submission.task.meeting.training.title,
+    if (existingScore) {
+      const totalScore = Math.round(
+        (existingScore.moduleScore + existingScore.quizScore + submission.score) / 3
+      );
+      
+      await tx.score.update({
+        where: { id: existingScore.id },
+        data: {
+          taskScore: submission.score,
+          totalScore: totalScore,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      await tx.score.create({
+        data: {
+          trainingUserId: trainingUser.id,
+          meetingId: task.meetingId,
+          taskScore: submission.score,
+          totalScore: Math.round(submission.score / 3),
+        },
+      });
+    }
+
+    // Check and update training completion status
+    const isCompleted = await trainingService.checkAndUpdateTrainingCompletion(trainingUser.id, tx);
+
+    return {
+      id: submission.id,
+      taskId: submission.taskId,
+      answer: submission.answer,
+      score: submission.score,
+      createdAt: submission.createdAt,
+      updatedAt: submission.updatedAt,
+      trainingCompleted: isCompleted, // Add this to response
+      task: {
+        id: submission.task.id,
+        title: submission.task.title,
+        taskQuestion: submission.task.taskQuestion,
+        meetingId: submission.task.meetingId,
+        meeting: {
+          id: submission.task.meeting.id,
+          title: submission.task.meeting.title,
+          training: {
+            id: submission.task.meeting.training.id,
+            title: submission.task.meeting.training.title,
+          },
         },
       },
-    },
-  };
+    };
+  });
 };
 
 const getDetailTask = async (user, request) => {

@@ -812,6 +812,88 @@ const removeTraining = async (user, trainingId) => {
   });
 };
 
+const checkAndUpdateTrainingCompletion = async (trainingUserId, tx = prismaClient) => {
+  // Get training user with related data
+  const trainingUser = await tx.training_Users.findUnique({
+    where: { id: trainingUserId },
+    include: {
+      training: {
+        include: {
+          meetings: {
+            include: {
+              modules: true,
+              quizzes: true,
+              tasks: true
+            }
+          }
+        }
+      },
+      moduleSubmissions: {
+        where: {
+          answer: {
+            not: null
+          }
+        }
+      },
+      quizSubmissions: {
+        where: {
+          score: {
+            gte: 0 // Score bisa 0, yang penting tidak null
+          }
+        }
+      },
+      taskSubmissions: {
+        where: {
+          answer: {
+            not: null
+          }
+        }
+      }
+    }
+  });
+
+  if (!trainingUser) {
+    return false;
+  }
+
+  // Get all module, quiz, and task IDs from all meetings
+  const allModuleIds = [];
+  const allQuizIds = [];
+  const allTaskIds = [];
+
+  trainingUser.training.meetings.forEach(meeting => {
+    meeting.modules.forEach(module => allModuleIds.push(module.id));
+    meeting.quizzes.forEach(quiz => allQuizIds.push(quiz.id));
+    meeting.tasks.forEach(task => allTaskIds.push(task.id));
+  });
+
+  // Get submitted module, quiz, and task IDs (with actual answers/scores)
+  const submittedModuleIds = trainingUser.moduleSubmissions.map(sub => sub.moduleId);
+  const submittedQuizIds = trainingUser.quizSubmissions.map(sub => sub.quizId);
+  const submittedTaskIds = trainingUser.taskSubmissions.map(sub => sub.taskId);
+
+  // Check if all required submissions are complete
+  const allModulesCompleted = allModuleIds.every(id => submittedModuleIds.includes(id));
+  const allQuizzesCompleted = allQuizIds.every(id => submittedQuizIds.includes(id));
+  const allTasksCompleted = allTaskIds.every(id => submittedTaskIds.includes(id));
+
+  const allSubmissionsComplete = allModulesCompleted && allQuizzesCompleted && allTasksCompleted;
+
+  // Update status if all submissions are complete
+  if (allSubmissionsComplete && trainingUser.status === 'enrolled') {
+    await tx.training_Users.update({
+      where: { id: trainingUserId },
+      data: { 
+        status: 'completed',
+        updatedAt: new Date()
+      }
+    });
+    return true;
+  }
+
+  return false;
+};
+
 export default {
   createTraining,
   createTrainingUser,
@@ -821,4 +903,5 @@ export default {
   getInstructorTrainingDetail,
   updateTraining,
   removeTraining,
+  checkAndUpdateTrainingCompletion
 };

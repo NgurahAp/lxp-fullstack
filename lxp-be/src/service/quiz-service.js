@@ -9,6 +9,7 @@ import {
   updateQuizValidation,
 } from "../validation/quiz-validation.js";
 import { validate } from "../validation/validation.js";
+import trainingService from "./training-service.js";
 
 const createQuiz = async (user, meetingId, request) => {
   const quiz = validate(createQuizValidation, request);
@@ -63,7 +64,7 @@ const createQuiz = async (user, meetingId, request) => {
 };
 
 const submitQuiz = async (user, quizId, request) => {
-  const { answers, trainingUserId } = validate(submitQuizValidation, request);
+  const { answers } = validate(submitQuizValidation, request);
 
   // Check if the quiz exists
   const quiz = await prismaClient.quiz.findUnique({
@@ -90,16 +91,24 @@ const submitQuiz = async (user, quizId, request) => {
     throw new ResponseError(404, "Quiz not found");
   }
 
-  // Check if user is enrolled in the training
   if (quiz.meeting.training.users.length === 0) {
     throw new ResponseError(403, "You are not enrolled in this training");
   }
 
+  // Get trainingUserId
+  const trainingUser = quiz.meeting.training.users[0];
+  const trainingUserId = trainingUser.id;
+
   const questions = quiz.questions;
+  
+  if (!questions || questions.length === 0) {
+    throw new ResponseError(400, "Quiz has no questions");
+  }
+
   const scorePerQuestion = 100 / questions.length;
   let quizScore = 0;
 
-  // Calculate score based on correct answers
+  // Calculate score
   answers.forEach((answer) => {
     const question = questions[answer.questionIndex];
     if (question && question.correctAnswer === answer.selectedAnswer) {
@@ -107,7 +116,6 @@ const submitQuiz = async (user, quizId, request) => {
     }
   });
 
-  // Round the score to nearest integer
   quizScore = Math.round(quizScore);
 
   return prismaClient.$transaction(async (tx) => {
@@ -121,6 +129,7 @@ const submitQuiz = async (user, quizId, request) => {
         data: {
           answers: answers,
           score: quizScore,
+          updatedAt: new Date(),
         },
       });
     } else {
@@ -134,6 +143,7 @@ const submitQuiz = async (user, quizId, request) => {
       });
     }
 
+    // Update score table
     const existingScore = await tx.score.findFirst({
       where: {
         trainingUserId: trainingUserId,
@@ -142,18 +152,16 @@ const submitQuiz = async (user, quizId, request) => {
     });
 
     if (existingScore) {
+      const totalScore = Math.round(
+        (existingScore.moduleScore + quizScore + existingScore.taskScore) / 3
+      );
+      
       await tx.score.update({
-        where: {
-          id: existingScore.id,
-        },
+        where: { id: existingScore.id },
         data: {
           quizScore: quizScore,
-          totalScore: Math.round(
-            (existingScore.quizScore +
-              quizScore +
-              (existingScore.taskScore || 0)) /
-              3
-          ),
+          totalScore: totalScore,
+          updatedAt: new Date(),
         },
       });
     } else {
@@ -162,10 +170,13 @@ const submitQuiz = async (user, quizId, request) => {
           trainingUserId: trainingUserId,
           meetingId: quiz.meetingId,
           quizScore: quizScore,
-          totalScore: Math.round(quizScore / 3), // default calculation
+          totalScore: Math.round(quizScore / 3),
         },
       });
     }
+
+    // Check and update training completion status
+    const isCompleted = await trainingService.checkAndUpdateTrainingCompletion(trainingUserId, tx);
 
     return {
       id: quiz.id,
@@ -174,8 +185,10 @@ const submitQuiz = async (user, quizId, request) => {
       submission: {
         id: submission.id,
         trainingUserId: submission.trainingUserId,
+        answers: submission.answers,
         score: quizScore,
       },
+      trainingCompleted: isCompleted, // Add this to response
       meeting: {
         id: quiz.meeting.id,
         title: quiz.meeting.title,
@@ -189,7 +202,6 @@ const submitQuiz = async (user, quizId, request) => {
     };
   });
 };
-
 const getDetailQuiz = async (user, request) => {
   const validationResult = validate(getDetailQuizValidation, request);
   const { meetingId, quizId } = validationResult;

@@ -11,6 +11,7 @@ import {
 import fs from "fs";
 import path from "path";
 import { validate } from "../validation/validation.js";
+import trainingService from "./training-service.js";
 
 const createModule = async (user, meetingId, request, file) => {
   const module = validate(createModuleValidation, request);
@@ -103,11 +104,12 @@ const submitModuleAnswer = async (user, moduleId, request) => {
     );
   }
 
-  // Get the training user record (we need this ID for the submission)
+  // Get the training user record
   const trainingUser = await prismaClient.training_Users.findFirst({
     where: {
       userId: user.id,
       trainingId: module.meeting.training.id,
+      status: "enrolled",
     },
   });
 
@@ -115,83 +117,86 @@ const submitModuleAnswer = async (user, moduleId, request) => {
     throw new ResponseError(404, "You're not enrolled in this training");
   }
 
-  // Check if there's an existing submission
-  const existingSubmission = await prismaClient.moduleSubmission.findFirst({
-    where: {
-      moduleId: moduleId,
-      trainingUserId: trainingUser.id,
-    },
-  });
-
-  let submission;
-
-  // Update or create submission
-  if (existingSubmission) {
-    // Update existing submission
-    submission = await prismaClient.moduleSubmission.update({
+  return prismaClient.$transaction(async (tx) => {
+    // Check if there's an existing submission
+    const existingSubmission = await tx.moduleSubmission.findFirst({
       where: {
-        id: existingSubmission.id,
-      },
-      data: {
-        answer: answer,
-        updatedAt: new Date(),
-      },
-      include: {
-        module: {
-          include: {
-            meeting: {
-              include: {
-                training: true,
-              },
-            },
-          },
-        },
-      },
-    });
-  } else {
-    // Create new submission
-    submission = await prismaClient.moduleSubmission.create({
-      data: {
         moduleId: moduleId,
         trainingUserId: trainingUser.id,
-        answer: answer,
       },
-      include: {
-        module: {
-          include: {
-            meeting: {
-              include: {
-                training: true,
+    });
+
+    let submission;
+
+    // Update or create submission
+    if (existingSubmission) {
+      submission = await tx.moduleSubmission.update({
+        where: {
+          id: existingSubmission.id,
+        },
+        data: {
+          answer: answer,
+          updatedAt: new Date(),
+        },
+        include: {
+          module: {
+            include: {
+              meeting: {
+                include: {
+                  training: true,
+                },
               },
             },
           },
         },
-      },
-    });
-  }
+      });
+    } else {
+      submission = await tx.moduleSubmission.create({
+        data: {
+          moduleId: moduleId,
+          trainingUserId: trainingUser.id,
+          answer: answer,
+        },
+        include: {
+          module: {
+            include: {
+              meeting: {
+                include: {
+                  training: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    }
 
-  // Return relevant data
-  return {
-    id: submission.id,
-    moduleId: submission.moduleId,
-    answer: submission.answer,
-    score: submission.score,
-    createdAt: submission.createdAt,
-    updatedAt: submission.updatedAt,
-    module: {
-      id: submission.module.id,
-      title: submission.module.title,
-      meetingId: submission.module.meetingId,
-      meeting: {
-        id: submission.module.meeting.id,
-        title: submission.module.meeting.title,
-        training: {
-          id: submission.module.meeting.training.id,
-          title: submission.module.meeting.training.title,
+    // Check and update training completion status
+    const isCompleted = await trainingService.checkAndUpdateTrainingCompletion(trainingUser.id, tx);
+
+    return {
+      id: submission.id,
+      moduleId: submission.moduleId,
+      answer: submission.answer,
+      score: submission.score,
+      createdAt: submission.createdAt,
+      updatedAt: submission.updatedAt,
+      trainingCompleted: isCompleted, // Add this to response
+      module: {
+        id: submission.module.id,
+        title: submission.module.title,
+        meetingId: submission.module.meetingId,
+        meeting: {
+          id: submission.module.meeting.id,
+          title: submission.module.meeting.title,
+          training: {
+            id: submission.module.meeting.training.id,
+            title: submission.module.meeting.training.title,
+          },
         },
       },
-    },
-  };
+    };
+  });
 };
 
 const getModuleDetail = async (user, request) => {
