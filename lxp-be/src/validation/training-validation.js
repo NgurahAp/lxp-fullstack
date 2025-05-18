@@ -16,7 +16,7 @@ const createTrainingUserValidation = Joi.object({
 const getStudentTrainingsValidation = Joi.object({
   page: Joi.number().min(1).default(1),
   size: Joi.number().min(1).max(50).default(10),
-  status: Joi.number().valid("enrolled", "completed", "dropped").optional(),
+  status: Joi.string().valid("enrolled", "completed", "dropped").optional(),
 });
 
 const getInstructorTrainingsValidation = Joi.object({

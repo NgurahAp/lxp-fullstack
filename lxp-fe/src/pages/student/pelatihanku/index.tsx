@@ -43,7 +43,7 @@ export const Pelatihanku = () => {
     [];
 
   const trainingCompleted =
-    trainingsData.filter((item: TrainingData) => item?.status === "complete") ||
+    trainingsData.filter((item: TrainingData) => item?.status === "completed") ||
     [];
 
   const renderTraining = (trainings: TrainingData[]) => {
