@@ -11,6 +11,9 @@ import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response-error.js";
 import path from "path";
 import fs from "fs";
+import { createCanvas, loadImage, registerFont } from "canvas";
+import { v4 as uuidv4 } from "uuid";
+import moment from "moment";
 
 const createTraining = async (user, request, file) => {
   const training = validate(createTrainingValidation, request);
@@ -812,7 +815,15 @@ const removeTraining = async (user, trainingId) => {
   });
 };
 
+/**
+ * Check and update training completion status, generate certificate if needed
+ * @param {string} trainingUserId - Training User ID
+ * @param {object} tx - Prisma transaction object (optional)
+ * @returns {Promise<boolean>} - Whether the training was completed
+ */
 const checkAndUpdateTrainingCompletion = async (trainingUserId, tx = prismaClient) => {
+  console.log(`Checking completion for training user: ${trainingUserId}`);
+  
   // Get training user with related data
   const trainingUser = await tx.training_Users.findUnique({
     where: { id: trainingUserId },
@@ -828,6 +839,7 @@ const checkAndUpdateTrainingCompletion = async (trainingUserId, tx = prismaClien
           }
         }
       },
+      user: true, // Include user data to get the name
       moduleSubmissions: {
         where: {
           answer: {
@@ -848,13 +860,17 @@ const checkAndUpdateTrainingCompletion = async (trainingUserId, tx = prismaClien
             not: null
           }
         }
-      }
+      },
+      scores: true // Include scores to calculate final score
     }
   });
 
   if (!trainingUser) {
+    console.log(`Training user ${trainingUserId} not found`);
     return false;
   }
+
+  console.log(`Found training user: ${trainingUser.id} for training: ${trainingUser.trainingId}`);
 
   // Get all module, quiz, and task IDs from all meetings
   const allModuleIds = [];
@@ -867,10 +883,14 @@ const checkAndUpdateTrainingCompletion = async (trainingUserId, tx = prismaClien
     meeting.tasks.forEach(task => allTaskIds.push(task.id));
   });
 
+  console.log(`Total requirements - Modules: ${allModuleIds.length}, Quizzes: ${allQuizIds.length}, Tasks: ${allTaskIds.length}`);
+
   // Get submitted module, quiz, and task IDs (with actual answers/scores)
   const submittedModuleIds = trainingUser.moduleSubmissions.map(sub => sub.moduleId);
   const submittedQuizIds = trainingUser.quizSubmissions.map(sub => sub.quizId);
   const submittedTaskIds = trainingUser.taskSubmissions.map(sub => sub.taskId);
+
+  console.log(`Completed - Modules: ${submittedModuleIds.length}, Quizzes: ${submittedQuizIds.length}, Tasks: ${submittedTaskIds.length}`);
 
   // Check if all required submissions are complete
   const allModulesCompleted = allModuleIds.every(id => submittedModuleIds.includes(id));
@@ -878,9 +898,12 @@ const checkAndUpdateTrainingCompletion = async (trainingUserId, tx = prismaClien
   const allTasksCompleted = allTaskIds.every(id => submittedTaskIds.includes(id));
 
   const allSubmissionsComplete = allModulesCompleted && allQuizzesCompleted && allTasksCompleted;
+  console.log(`All submissions complete: ${allSubmissionsComplete}`);
 
   // Update status if all submissions are complete
   if (allSubmissionsComplete && trainingUser.status === 'enrolled') {
+    console.log(`Updating status to completed for training user ${trainingUserId}`);
+    
     await tx.training_Users.update({
       where: { id: trainingUserId },
       data: { 
@@ -888,10 +911,260 @@ const checkAndUpdateTrainingCompletion = async (trainingUserId, tx = prismaClien
         updatedAt: new Date()
       }
     });
+    
+    // Calculate final score from all scores
+    const finalScore = calculateFinalScore(trainingUser.scores);
+    console.log(`Final score calculated: ${finalScore}`);
+    
+    // Check if the final score meets the minimum required for certification
+    const minimumScore =  5;
+    console.log(`Minimum score required: ${minimumScore}`);
+    
+    if (finalScore >= minimumScore) {
+      console.log(`Score meets requirements. Generating certificate...`);
+      try {
+        // Generate certificate
+        const certificate = await generateAndSaveCertificate(
+          trainingUser.user.id,
+          trainingUser.training.id,
+          trainingUser.user.name,
+          trainingUser.training.title,
+          finalScore,
+          tx
+        );
+        console.log(`Certificate generated successfully: ${certificate.id}`);
+      } catch (error) {
+        console.error('Failed to generate certificate:', error);
+      }
+    } else {
+      console.log(`Score does not meet minimum requirements for certification`);
+    }
+    
     return true;
   }
 
   return false;
+};
+
+/**
+ * Calculate the final score from all the scores
+ * @param {Array} scores - Array of score objects
+ * @returns {number} - The final score
+ */
+const calculateFinalScore = (scores) => {
+  if (!scores || scores.length === 0) return 0;
+  
+  // Calculate average of totalScores
+  const totalScoreSum = scores.reduce((sum, score) => sum + score.totalScore, 0);
+  return Math.round(totalScoreSum / scores.length);
+};
+
+/**
+ * Generate certificate image and save to database
+ * @param {string} userId - User ID
+ * @param {string} trainingId - Training ID
+ * @param {string} userName - User's full name
+ * @param {string} trainingTitle - Training title
+ * @param {number} finalScore - Final score achieved
+ * @param {object} tx - Prisma transaction object
+ * @returns {Promise<object>} - The created certificate
+ */
+const generateAndSaveCertificate = async (userId, trainingId, userName, trainingTitle, finalScore, tx) => {
+  try {
+    console.log(`Generating certificate for user ${userId} in training ${trainingId}`);
+    
+    // Check if certificate already exists
+    const existingCertificate = await tx.certificate.findUnique({
+      where: {
+        trainingId_userId: {
+          trainingId,
+          userId
+        }
+      }
+    });
+
+    if (existingCertificate) {
+      console.log(`Certificate already exists: ${existingCertificate.id}`);
+      return existingCertificate;
+    }
+    
+    // Generate a unique certificate number
+    const certificateNumber = generateCertificateNumber();
+    console.log(`Generated certificate number: ${certificateNumber}`);
+    
+    // Generate the certificate image
+    const certificatePath = await createCertificateImage(userName, trainingTitle, certificateNumber);
+    console.log(`Certificate image created at: ${certificatePath}`);
+    
+    // Save certificate to database
+    const certificate = await tx.certificate.create({
+      data: {
+        certificateNumber,
+        trainingId,
+        userId,
+        issuedDate: new Date(),
+        expiryDate: getExpiryDate(),
+        finalScore,
+        status: 'active',
+        filePath: certificatePath,
+        metadata: {
+          generatedAt: new Date().toISOString(),
+          template: 'standard'
+        }
+      }
+    });
+    
+    console.log(`Certificate saved to database with ID: ${certificate.id}`);
+    return certificate;
+  } catch (error) {
+    console.error('Error generating certificate:', error);
+    throw error;
+  }
+};
+
+/**
+ * Generate a unique certificate number
+ * @returns {string} - Certificate number
+ */
+const generateCertificateNumber = () => {
+  const prefix = 'KG/CERT';
+  const date = moment().format('YYYY/MM/DD');
+  const random = Math.floor(Math.random() * 10000000000000).toString().padStart(13, '0');
+  return `${prefix}/${date}/${random}`;
+};
+
+/**
+ * Get expiry date (1 year from now)
+ * @returns {Date} - Expiry date
+ */
+const getExpiryDate = () => {
+  const expiryDate = new Date();
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+  return expiryDate;
+};
+
+/**
+ * Create certificate image from template
+ * @param {string} userName - User's full name
+ * @param {string} trainingTitle - Training title
+ * @param {string} certificateNumber - Certificate number
+ * @returns {Promise<string>} - Path to saved certificate image
+ */
+const createCertificateImage = async (userName, trainingTitle, certificateNumber) => {
+  try {
+    console.log('Creating certificate image...');
+    
+    // Register the Poppins font
+    try {
+      // Resolve font path using runtime path resolution
+      const fontPath = path.resolve(process.cwd(), 'fonts', 'Poppins-Regular.ttf');
+      console.log(`Looking for font at: ${fontPath}`);
+      
+      if (fs.existsSync(fontPath)) {
+        console.log('Font file exists, registering...');
+        registerFont(fontPath, { family: 'Poppins' });
+      } else {
+        console.log('Font file not found, using fallback fonts');
+        // We'll use a fallback font in the font settings
+      }
+    } catch (fontError) {
+      console.error('Error registering font:', fontError);
+      // Continue with default fonts
+    }
+    
+    // Try multiple locations for the template file
+    let template;
+    const possibleTemplatePaths = [
+      path.resolve(process.cwd(), 'public', 'certif.jpeg'),
+      path.resolve(process.cwd(), 'src', 'public', 'certif.jpeg'),
+      path.resolve(process.cwd(), '..', 'public', 'certif.jpeg')
+    ];
+    
+    console.log('Trying to locate certificate template...');
+    for (const templatePath of possibleTemplatePaths) {
+      console.log(`Checking path: ${templatePath}`);
+      if (fs.existsSync(templatePath)) {
+        console.log(`Template found at: ${templatePath}`);
+        template = await loadImage(templatePath);
+        break;
+      }
+    }
+    
+    if (!template) {
+      throw new Error('Certificate template not found in any of the expected locations');
+    }
+    
+    // Create canvas with template dimensions
+    const canvas = createCanvas(template.width, template.height);
+    const ctx = canvas.getContext('2d');
+    
+    // Draw template image
+    ctx.drawImage(template, 0, 0, template.width, template.height);
+    
+    // Set font styles
+    const fontFamily = 'Poppins, Arial, sans-serif';
+    
+    // Draw certificate ID
+    ctx.font = `bold 16px ${fontFamily}`;
+    ctx.fillStyle = '#333333';
+    ctx.textAlign = 'center';
+    ctx.fillText(certificateNumber, template.width / 2, 240);
+    
+    // Draw participant name
+    ctx.font = `bold 24px ${fontFamily}`;
+    ctx.fillStyle = '#333333';
+    ctx.textAlign = 'center';
+    ctx.fillText(userName, template.width / 2, 380);
+    
+    // Draw training title
+    ctx.font = `18px ${fontFamily}`;
+    ctx.fillStyle = '#333333';
+    ctx.textAlign = 'center';
+    ctx.fillText(trainingTitle, template.width / 2, 520);
+    
+    // Draw current date
+    const currentDate = moment().format('DD MMMM YYYY');
+    ctx.font = `16px ${fontFamily}`;
+    ctx.fillStyle = '#333333';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Jakarta, ${currentDate}`, template.width / 2, 640);
+    
+    // Create directory if it doesn't exist
+    const certificatesDir = path.resolve(process.cwd(), 'public', 'certificates');
+    console.log(`Creating certificates directory if needed: ${certificatesDir}`);
+    
+    if (!fs.existsSync(certificatesDir)) {
+      console.log('Directory does not exist, creating...');
+      fs.mkdirSync(certificatesDir, { recursive: true });
+    }
+    
+    // Save the certificate as PNG
+    const fileName = `certificate-${certificateNumber.replace(/\//g, '-')}.png`;
+    const outputPath = path.join(certificatesDir, fileName);
+    console.log(`Saving certificate to: ${outputPath}`);
+    
+    // Use a promise to handle file saving
+    return new Promise((resolve, reject) => {
+      const outStream = fs.createWriteStream(outputPath);
+      const pngStream = canvas.createPNGStream();
+      
+      outStream.on('finish', () => {
+        console.log('Certificate file written successfully');
+        resolve(`/certificates/${fileName}`);
+      });
+      
+      outStream.on('error', (err) => {
+        console.error('Error writing certificate file:', err);
+        reject(err);
+      });
+      
+      pngStream.pipe(outStream);
+    });
+    
+  } catch (error) {
+    console.error('Error creating certificate image:', error);
+    throw error;
+  }
 };
 
 export default {

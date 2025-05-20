@@ -22,6 +22,7 @@ model User {
 
   trainings      Training[]
   trainingUsers  Training_Users[]
+  certificates   Certificate[]
   
   @@map("users")
 }
@@ -32,12 +33,16 @@ model Training {
   description  String?  @db.Text 
   image        String?  
   instructorId String
+  // Certificate template configuration
+  certificateTemplate String? @db.Text // JSON untuk konfigurasi template sertifikat
+  minimumScore Int @default(70) // Minimum score untuk dapat sertifikat
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  instructor User   @relation(fields: [instructorId], references: [id])
-  meetings   Meeting[]
-  users      Training_Users[]
+  instructor   User   @relation(fields: [instructorId], references: [id])
+  meetings     Meeting[]
+  users        Training_Users[]
+  certificates Certificate[]
 
   @@map("trainings")
 }
@@ -181,6 +186,28 @@ model Score {
   @@map("scores")
 }
 
+// Model baru untuk sertifikat
+model Certificate {
+  id            String   @id @default(uuid()) @db.VarChar(36)
+  certificateNumber String @unique @db.VarChar(100) // Nomor sertifikat unik
+  trainingId    String
+  userId        String
+  issuedDate    DateTime @default(now())
+  expiryDate    DateTime? // Jika sertifikat bisa expired
+  finalScore    Int      // Skor akhir yang diperoleh
+  status        CertificateStatus @default(active)
+  filePath      String?  @db.VarChar(500) // Path file PDF sertifikat yang sudah digenerate
+  metadata      Json?    // Data tambahan seperti detail konfigurasi sertifikat
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  training Training @relation(fields: [trainingId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([trainingId, userId]) // Satu user hanya bisa punya satu sertifikat per training
+  @@map("certificates")
+}
+
 enum Role {
   admin
   instructor
@@ -191,4 +218,10 @@ enum Status {
   enrolled
   completed
   dropped
+}
+
+enum CertificateStatus {
+  active
+  revoked
+  expired
 }
