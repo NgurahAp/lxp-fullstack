@@ -93,7 +93,7 @@ const generateCertificateNumber = () => {
  */
 const getExpiryDate = () => {
   const expiryDate = new Date();
-  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+  expiryDate.setFullYear(expiryDate.getFullYear() + 5);
   return expiryDate;
 };
 
@@ -130,8 +130,6 @@ const createCertificateImage = async (userName, trainingTitle, certificateNumber
     let template;
     const possibleTemplatePaths = [
       path.resolve(process.cwd(), 'public', 'certif.jpeg'),
-      path.resolve(process.cwd(), 'src', 'public', 'certif.jpeg'),
-      path.resolve(process.cwd(), '..', 'public', 'certif.jpeg')
     ];
     
     console.log('Trying to locate certificate template...');
@@ -159,10 +157,10 @@ const createCertificateImage = async (userName, trainingTitle, certificateNumber
     const fontFamily = 'Poppins, Arial, sans-serif';
     
     // Draw certificate ID
-    ctx.font = `bold 16px ${fontFamily}`;
-    ctx.fillStyle = '#333333';
+    ctx.font = `48px ${fontFamily}`;
+    ctx.fillStyle = '#503445';
     ctx.textAlign = 'center';
-    ctx.fillText(certificateNumber, template.width / 2, 240);
+    ctx.fillText(`ID Sertifikat : ${certificateNumber}`, template.width / 2, 560);
     
     // Draw participant name
     ctx.font = `bold 24px ${fontFamily}`;
@@ -174,7 +172,7 @@ const createCertificateImage = async (userName, trainingTitle, certificateNumber
     ctx.font = `18px ${fontFamily}`;
     ctx.fillStyle = '#333333';
     ctx.textAlign = 'center';
-    ctx.fillText(trainingTitle, template.width / 2, 520);
+    ctx.fillText(trainingTitle, template.width / 2, 700);
     
     // Draw current date
     const currentDate = moment().format('DD MMMM YYYY');
