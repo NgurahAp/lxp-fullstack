@@ -157,29 +157,29 @@ const createCertificateImage = async (userName, trainingTitle, certificateNumber
     const fontFamily = 'Poppins, Arial, sans-serif';
     
     // Draw certificate ID
-    ctx.font = `48px ${fontFamily}`;
+    ctx.font = `52px ${fontFamily}`;
     ctx.fillStyle = '#503445';
     ctx.textAlign = 'center';
-    ctx.fillText(`ID Sertifikat : ${certificateNumber}`, template.width / 2, 560);
+    ctx.fillText(`ID Sertifikat : ${certificateNumber}`, template.width / 2, 558);
     
     // Draw participant name
-    ctx.font = `bold 24px ${fontFamily}`;
+    ctx.font = `bold 85px ${fontFamily}`;
     ctx.fillStyle = '#333333';
     ctx.textAlign = 'center';
-    ctx.fillText(userName, template.width / 2, 380);
+    ctx.fillText(userName, template.width / 2, 950);
     
     // Draw training title
-    ctx.font = `18px ${fontFamily}`;
+    ctx.font = `bold 60px ${fontFamily}`;
     ctx.fillStyle = '#333333';
     ctx.textAlign = 'center';
-    ctx.fillText(trainingTitle, template.width / 2, 700);
+    ctx.fillText(trainingTitle, template.width / 2, 1250);
     
     // Draw current date
     const currentDate = moment().format('DD MMMM YYYY');
-    ctx.font = `16px ${fontFamily}`;
+    ctx.font = `45px ${fontFamily}`;
     ctx.fillStyle = '#333333';
     ctx.textAlign = 'center';
-    ctx.fillText(`Jakarta, ${currentDate}`, template.width / 2, 640);
+    ctx.fillText(`Pada Tanggal ${currentDate}`, template.width / 2, 1450);
     
     // Create directory if it doesn't exist
     const certificatesDir = path.resolve(process.cwd(), 'public', 'certificates');

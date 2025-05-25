@@ -152,7 +152,7 @@ export const QuizAttempt = () => {
         <div className="bg-white p-6 mt-5 rounded-lg shadow-lg">
           <h1 className="text-end text-red-500 font-bold text-xs pb-3">
             Sisa waktu:{" "}
-            <CountdownTimer initialDuration={6000} onTimeUp={handleTimesUp} />
+            <CountdownTimer initialDuration={600} onTimeUp={handleTimesUp} />
           </h1>
           <h2 className="text-lg font-semibold">{currentQuestion.question}</h2>
           <p className="md:pt-2 pb-4 md:pb-7 text-xs text-gray-500">

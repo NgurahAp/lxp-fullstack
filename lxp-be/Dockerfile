@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose port backend (ubah kalau beda)
-EXPOSE 3000
+EXPOSE 5000
 
 # Perintah untuk menjalankan aplikasi
 CMD ["npm", "start"]
