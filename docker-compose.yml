@@ -3,17 +3,23 @@ services:
     build:
       context: ./lxp-be
       dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     container_name: lxp-backend
     ports:
       - "5000:5000"
     environment:
       - NODE_ENV=development
     restart: unless-stopped
+    networks:
+      - lxp-network
 
   frontend:
     build:
       context: ./lxp-fe
       dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     container_name: lxp-frontend
     ports:
       - "5173:5173"
@@ -22,3 +28,9 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - lxp-network
+
+networks:
+  lxp-network:
+    driver: bridge
