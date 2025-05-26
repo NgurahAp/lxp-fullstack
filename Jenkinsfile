@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 echo "🔄 Cloning repo..."
-                git 'https://github.com/username/project.git' // Ganti ke URL repo kamu
+                git 'https://gitlab.com/ngurahpratama2002/lxp-fullstack.git' 
             }
         }
 
