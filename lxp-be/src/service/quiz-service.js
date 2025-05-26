@@ -215,7 +215,6 @@ const getDetailQuiz = async (user, request) => {
           users: {
             some: {
               userId: user.id,
-              status: "enrolled",
             },
           },
         },
