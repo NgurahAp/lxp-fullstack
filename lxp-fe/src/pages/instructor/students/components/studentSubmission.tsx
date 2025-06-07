@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Module, Quiz, Task } from "../../../../types/students";
+import { API_ASSETS } from "../../../../config/api";
 
 interface ModuleSubmissionsProps {
   modules: Module[];
@@ -342,7 +343,7 @@ const TaskSubmissions: React.FC<TaskSubmissionsProps> = ({
               <button
                 onClick={() =>
                   window.open(
-                    `http://localhost:3001/public/${submission.answer}`,
+                    `${API_ASSETS}/${submission.answer}`,
                     "_blank"
                   )
                 }

@@ -22,6 +22,7 @@ import {
 } from "../../../../../hooks/useTask";
 import CreateTask from "./CreateTask";
 import DeleteTask from "./DeleteTask";
+import { API_ASSETS } from "../../../../../config/api";
 
 interface ModulesTabProps {
   modules?: Module[];
@@ -162,7 +163,7 @@ const ModulesTab: React.FC<ModulesTabProps> = ({
             <h3 className="font-medium">{module.title}</h3>
             <div className="flex items-center mt-2 text-sm">
               <a
-                href={`http://localhost:3001/public/${module.content}`}
+                href={`${API_ASSETS}/${module.content}`}
                 target="_blank"
                 className="text-gray-900 hover:underline flex items-center"
               >

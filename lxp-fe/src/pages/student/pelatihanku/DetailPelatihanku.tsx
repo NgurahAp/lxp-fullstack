@@ -1,10 +1,17 @@
 import { Link, useParams } from "react-router-dom";
-import { FaCheckCircle, FaChevronDown, FaChevronUp, FaLock } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaTimesCircle,
+  FaChevronDown,
+  FaChevronUp,
+  FaLock,
+} from "react-icons/fa";
 import { useState } from "react";
 import { Breadcrumb } from "../../../Components/BreadCrumbs";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
 import { useGetDetailTrainings } from "../../../hooks/useTrainings";
 import { Meeting } from "../../../types/training";
+import { API_ASSETS } from "../../../config/api";
 
 export const PelatihankuDetail: React.FC = () => {
   const { trainingId } = useParams<{ trainingId: string }>();
@@ -16,7 +23,7 @@ export const PelatihankuDetail: React.FC = () => {
     if (isLocked) {
       return;
     }
-    
+
     setOpenSessions((prev) => ({
       ...prev,
       [sessionId]: !prev[sessionId],
@@ -28,9 +35,15 @@ export const PelatihankuDetail: React.FC = () => {
   };
 
   const getQuizIcon = (score: number): JSX.Element | null => {
-    return score !== 0 ? (
-      <FaCheckCircle className="text-green-500 ml-2" />
-    ) : null;
+    if (score === 0) {
+      return null;
+    }
+
+    if (score < 80) {
+      return <FaTimesCircle className="text-red-500 ml-2" />;
+    }
+
+    return <FaCheckCircle className="text-green-500 ml-2" />;
   };
 
   const getTaskIcon = (answer: string): JSX.Element | null => {
@@ -83,12 +96,13 @@ export const PelatihankuDetail: React.FC = () => {
   const renderLockedMessage = (index: number) => {
     if (index === 0) return null;
     const previousMeeting = data?.meetings[index - 1];
-    
+
     return (
       <div className="bg-yellow-50 p-3 border border-yellow-200 rounded-b-lg text-sm text-yellow-700">
         <p className="flex items-center">
-          <FaLock className="mr-2" /> 
-          Selesaikan semua materi pada {previousMeeting?.title} untuk membuka sesi ini:
+          <FaLock className="mr-2" />
+          Selesaikan semua materi pada {previousMeeting?.title} untuk membuka
+          sesi ini:
         </p>
         <ul className="ml-8 mt-1 list-disc text-xs">
           <li>Semua modul harus dikerjakan</li>
@@ -135,7 +149,7 @@ export const PelatihankuDetail: React.FC = () => {
           <div className="lg:w-1/3 mb-6 lg:mb-0">
             <div className="relative">
               <img
-                src={`http://localhost:3001/public${data?.image}`}
+                src={`${API_ASSETS}${data?.image}`}
                 alt=""
                 className="w-full h-auto"
               />
@@ -165,8 +179,8 @@ export const PelatihankuDetail: React.FC = () => {
                 onClick={() => toggleDropdown(session.id, session.isLocked)}
                 disabled={session.isLocked}
                 className={`w-full flex justify-between text-sm text-left items-center px-4 py-5 rounded-t-lg ${
-                  session.isLocked 
-                    ? "bg-gray-400 cursor-not-allowed" 
+                  session.isLocked
+                    ? "bg-gray-400 cursor-not-allowed"
                     : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
                 } text-white`}
               >
@@ -176,16 +190,20 @@ export const PelatihankuDetail: React.FC = () => {
                   )}
                   <span className="pr-5">{session.title}</span>
                 </div>
-                {session.isLocked ? null : (
-                  openSessions[session.id] ? <FaChevronUp /> : <FaChevronDown />
+                {session.isLocked ? null : openSessions[session.id] ? (
+                  <FaChevronUp />
+                ) : (
+                  <FaChevronDown />
                 )}
               </button>
 
               {/* Show locked message for locked meetings */}
               {session.isLocked && renderLockedMessage(index)}
-              
+
               {/* Show meeting content only if unlocked and open */}
-              {!session.isLocked && openSessions[session.id] && renderSessionContent(session)}
+              {!session.isLocked &&
+                openSessions[session.id] &&
+                renderSessionContent(session)}
             </div>
           </div>
         ))}

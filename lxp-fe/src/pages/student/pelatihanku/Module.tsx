@@ -8,6 +8,7 @@ import { BackLink } from "../../../Components/BackLink";
 import { Breadcrumb } from "../../../Components/BreadCrumbs";
 import LoadingSpinner from "../../../Components/LoadingSpinner";
 import { useGetModule } from "../../../hooks/useModule";
+import { API_ASSETS } from "../../../config/api";
 
 export const Module = () => {
   const { meetingId, moduleId } = useParams<{
@@ -76,10 +77,7 @@ export const Module = () => {
 
               <button
                 onClick={() =>
-                  window.open(
-                    `http://localhost:3001/public/${data?.content}`,
-                    "_blank"
-                  )
+                  window.open(`${API_ASSETS}/${data?.content}`, "_blank")
                 }
                 className="flex items-center gap-4 w-full bg-white hover:bg-gray-50 transition-colors border border-gray-200 rounded-lg p-5 shadow-sm"
               >

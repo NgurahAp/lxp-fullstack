@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PlusCircle, Search, Book, Users, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useGetTrainingsInstructor } from "../../../hooks/useTrainings";
+import { API_ASSETS } from "../../../config/api";
 
 const CoursePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,7 +70,7 @@ const CoursePage = () => {
                 <img
                   src={
                     course?.image
-                      ? `http://localhost:3001/public${course.image}`
+                      ? `${API_ASSETS}${course.image}`
                       : undefined
                   }
                   alt={course.title}

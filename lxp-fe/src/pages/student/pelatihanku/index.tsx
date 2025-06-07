@@ -5,6 +5,7 @@ import LoadingSpinner from "../../../Components/LoadingSpinner";
 import { SearchBar } from "../../../Components/SearchBar";
 import { useGetTrainings } from "../../../hooks/useTrainings";
 import { TrainingData } from "../../../types/training";
+import { API_ASSETS } from "../../../config/api";
 
 export const Pelatihanku = () => {
   const { data, isLoading, error } = useGetTrainings();
@@ -72,7 +73,7 @@ export const Pelatihanku = () => {
             <div className="border rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-white max-w-sm mx-auto w-full">
               <div className="relative w-full h-48">
                 <img
-                  src={`http://localhost:3001/public${item.training.image}`}
+                  src={`${API_ASSETS}${item.training.image}`}
                   alt={item.training.title}
                   className="absolute top-0 left-0 w-full h-full object-cover"
                 />

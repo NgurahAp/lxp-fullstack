@@ -1,3 +1,4 @@
+import { API_ASSETS } from "../../../../config/api";
 import { TaskData } from "../../../../types/task";
 import { formatToIndonesianDateTime } from "./Date";
 // import { calculateRemainingTime, formatToIndonesianDateTime } from "./Date";
@@ -67,7 +68,7 @@ export const FinishedAssignment: React.FC<OngoingStatusProps> = ({
             </td>
             <td className="p-4 bg-gray-50">
                   <a
-                    href={`http://localhost:3001/public/${assignmentData.submission.answer}`}
+                    href={`${API_ASSETS}/${assignmentData.submission.answer}`}
                     className="text-blue-500 hover:underline flex items-center"
                     target="_blank"
                     rel="noopener noreferrer"

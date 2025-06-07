@@ -225,6 +225,7 @@ const getDetailStudent = async (user, request) => {
         in: trainingUserIds,
       },
     },
+    orderBy: { createdAt: "asc" },
     select: {
       id: true,
       answer: true,
@@ -257,6 +258,7 @@ const getDetailStudent = async (user, request) => {
         in: trainingUserIds,
       },
     },
+    orderBy: { createdAt: "asc" },
     select: {
       id: true,
       score: true,
@@ -288,6 +290,7 @@ const getDetailStudent = async (user, request) => {
         in: trainingUserIds,
       },
     },
+    orderBy: { createdAt: "asc" },
     select: {
       id: true,
       answer: true,

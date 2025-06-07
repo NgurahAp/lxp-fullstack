@@ -29,7 +29,7 @@ services:
       - backend
     restart: unless-stopped
     networks:
-      - lxp-network
+      - lxp-network 
 
 networks:
   lxp-network:
